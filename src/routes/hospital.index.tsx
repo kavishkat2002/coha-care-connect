@@ -20,7 +20,7 @@ export const Route = createFileRoute("/hospital/")({
 });
 
 function HospitalDashboard() {
-  const h = hospitals[0];
+  const h = hospitals[0]!;
   return (
     <div className="space-y-8">
       <PageHeader title={h.name} description={`${h.branches.length} branches · ${h.city}`} />
