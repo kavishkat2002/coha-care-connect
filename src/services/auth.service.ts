@@ -9,7 +9,7 @@ const mapUserToSession = (user: any): Session | null => {
   return {
     email: user.email,
     role: (user.user_metadata?.role as Role) || "patient",
-    name: user.user_metadata?.name || user.email?.split("@")[0] || "Member",
+    name: user.user_metadata?.name || user.user_metadata?.full_name || user.email?.split("@")[0] || "Member",
   };
 };
 
