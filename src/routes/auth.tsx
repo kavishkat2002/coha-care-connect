@@ -11,7 +11,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import type { Role } from "@/data/mock";
-import { portalHome, signIn } from "@/services/auth.service";
+import { portalHome, signIn, signUp } from "@/services/auth.service";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/auth")({
@@ -74,10 +74,32 @@ function AuthPage() {
   const navigate = useNavigate();
   const [role, setRole] = useState<Role>("patient");
 
-  const enter = (email: string, name?: string) => {
-    signIn(email, role, name);
-    toast.success("Signed in");
-    navigate({ to: portalHome[role] });
+  const [isLoading, setIsLoading] = useState(false);
+
+  const handleLogin = async (email: string, password: string) => {
+    setIsLoading(true);
+    try {
+      await signIn(email, password);
+      toast.success("Signed in successfully");
+      navigate({ to: portalHome[role] });
+    } catch (error: any) {
+      toast.error(error.message || "Failed to sign in");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleRegister = async (email: string, password: string, name: string) => {
+    setIsLoading(true);
+    try {
+      await signUp(email, password, role, name);
+      toast.success("Account created successfully");
+      navigate({ to: portalHome[role] });
+    } catch (error: any) {
+      toast.error(error.message || "Failed to create account");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -126,7 +148,7 @@ function AuthPage() {
                     onSubmit={(e) => {
                       e.preventDefault();
                       const data = new FormData(e.currentTarget);
-                      enter(String(data.get("email")));
+                      handleLogin(String(data.get("email")), String(data.get("password")));
                     }}
                   >
                     <RoleSelect value={role} onChange={setRole} />
@@ -138,8 +160,8 @@ function AuthPage() {
                       <Label htmlFor="login-password">Password</Label>
                       <Input id="login-password" name="password" type="password" required placeholder="••••••••" />
                     </div>
-                    <Button type="submit" className="w-full">
-                      Sign in
+                    <Button type="submit" className="w-full" disabled={isLoading}>
+                      {isLoading ? "Signing in..." : "Sign in"}
                     </Button>
                   </form>
                 </CardContent>
@@ -158,7 +180,7 @@ function AuthPage() {
                     onSubmit={(e) => {
                       e.preventDefault();
                       const data = new FormData(e.currentTarget);
-                      enter(String(data.get("email")), String(data.get("name")));
+                      handleRegister(String(data.get("email")), String(data.get("password")), String(data.get("name")));
                     }}
                   >
                     <RoleSelect value={role} onChange={setRole} />
@@ -174,8 +196,8 @@ function AuthPage() {
                       <Label htmlFor="reg-password">Password</Label>
                       <Input id="reg-password" name="password" type="password" required minLength={8} />
                     </div>
-                    <Button type="submit" className="w-full">
-                      Create account
+                    <Button type="submit" className="w-full" disabled={isLoading}>
+                      {isLoading ? "Creating account..." : "Create account"}
                     </Button>
                   </form>
                 </CardContent>

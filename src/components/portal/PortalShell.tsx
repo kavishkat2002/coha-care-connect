@@ -14,7 +14,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Sheet, SheetContent, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
-import { getSession, signOut, type Session } from "@/services/auth.service";
+import { getSession, signOut, onAuthStateChange, type Session } from "@/services/auth.service";
 import { cn } from "@/lib/utils";
 
 export type NavItem = { label: string; to: string; icon: LucideIcon };
@@ -33,7 +33,14 @@ export function PortalShell({
   const navigate = useNavigate();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
 
-  useEffect(() => setSession(getSession()), []);
+  useEffect(() => {
+    getSession().then(setSession);
+    const unsubscribe = onAuthStateChange(setSession);
+    return () => {
+      unsubscribe.unsubscribe();
+    };
+  }, []);
+
   useEffect(() => setOpen(false), [pathname]);
 
   const initials = (session?.name ?? "Guest")
@@ -123,8 +130,8 @@ export function PortalShell({
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem
-                  onClick={() => {
-                    signOut();
+                  onClick={async () => {
+                    await signOut();
                     navigate({ to: "/auth" });
                   }}
                 >
