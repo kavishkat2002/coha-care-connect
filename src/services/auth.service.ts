@@ -1,5 +1,5 @@
 import type { Role } from "@/data/mock";
-import { supabase } from "@/lib/supabase";
+import { supabase, adminAuthClient } from "@/lib/supabase";
 
 export type Session = { name: string; email: string; role: Role };
 
@@ -31,6 +31,28 @@ export async function signUp(email: string, password: string, role: Role, name: 
     },
   });
   if (error) throw error;
+  return mapUserToSession(data.user);
+}
+
+export async function adminCreateAccount(email: string, password: string, role: Role, name: string) {
+  // Use the secondary client to prevent logging the Admin out!
+  const { data, error } = await adminAuthClient.auth.signUp({
+    email,
+    password,
+    options: {
+      data: {
+        role,
+        name,
+      },
+    },
+  });
+  
+  if (error) throw error;
+  
+  // Note: Since email confirmations might be turned off, Supabase might auto-login this secondary client.
+  // Because it has persistSession: false, it just sits in memory. To be extra safe, we sign it out immediately.
+  await adminAuthClient.auth.signOut();
+  
   return mapUserToSession(data.user);
 }
 
