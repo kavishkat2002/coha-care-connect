@@ -13,6 +13,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as PatientRouteImport } from './routes/patient'
 import { Route as PatientIndexRouteImport } from './routes/patient.index'
+import { Route as PatientAssistantRouteImport } from './routes/patient.assistant'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -34,16 +35,23 @@ const PatientIndexRoute = PatientIndexRouteImport.update({
   path: '/',
   getParentRoute: () => PatientRoute,
 } as any)
+const PatientAssistantRoute = PatientAssistantRouteImport.update({
+  id: '/assistant',
+  path: '/assistant',
+  getParentRoute: () => PatientRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/patient': typeof PatientRouteWithChildren
+  '/patient/assistant': typeof PatientAssistantRoute
   '/patient/': typeof PatientIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/patient/assistant': typeof PatientAssistantRoute
   '/patient': typeof PatientIndexRoute
 }
 export interface FileRoutesById {
@@ -51,14 +59,16 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/patient': typeof PatientRouteWithChildren
+  '/patient/assistant': typeof PatientAssistantRoute
   '/patient/': typeof PatientIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/auth' | '/patient' | '/patient/'
+  fullPaths: '/' | '/auth' | '/patient' | '/patient/assistant' | '/patient/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/auth' | '/patient'
-  id: '__root__' | '/' | '/auth' | '/patient' | '/patient/'
+  to: '/' | '/auth' | '/patient/assistant' | '/patient'
+  id:
+    '__root__' | '/' | '/auth' | '/patient' | '/patient/assistant' | '/patient/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -97,14 +107,23 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PatientIndexRouteImport
       parentRoute: typeof PatientRoute
     }
+    '/patient/assistant': {
+      id: '/patient/assistant'
+      path: '/assistant'
+      fullPath: '/patient/assistant'
+      preLoaderRoute: typeof PatientAssistantRouteImport
+      parentRoute: typeof PatientRoute
+    }
   }
 }
 
 interface PatientRouteChildren {
+  PatientAssistantRoute: typeof PatientAssistantRoute
   PatientIndexRoute: typeof PatientIndexRoute
 }
 
 const PatientRouteChildren: PatientRouteChildren = {
+  PatientAssistantRoute: PatientAssistantRoute,
   PatientIndexRoute: PatientIndexRoute,
 }
 
