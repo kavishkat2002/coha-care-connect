@@ -19,7 +19,7 @@ export function getSession(): Session | null {
 }
 
 export function signIn(email: string, role: Role, name?: string): Session {
-  const session: Session = { email, role, name: name ?? email.split("@")[0] };
+  const session: Session = { email, role, name: name ?? (email.split("@")[0] ?? "Member") };
   window.localStorage.setItem(KEY, JSON.stringify(session));
   return session;
 }
