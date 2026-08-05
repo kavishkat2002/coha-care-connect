@@ -1,18 +1,11 @@
 import {
   Activity,
-  BarChart3,
   Bot,
-  Building2,
   CalendarCheck,
   ClipboardList,
-  CreditCard,
   FileText,
   Image,
   LayoutDashboard,
-  Settings,
-  ShieldCheck,
-  Stethoscope,
-  Users,
   Video,
   UserRound,
 } from "lucide-react";
@@ -30,27 +23,8 @@ export const patientNav: NavItem[] = [
   { label: "Profile", to: "/patient/profile", icon: UserRound },
 ];
 
-export const doctorNav: NavItem[] = [
-  { label: "Overview", to: "/doctor", icon: LayoutDashboard },
-  { label: "Patient Queue", to: "/doctor/queue", icon: Users },
-  { label: "AI Assessments", to: "/doctor/assessments", icon: Bot },
-  { label: "Prescriptions", to: "/doctor/prescriptions", icon: Stethoscope },
-  { label: "Telemedicine", to: "/doctor/telemedicine", icon: Video },
-  { label: "Analytics", to: "/doctor/analytics", icon: BarChart3 },
-];
+export const doctorNav: NavItem[] = [{ label: "Overview", to: "/doctor", icon: LayoutDashboard }];
 
-export const hospitalNav: NavItem[] = [
-  { label: "Overview", to: "/hospital", icon: LayoutDashboard },
-  { label: "Doctors", to: "/hospital/doctors", icon: Stethoscope },
-  { label: "Departments", to: "/hospital/departments", icon: Building2 },
-  { label: "Appointments", to: "/hospital/appointments", icon: CalendarCheck },
-  { label: "Revenue", to: "/hospital/revenue", icon: CreditCard },
-];
+export const hospitalNav: NavItem[] = [{ label: "Overview", to: "/hospital", icon: LayoutDashboard }];
 
-export const adminNav: NavItem[] = [
-  { label: "Overview", to: "/admin", icon: LayoutDashboard },
-  { label: "Users", to: "/admin/users", icon: Users },
-  { label: "Hospitals", to: "/admin/hospitals", icon: Building2 },
-  { label: "AI Monitoring", to: "/admin/ai", icon: ShieldCheck },
-  { label: "Settings", to: "/admin/settings", icon: Settings },
-];
+export const adminNav: NavItem[] = [{ label: "Overview", to: "/admin", icon: LayoutDashboard }];

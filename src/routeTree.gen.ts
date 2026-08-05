@@ -17,6 +17,10 @@ import { Route as PatientAppointmentsRouteImport } from './routes/patient.appoin
 import { Route as PatientAssistantRouteImport } from './routes/patient.assistant'
 import { Route as PatientBookRouteImport } from './routes/patient.book'
 import { Route as PatientImagesRouteImport } from './routes/patient.images'
+import { Route as PatientProfileRouteImport } from './routes/patient.profile'
+import { Route as PatientReportsRouteImport } from './routes/patient.reports'
+import { Route as PatientTelemedicineRouteImport } from './routes/patient.telemedicine'
+import { Route as PatientTimelineRouteImport } from './routes/patient.timeline'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -58,6 +62,26 @@ const PatientImagesRoute = PatientImagesRouteImport.update({
   path: '/images',
   getParentRoute: () => PatientRoute,
 } as any)
+const PatientProfileRoute = PatientProfileRouteImport.update({
+  id: '/profile',
+  path: '/profile',
+  getParentRoute: () => PatientRoute,
+} as any)
+const PatientReportsRoute = PatientReportsRouteImport.update({
+  id: '/reports',
+  path: '/reports',
+  getParentRoute: () => PatientRoute,
+} as any)
+const PatientTelemedicineRoute = PatientTelemedicineRouteImport.update({
+  id: '/telemedicine',
+  path: '/telemedicine',
+  getParentRoute: () => PatientRoute,
+} as any)
+const PatientTimelineRoute = PatientTimelineRouteImport.update({
+  id: '/timeline',
+  path: '/timeline',
+  getParentRoute: () => PatientRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -67,6 +91,10 @@ export interface FileRoutesByFullPath {
   '/patient/assistant': typeof PatientAssistantRoute
   '/patient/book': typeof PatientBookRoute
   '/patient/images': typeof PatientImagesRoute
+  '/patient/profile': typeof PatientProfileRoute
+  '/patient/reports': typeof PatientReportsRoute
+  '/patient/telemedicine': typeof PatientTelemedicineRoute
+  '/patient/timeline': typeof PatientTimelineRoute
   '/patient/': typeof PatientIndexRoute
 }
 export interface FileRoutesByTo {
@@ -76,6 +104,10 @@ export interface FileRoutesByTo {
   '/patient/assistant': typeof PatientAssistantRoute
   '/patient/book': typeof PatientBookRoute
   '/patient/images': typeof PatientImagesRoute
+  '/patient/profile': typeof PatientProfileRoute
+  '/patient/reports': typeof PatientReportsRoute
+  '/patient/telemedicine': typeof PatientTelemedicineRoute
+  '/patient/timeline': typeof PatientTimelineRoute
   '/patient': typeof PatientIndexRoute
 }
 export interface FileRoutesById {
@@ -87,6 +119,10 @@ export interface FileRoutesById {
   '/patient/assistant': typeof PatientAssistantRoute
   '/patient/book': typeof PatientBookRoute
   '/patient/images': typeof PatientImagesRoute
+  '/patient/profile': typeof PatientProfileRoute
+  '/patient/reports': typeof PatientReportsRoute
+  '/patient/telemedicine': typeof PatientTelemedicineRoute
+  '/patient/timeline': typeof PatientTimelineRoute
   '/patient/': typeof PatientIndexRoute
 }
 export interface FileRouteTypes {
@@ -99,6 +135,10 @@ export interface FileRouteTypes {
     | '/patient/assistant'
     | '/patient/book'
     | '/patient/images'
+    | '/patient/profile'
+    | '/patient/reports'
+    | '/patient/telemedicine'
+    | '/patient/timeline'
     | '/patient/'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -108,6 +148,10 @@ export interface FileRouteTypes {
     | '/patient/assistant'
     | '/patient/book'
     | '/patient/images'
+    | '/patient/profile'
+    | '/patient/reports'
+    | '/patient/telemedicine'
+    | '/patient/timeline'
     | '/patient'
   id:
     | '__root__'
@@ -118,6 +162,10 @@ export interface FileRouteTypes {
     | '/patient/assistant'
     | '/patient/book'
     | '/patient/images'
+    | '/patient/profile'
+    | '/patient/reports'
+    | '/patient/telemedicine'
+    | '/patient/timeline'
     | '/patient/'
   fileRoutesById: FileRoutesById
 }
@@ -185,6 +233,34 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PatientImagesRouteImport
       parentRoute: typeof PatientRoute
     }
+    '/patient/profile': {
+      id: '/patient/profile'
+      path: '/profile'
+      fullPath: '/patient/profile'
+      preLoaderRoute: typeof PatientProfileRouteImport
+      parentRoute: typeof PatientRoute
+    }
+    '/patient/reports': {
+      id: '/patient/reports'
+      path: '/reports'
+      fullPath: '/patient/reports'
+      preLoaderRoute: typeof PatientReportsRouteImport
+      parentRoute: typeof PatientRoute
+    }
+    '/patient/telemedicine': {
+      id: '/patient/telemedicine'
+      path: '/telemedicine'
+      fullPath: '/patient/telemedicine'
+      preLoaderRoute: typeof PatientTelemedicineRouteImport
+      parentRoute: typeof PatientRoute
+    }
+    '/patient/timeline': {
+      id: '/patient/timeline'
+      path: '/timeline'
+      fullPath: '/patient/timeline'
+      preLoaderRoute: typeof PatientTimelineRouteImport
+      parentRoute: typeof PatientRoute
+    }
   }
 }
 
@@ -193,6 +269,10 @@ interface PatientRouteChildren {
   PatientAssistantRoute: typeof PatientAssistantRoute
   PatientBookRoute: typeof PatientBookRoute
   PatientImagesRoute: typeof PatientImagesRoute
+  PatientProfileRoute: typeof PatientProfileRoute
+  PatientReportsRoute: typeof PatientReportsRoute
+  PatientTelemedicineRoute: typeof PatientTelemedicineRoute
+  PatientTimelineRoute: typeof PatientTimelineRoute
   PatientIndexRoute: typeof PatientIndexRoute
 }
 
@@ -201,6 +281,10 @@ const PatientRouteChildren: PatientRouteChildren = {
   PatientAssistantRoute: PatientAssistantRoute,
   PatientBookRoute: PatientBookRoute,
   PatientImagesRoute: PatientImagesRoute,
+  PatientProfileRoute: PatientProfileRoute,
+  PatientReportsRoute: PatientReportsRoute,
+  PatientTelemedicineRoute: PatientTelemedicineRoute,
+  PatientTimelineRoute: PatientTimelineRoute,
   PatientIndexRoute: PatientIndexRoute,
 }
 
