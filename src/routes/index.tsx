@@ -1,24 +1,59 @@
 import { createFileRoute } from "@tanstack/react-router";
 
-// No head() here: the home route inherits title/description/og/twitter from
-// __root.tsx, and ships no og:image so serve-time hosting can inject the
-// project's social preview (explicit og:image or latest screenshot).
+import { LandingNav } from "@/components/landing/LandingNav";
+import { LandingFooter } from "@/components/landing/LandingFooter";
+import {
+  AiFeatures,
+  CancerScreening,
+  Contact,
+  Faq,
+  Hero,
+  HowItWorks,
+  PlatformOverview,
+  Services,
+  Stats,
+  Telemedicine,
+  Testimonials,
+} from "@/components/landing/sections";
+
 export const Route = createFileRoute("/")({
-  component: Index,
+  head: () => ({
+    meta: [
+      { title: "COHA AI — AI-Powered Healthcare & Early Cancer Screening" },
+      {
+        name: "description",
+        content:
+          "Book appointments, chat with an AI health assistant, analyse medical images and reports, and consult online — all in one healthcare platform.",
+      },
+      { property: "og:title", content: "COHA AI — AI-Powered Healthcare & Early Cancer Screening" },
+      {
+        property: "og:description",
+        content:
+          "AI-assisted assessments, specialist recommendation and telemedicine for patients, doctors and hospitals.",
+      },
+    ],
+  }),
+  component: Landing,
 });
 
-// IMPORTANT: Replace this placeholder. See ./README.md for routing conventions.
-function Index() {
+function Landing() {
   return (
-    <div
-      className="flex min-h-screen items-center justify-center"
-      style={{ backgroundColor: "#fcfbf8" }}
-    >
-      <img
-        data-lovable-blank-page-placeholder="REMOVE_THIS"
-        src="https://cdn.gpteng.co/blank-app-v1.svg"
-        alt="Your app will live here!"
-      />
+    <div className="min-h-dvh bg-background">
+      <LandingNav />
+      <main>
+        <Hero />
+        <PlatformOverview />
+        <HowItWorks />
+        <Services />
+        <AiFeatures />
+        <CancerScreening />
+        <Telemedicine />
+        <Stats />
+        <Testimonials />
+        <Faq />
+        <Contact />
+      </main>
+      <LandingFooter />
     </div>
   );
 }
