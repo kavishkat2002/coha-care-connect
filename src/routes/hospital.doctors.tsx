@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { Plus, Search, Stethoscope, Mail, MoreHorizontal, Link as LinkIcon, Loader2, UserPlus } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { toast } from "sonner";
 
 import { PageHeader } from "@/components/shared/PageHeader";
@@ -25,7 +25,22 @@ export const Route = createFileRoute("/hospital/doctors")({
 
 function HospitalDoctors() {
   const [searchTerm, setSearchTerm] = useState("");
-  const [roster, setRoster] = useState(initialDoctors);
+  const [roster, setRoster] = useState<typeof initialDoctors>(() => {
+    const saved = localStorage.getItem("mock_hospital_roster");
+    if (saved) {
+      try {
+        return JSON.parse(saved);
+      } catch (e) {
+        return initialDoctors;
+      }
+    }
+    return initialDoctors;
+  });
+
+  useEffect(() => {
+    localStorage.setItem("mock_hospital_roster", JSON.stringify(roster));
+  }, [roster]);
+
   
   // Dialog State
   const [isAddOpen, setIsAddOpen] = useState(false);
@@ -70,6 +85,11 @@ function HospitalDoctors() {
         languages: ["English"],
         photoInitials: initials,
         online: true,
+        city: "Colombo",
+        distanceKm: 0,
+        experienceYears: 5,
+        queue: 0,
+        nextSlot: "Available",
       };
       
       setRoster([newDoctor, ...roster]);
@@ -108,6 +128,11 @@ function HospitalDoctors() {
         languages: ["English"],
         photoInitials: initials,
         online: false,
+        city: "Colombo",
+        distanceKm: 0,
+        experienceYears: 5,
+        queue: 0,
+        nextSlot: "Available",
       };
       
       setRoster([newDoctor, ...roster]);
