@@ -16,6 +16,17 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { doctors as initialDoctors } from "@/data/mock";
 import { adminCreateAccount } from "@/services/auth.service";
 
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+  DropdownMenuSub,
+  DropdownMenuSubTrigger,
+  DropdownMenuPortal,
+  DropdownMenuSubContent
+} from "@/components/ui/dropdown-menu";
+
 export const Route = createFileRoute("/hospital/doctors")({
   head: () => ({
     meta: [{ title: "Manage Doctors — Hospital Portal" }],
@@ -35,6 +46,15 @@ function HospitalDoctors() {
       }
     }
     return initialDoctors;
+  });
+
+  const [branchesData] = useState<{name: string, capacity: number}[]>(() => {
+    const saved = localStorage.getItem("mock_hospital_branches_data");
+    if (saved) {
+      try { return JSON.parse(saved); } catch (e) { return []; }
+    }
+    // Fallback to initial mock if branches weren't set yet
+    return require("@/data/mock").hospitals[0].branches.map((b: string) => ({ name: b, capacity: 100 }));
   });
 
   useEffect(() => {
@@ -77,7 +97,7 @@ function HospitalDoctors() {
         name: linkName || "Linked Doctor", 
         specialty: linkSpecialty || "General Medicine",
         hospital: "Lakeside General Hospital",
-        branch: "Colombo 07",
+        branch: branchesData[0]?.name || "Main Branch",
         rating: 0,
         reviews: 0,
         fee: 2000,
@@ -120,7 +140,7 @@ function HospitalDoctors() {
         name,
         specialty,
         hospital: "Lakeside General Hospital", // Mock current hospital context
-        branch: "Main Branch",
+        branch: branchesData[0]?.name || "Main Branch",
         rating: 0,
         reviews: 0,
         fee: 2500,
@@ -142,6 +162,21 @@ function HospitalDoctors() {
       toast.error(error.message || "Failed to create doctor account");
     } finally {
       setIsCreating(false);
+    }
+  };
+
+  const handleRemoveDoctor = (id: string) => {
+    const doc = roster.find(d => d.id === id);
+    if (!doc) return;
+    setRoster(roster.filter(d => d.id !== id));
+    toast.success(`${doc.name} was removed from your hospital roster.`);
+  };
+
+  const handleReassignBranch = (id: string, newBranch: string) => {
+    setRoster(roster.map(d => d.id === id ? { ...d, branch: newBranch } : d));
+    const doc = roster.find(d => d.id === id);
+    if (doc) {
+      toast.success(`${doc.name} reassigned to ${newBranch}`);
     }
   };
 
@@ -340,10 +375,35 @@ function HospitalDoctors() {
                     )}
                   </TableCell>
                   <TableCell className="text-right">
-                    <Button variant="ghost" size="icon" className="text-muted-foreground">
-                      <MoreHorizontal className="size-4" />
-                      <span className="sr-only">Actions</span>
-                    </Button>
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" size="icon" className="text-muted-foreground">
+                          <MoreHorizontal className="size-4" />
+                          <span className="sr-only">Actions</span>
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        <DropdownMenuSub>
+                          <DropdownMenuSubTrigger>Reassign Branch</DropdownMenuSubTrigger>
+                          <DropdownMenuPortal>
+                            <DropdownMenuSubContent>
+                              {branchesData.map(b => (
+                                <DropdownMenuItem 
+                                  key={b.name} 
+                                  onClick={() => handleReassignBranch(doc.id, b.name)}
+                                  disabled={doc.branch === b.name}
+                                >
+                                  {b.name}
+                                </DropdownMenuItem>
+                              ))}
+                            </DropdownMenuSubContent>
+                          </DropdownMenuPortal>
+                        </DropdownMenuSub>
+                        <DropdownMenuItem className="text-destructive focus:bg-destructive/10 focus:text-destructive" onClick={() => handleRemoveDoctor(doc.id)}>
+                          Remove from Hospital
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
                   </TableCell>
                 </TableRow>
               ))}

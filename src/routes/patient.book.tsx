@@ -47,14 +47,29 @@ function BookPage() {
   const [slot, setSlot] = useState<string | null>(null);
   const [confirmed, setConfirmed] = useState(false);
 
+  // Load custom hospital roster from localStorage to sync with Hospital Portal
+  const [rosterDoctors] = useState<Doctor[]>(() => {
+    const saved = localStorage.getItem("mock_hospital_roster");
+    if (saved) {
+      try {
+        return JSON.parse(saved);
+      } catch (e) {
+        return [];
+      }
+    }
+    return [];
+  });
+
   const branches = useMemo(() => {
     const h = hospitals.find((x) => x.name === hospital);
     return h ? h.branches : [];
   }, [hospital]);
 
-  const results = useMemo(
-    () =>
-      doctors.filter((d) => {
+  const results = useMemo(() => {
+      // Use the live hospital roster if available, otherwise fallback to static mock doctors
+      const allDoctors = rosterDoctors.length > 0 ? rosterDoctors : doctors;
+      
+      return allDoctors.filter((d) => {
         const q = query.trim().toLowerCase();
         const matchesQuery =
           !q ||
@@ -68,9 +83,8 @@ function BookPage() {
           (hospital === "all" || d.hospital === hospital) &&
           (branch === "all" || d.branch === branch)
         );
-      }),
-    [query, specialty, hospital, branch],
-  );
+      });
+  }, [query, specialty, hospital, branch, rosterDoctors, doctors]);
 
   if (confirmed && selected) {
     return (

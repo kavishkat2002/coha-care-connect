@@ -138,13 +138,48 @@ function DoctorProfile() {
                     </div>
                   </div>
 
-                  <div className="space-y-2">
-                    <Label htmlFor="prof-hospital">Primary Hospital</Label>
-                    <div className="relative">
-                      <Building2 className="absolute left-3 top-2.5 size-4 text-muted-foreground" />
-                      <Input id="prof-hospital" defaultValue="Lakeside General Hospital" className="pl-9" />
-                    </div>
-                  </div>
+                  {(() => {
+                    // Look up the doctor's real-time hospital and branch from the global roster
+                    const savedRoster = localStorage.getItem("mock_hospital_roster");
+                    let rosterDetails: any = null;
+                    if (savedRoster && session) {
+                      try {
+                        const roster = JSON.parse(savedRoster);
+                        const id = session.registration_id || `DOC-${session.id.substring(0, 6).toUpperCase()}`;
+                        rosterDetails = roster.find((d: any) => d.id === id || d.name === session.name);
+                      } catch (e) {}
+                    }
+                    
+                    return (
+                      <>
+                        <div className="space-y-2">
+                          <Label htmlFor="prof-hospital">Affiliated Hospital</Label>
+                          <div className="relative">
+                            <Building2 className="absolute left-3 top-2.5 size-4 text-muted-foreground" />
+                            <Input 
+                              id="prof-hospital" 
+                              value={rosterDetails?.hospital || "Not Affiliated"} 
+                              disabled
+                              className="pl-9 bg-muted/50" 
+                            />
+                          </div>
+                        </div>
+                        
+                        <div className="space-y-2">
+                          <Label htmlFor="prof-branch">Assigned Branch</Label>
+                          <div className="relative">
+                            <Building2 className="absolute left-3 top-2.5 size-4 text-muted-foreground" />
+                            <Input 
+                              id="prof-branch" 
+                              value={rosterDetails?.branch || "N/A"} 
+                              disabled
+                              className="pl-9 bg-muted/50" 
+                            />
+                          </div>
+                        </div>
+                      </>
+                    );
+                  })()}
 
                   <div className="space-y-2">
                     <Label htmlFor="prof-fee">Consultation Fee (LKR)</Label>
