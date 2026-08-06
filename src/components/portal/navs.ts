@@ -8,6 +8,8 @@ import {
   LayoutDashboard,
   Video,
   UserRound,
+  Building2,
+  Stethoscope,
 } from "lucide-react";
 import type { NavItem } from "./PortalShell";
 
@@ -23,8 +25,16 @@ export const patientNav: NavItem[] = [
   { label: "Profile", to: "/patient/profile", icon: UserRound },
 ];
 
-export const doctorNav: NavItem[] = [{ label: "Overview", to: "/doctor", icon: LayoutDashboard }];
+export const doctorNav: NavItem[] = [
+  { label: "Overview", to: "/doctor", icon: LayoutDashboard },
+  { label: "Profile", to: "/doctor/profile", icon: UserRound },
+];
 
-export const hospitalNav: NavItem[] = [{ label: "Overview", to: "/hospital", icon: LayoutDashboard }];
+export const hospitalNav: NavItem[] = [
+  { label: "Overview", to: "/hospital", icon: LayoutDashboard },
+  { label: "Doctors", to: "/hospital/doctors", icon: Stethoscope },
+  { label: "Branches", to: "/hospital/branches", icon: Building2 },
+  { label: "Profile", to: "/hospital/profile", icon: UserRound },
+];
 
 export const adminNav: NavItem[] = [{ label: "Overview", to: "/admin", icon: LayoutDashboard }];

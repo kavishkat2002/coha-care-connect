@@ -1,11 +1,13 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { Building2, CalendarCheck, CreditCard, Star, Stethoscope } from "lucide-react";
+import { useEffect, useState } from "react";
 
 import { PageHeader } from "@/components/shared/PageHeader";
 import { StatCard } from "@/components/shared/StatCard";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { hospitals } from "@/data/mock";
+import { getSession, type Session } from "@/services/auth.service";
 
 export const Route = createFileRoute("/hospital/")({
   head: () => ({
@@ -20,10 +22,17 @@ export const Route = createFileRoute("/hospital/")({
 });
 
 function HospitalDashboard() {
-  const h = hospitals[0]!;
+  const [session, setSession] = useState<Session | null>(null);
+  
+  useEffect(() => {
+    getSession().then(setSession);
+  }, []);
+
+  const h = hospitals[0]!; // Using mock data for stats and departments for now
+  
   return (
     <div className="space-y-8">
-      <PageHeader title={h.name} description={`${h.branches.length} branches · ${h.city}`} />
+      <PageHeader title={session?.name ?? h.name} description={`${h.branches.length} branches · ${h.city}`} />
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <StatCard icon={Stethoscope} label="Active doctors" value="86" hint="12 online now" />
         <StatCard icon={CalendarCheck} label="Appointments this week" value="1,248" hint="+8% vs last week" />

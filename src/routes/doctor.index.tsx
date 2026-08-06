@@ -21,7 +21,7 @@ export const Route = createFileRoute("/doctor/")({
 });
 
 const queue = [
-  { name: "Dilani Rathnayake", time: "09:00", reason: "Skin lesion review", ai: "Low risk indication" },
+  { name: "Saman Kumara", time: "09:00", reason: "Skin lesion review", ai: "Low risk indication" },
   { name: "Kasun Silva", time: "09:30", reason: "Oral ulcer, 3 weeks", ai: "Moderate risk indication" },
   { name: "Nimasha Perera", time: "10:15", reason: "Blood report review", ai: "2 flagged values" },
   { name: "Tharindu Weera", time: "11:00", reason: "Follow-up", ai: "—" },

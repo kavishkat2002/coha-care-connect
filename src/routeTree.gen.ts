@@ -17,7 +17,11 @@ import { Route as HospitalRouteImport } from './routes/hospital'
 import { Route as PatientRouteImport } from './routes/patient'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as DoctorIndexRouteImport } from './routes/doctor.index'
+import { Route as DoctorProfileRouteImport } from './routes/doctor.profile'
 import { Route as HospitalIndexRouteImport } from './routes/hospital.index'
+import { Route as HospitalBranchesRouteImport } from './routes/hospital.branches'
+import { Route as HospitalDoctorsRouteImport } from './routes/hospital.doctors'
+import { Route as HospitalProfileRouteImport } from './routes/hospital.profile'
 import { Route as PatientIndexRouteImport } from './routes/patient.index'
 import { Route as PatientAppointmentsRouteImport } from './routes/patient.appointments'
 import { Route as PatientAssistantRouteImport } from './routes/patient.assistant'
@@ -68,9 +72,29 @@ const DoctorIndexRoute = DoctorIndexRouteImport.update({
   path: '/',
   getParentRoute: () => DoctorRoute,
 } as any)
+const DoctorProfileRoute = DoctorProfileRouteImport.update({
+  id: '/profile',
+  path: '/profile',
+  getParentRoute: () => DoctorRoute,
+} as any)
 const HospitalIndexRoute = HospitalIndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => HospitalRoute,
+} as any)
+const HospitalBranchesRoute = HospitalBranchesRouteImport.update({
+  id: '/branches',
+  path: '/branches',
+  getParentRoute: () => HospitalRoute,
+} as any)
+const HospitalDoctorsRoute = HospitalDoctorsRouteImport.update({
+  id: '/doctors',
+  path: '/doctors',
+  getParentRoute: () => HospitalRoute,
+} as any)
+const HospitalProfileRoute = HospitalProfileRouteImport.update({
+  id: '/profile',
+  path: '/profile',
   getParentRoute: () => HospitalRoute,
 } as any)
 const PatientIndexRoute = PatientIndexRouteImport.update({
@@ -126,6 +150,10 @@ export interface FileRoutesByFullPath {
   '/doctor': typeof DoctorRouteWithChildren
   '/hospital': typeof HospitalRouteWithChildren
   '/patient': typeof PatientRouteWithChildren
+  '/doctor/profile': typeof DoctorProfileRoute
+  '/hospital/branches': typeof HospitalBranchesRoute
+  '/hospital/doctors': typeof HospitalDoctorsRoute
+  '/hospital/profile': typeof HospitalProfileRoute
   '/patient/appointments': typeof PatientAppointmentsRoute
   '/patient/assistant': typeof PatientAssistantRoute
   '/patient/book': typeof PatientBookRoute
@@ -142,6 +170,10 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/doctor/profile': typeof DoctorProfileRoute
+  '/hospital/branches': typeof HospitalBranchesRoute
+  '/hospital/doctors': typeof HospitalDoctorsRoute
+  '/hospital/profile': typeof HospitalProfileRoute
   '/patient/appointments': typeof PatientAppointmentsRoute
   '/patient/assistant': typeof PatientAssistantRoute
   '/patient/book': typeof PatientBookRoute
@@ -163,6 +195,10 @@ export interface FileRoutesById {
   '/doctor': typeof DoctorRouteWithChildren
   '/hospital': typeof HospitalRouteWithChildren
   '/patient': typeof PatientRouteWithChildren
+  '/doctor/profile': typeof DoctorProfileRoute
+  '/hospital/branches': typeof HospitalBranchesRoute
+  '/hospital/doctors': typeof HospitalDoctorsRoute
+  '/hospital/profile': typeof HospitalProfileRoute
   '/patient/appointments': typeof PatientAppointmentsRoute
   '/patient/assistant': typeof PatientAssistantRoute
   '/patient/book': typeof PatientBookRoute
@@ -185,6 +221,10 @@ export interface FileRouteTypes {
     | '/doctor'
     | '/hospital'
     | '/patient'
+    | '/doctor/profile'
+    | '/hospital/branches'
+    | '/hospital/doctors'
+    | '/hospital/profile'
     | '/patient/appointments'
     | '/patient/assistant'
     | '/patient/book'
@@ -201,6 +241,10 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/auth'
+    | '/doctor/profile'
+    | '/hospital/branches'
+    | '/hospital/doctors'
+    | '/hospital/profile'
     | '/patient/appointments'
     | '/patient/assistant'
     | '/patient/book'
@@ -221,6 +265,10 @@ export interface FileRouteTypes {
     | '/doctor'
     | '/hospital'
     | '/patient'
+    | '/doctor/profile'
+    | '/hospital/branches'
+    | '/hospital/doctors'
+    | '/hospital/profile'
     | '/patient/appointments'
     | '/patient/assistant'
     | '/patient/book'
@@ -302,11 +350,39 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DoctorIndexRouteImport
       parentRoute: typeof DoctorRoute
     }
+    '/doctor/profile': {
+      id: '/doctor/profile'
+      path: '/profile'
+      fullPath: '/doctor/profile'
+      preLoaderRoute: typeof DoctorProfileRouteImport
+      parentRoute: typeof DoctorRoute
+    }
     '/hospital/': {
       id: '/hospital/'
       path: '/'
       fullPath: '/hospital/'
       preLoaderRoute: typeof HospitalIndexRouteImport
+      parentRoute: typeof HospitalRoute
+    }
+    '/hospital/branches': {
+      id: '/hospital/branches'
+      path: '/branches'
+      fullPath: '/hospital/branches'
+      preLoaderRoute: typeof HospitalBranchesRouteImport
+      parentRoute: typeof HospitalRoute
+    }
+    '/hospital/doctors': {
+      id: '/hospital/doctors'
+      path: '/doctors'
+      fullPath: '/hospital/doctors'
+      preLoaderRoute: typeof HospitalDoctorsRouteImport
+      parentRoute: typeof HospitalRoute
+    }
+    '/hospital/profile': {
+      id: '/hospital/profile'
+      path: '/profile'
+      fullPath: '/hospital/profile'
+      preLoaderRoute: typeof HospitalProfileRouteImport
       parentRoute: typeof HospitalRoute
     }
     '/patient/': {
@@ -386,10 +462,12 @@ const AdminRouteChildren: AdminRouteChildren = {
 const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
 
 interface DoctorRouteChildren {
+  DoctorProfileRoute: typeof DoctorProfileRoute
   DoctorIndexRoute: typeof DoctorIndexRoute
 }
 
 const DoctorRouteChildren: DoctorRouteChildren = {
+  DoctorProfileRoute: DoctorProfileRoute,
   DoctorIndexRoute: DoctorIndexRoute,
 }
 
@@ -397,10 +475,16 @@ const DoctorRouteWithChildren =
   DoctorRoute._addFileChildren(DoctorRouteChildren)
 
 interface HospitalRouteChildren {
+  HospitalBranchesRoute: typeof HospitalBranchesRoute
+  HospitalDoctorsRoute: typeof HospitalDoctorsRoute
+  HospitalProfileRoute: typeof HospitalProfileRoute
   HospitalIndexRoute: typeof HospitalIndexRoute
 }
 
 const HospitalRouteChildren: HospitalRouteChildren = {
+  HospitalBranchesRoute: HospitalBranchesRoute,
+  HospitalDoctorsRoute: HospitalDoctorsRoute,
+  HospitalProfileRoute: HospitalProfileRoute,
   HospitalIndexRoute: HospitalIndexRoute,
 }
 
