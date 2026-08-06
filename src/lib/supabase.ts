@@ -13,5 +13,6 @@ export const adminAuthClient = createClient(supabaseUrl, supabaseAnonKey, {
     persistSession: false,
     autoRefreshToken: false,
     detectSessionInUrl: false,
+    storageKey: "admin-auth-token",
   },
 });

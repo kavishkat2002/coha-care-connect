@@ -73,6 +73,29 @@ function DoctorProfile() {
                 <Label>Account Role</Label>
                 <Input value="Doctor" disabled className="bg-muted/50 font-medium text-primary" />
               </div>
+              <div className="space-y-2">
+                <Label>Registration ID</Label>
+                <div className="relative">
+                  <Input 
+                    value={session?.registration_id || `DOC-${session?.id?.substring(0, 6).toUpperCase() || 'UNKNOWN'}`} 
+                    disabled 
+                    className="bg-muted/50 font-mono text-sm tracking-wide text-foreground pr-10" 
+                  />
+                  <Button 
+                    variant="ghost" 
+                    size="icon" 
+                    className="absolute right-1 top-1 h-7 w-7 text-muted-foreground hover:text-foreground"
+                    onClick={() => {
+                      const id = session?.registration_id || `DOC-${session?.id?.substring(0, 6).toUpperCase() || 'UNKNOWN'}`;
+                      navigator.clipboard.writeText(id);
+                      toast.success("Registration ID copied to clipboard!");
+                    }}
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>
+                  </Button>
+                </div>
+                <p className="text-[11px] text-muted-foreground mt-1">Share this ID with hospitals to link your profile.</p>
+              </div>
             </CardContent>
             <CardFooter className="flex-col gap-3">
               <Button variant="outline" className="w-full text-destructive hover:bg-destructive/10 hover:text-destructive" onClick={handleSignOut}>
