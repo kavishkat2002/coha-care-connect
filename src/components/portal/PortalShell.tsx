@@ -61,7 +61,7 @@ export function PortalShell({
     ? nav 
     : session 
       ? nav 
-      : nav.filter(item => item.label !== "Overview" && item.label !== "Profile" && item.label !== "Appointments");
+      : nav.filter(item => item.label !== "Overview" && item.label !== "Profile" && item.label !== "Appointments" && item.label !== "Health Timeline");
 
   const links = (
     <nav className="flex flex-col gap-1" aria-label={`${portalLabel} navigation`}>
@@ -121,37 +121,44 @@ export function PortalShell({
               <Bell className="size-5" />
               <span className="absolute right-2 top-2 size-2 rounded-full bg-primary" />
             </Button>
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" className="gap-2 px-2">
-                  <Avatar className="size-8">
-                    <AvatarFallback className="bg-accent text-xs text-accent-foreground">
-                      {initials}
-                    </AvatarFallback>
-                  </Avatar>
-                  <span className="hidden text-sm font-medium sm:inline">
-                    {session?.name ?? "Guest"}
-                  </span>
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-56">
-                <DropdownMenuLabel className="font-normal">
-                  <span className="block text-sm font-medium">{session?.name ?? "Guest user"}</span>
-                  <span className="block text-xs text-muted-foreground">
-                    {session?.email ?? "Not signed in"}
-                  </span>
-                </DropdownMenuLabel>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem
-                  onClick={async () => {
-                    await signOut();
-                    navigate({ to: "/auth" });
-                  }}
-                >
-                  <LogOut className="mr-2 size-4" /> Sign out
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+            
+            {isLoading ? null : session ? (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" className="gap-2 px-2">
+                    <Avatar className="size-8">
+                      <AvatarFallback className="bg-accent text-xs text-accent-foreground">
+                        {initials}
+                      </AvatarFallback>
+                    </Avatar>
+                    <span className="hidden text-sm font-medium sm:inline">
+                      {session.name}
+                    </span>
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-56">
+                  <DropdownMenuLabel className="font-normal">
+                    <span className="block text-sm font-medium">{session.name}</span>
+                    <span className="block text-xs text-muted-foreground">
+                      {session.email}
+                    </span>
+                  </DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem
+                    onClick={async () => {
+                      await signOut();
+                      navigate({ to: "/auth" });
+                    }}
+                  >
+                    <LogOut className="mr-2 size-4" /> Sign out
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            ) : (
+              <Button asChild variant="default" className="ml-2 bg-primary">
+                <Link to="/auth">Login as MedDoc member</Link>
+              </Button>
+            )}
           </div>
         </header>
 
