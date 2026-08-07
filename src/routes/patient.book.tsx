@@ -1,5 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { CalendarCheck, CheckCircle2, CreditCard, QrCode, Search } from "lucide-react";
+import {
+  CalendarCheck, CheckCircle2, CreditCard, QrCode, Search,
+  Car, FileText, Leaf, Award, Building2, Home, Pill, Activity, Plane, Smile, Sparkles, Flower2, Info, Brain
+} from "lucide-react";
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
 
@@ -66,24 +69,24 @@ function BookPage() {
   }, [hospital]);
 
   const results = useMemo(() => {
-      // Use the live hospital roster if available, otherwise fallback to static mock doctors
-      const allDoctors = rosterDoctors.length > 0 ? rosterDoctors : doctors;
-      
-      return allDoctors.filter((d) => {
-        const q = query.trim().toLowerCase();
-        const matchesQuery =
-          !q ||
-          d.name.toLowerCase().includes(q) ||
-          d.hospital.toLowerCase().includes(q) ||
-          d.specialty.toLowerCase().includes(q) ||
-          d.city.toLowerCase().includes(q);
-        return (
-          matchesQuery &&
-          (specialty === "all" || d.specialty === specialty) &&
-          (hospital === "all" || d.hospital === hospital) &&
-          (branch === "all" || d.branch === branch)
-        );
-      });
+    // Use the live hospital roster if available, otherwise fallback to static mock doctors
+    const allDoctors = rosterDoctors.length > 0 ? rosterDoctors : doctors;
+
+    return allDoctors.filter((d) => {
+      const q = query.trim().toLowerCase();
+      const matchesQuery =
+        !q ||
+        d.name.toLowerCase().includes(q) ||
+        d.hospital.toLowerCase().includes(q) ||
+        d.specialty.toLowerCase().includes(q) ||
+        d.city.toLowerCase().includes(q);
+      return (
+        matchesQuery &&
+        (specialty === "all" || d.specialty === specialty) &&
+        (hospital === "all" || d.hospital === hospital) &&
+        (branch === "all" || d.branch === branch)
+      );
+    });
   }, [query, specialty, hospital, branch, rosterDoctors, doctors]);
 
   if (confirmed && selected) {
@@ -149,7 +152,49 @@ function BookPage() {
         description="Search by doctor, hospital, specialty or branch, then pick an available slot."
       />
 
-      <Card className="shadow-soft">
+      <div className="space-y-4">
+        <h2 className="text-lg font-semibold text-[#0E3860] dark:text-blue-100">Quick Access</h2>
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+          {[
+            { id: "dl", label: "MedMind eCare", image: "/brain-care-icon-white-background-brain-care-icon-361728746.webp", isNew: false, color: "text-purple-500" },
+            { id: "mfa", label: "MedDoc ePass", image: "/eSubscription.svg", isNew: false, color: "text-blue-500" },
+            { id: "ayur", label: "eAyurveda", image: "/ayurvedic-medicine-illustration_1480904-73.avif", isNew: true, color: "text-green-500" },
+            { id: "prem", label: "MedDoc ePremium", image: "/Screenshot 2026-08-08 at 01.56.15.png", isNew: false, color: "text-yellow-500" },
+            { id: "hosp", label: "eHospital", icon: Building2, isNew: true, color: "text-emerald-600" },
+            { id: "homec", label: "eHomeCare", icon: Home, isNew: true, color: "text-blue-400" },
+            { id: "pharm", label: "ePharmacy", icon: Pill, isNew: false, color: "text-purple-500" },
+            { id: "diag", label: "eDiagnostics", icon: Activity, isNew: false, color: "text-red-600" },
+            { id: "visa", label: "eVisa Medical Services", icon: Plane, isNew: true, color: "text-sky-500" },
+            { id: "dental", label: "eDental", icon: Smile, isNew: true, color: "text-indigo-500" },
+            { id: "skin", label: "eSkinCare", icon: Sparkles, isNew: true, color: "text-amber-500" },
+            { id: "homeo", label: "eHomeopathy", icon: Flower2, isNew: true, color: "text-green-600" },
+          ].map((item) => (
+            <div
+              key={item.id}
+              className="relative p-5 bg-card border border-border shadow-soft rounded-2xl flex flex-col items-center justify-center gap-4 hover:shadow-md transition-shadow cursor-pointer"
+            >
+              {item.isNew && (
+                <span className="absolute top-0 left-0 bg-green-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-tl-2xl rounded-br-lg">
+                  New
+                </span>
+              )}
+              <Info className="absolute top-3 right-3 size-4 text-muted-foreground/50 hover:text-muted-foreground" />
+              {(item as any).image ? (
+                <div className="w-16 h-16 flex items-center justify-center">
+                  <img src={(item as any).image} alt={item.label} className="w-full h-full object-contain" />
+                </div>
+              ) : (
+                <div className={`p-4 rounded-full bg-muted/30 ${item.color}`}>
+                  {item.icon && <item.icon className="size-8" strokeWidth={1.5} />}
+                </div>
+              )}
+              <span className="text-sm font-medium text-foreground text-center">{item.label}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <Card className="shadow-soft mt-8">
         <CardContent className="grid gap-4 p-5 lg:grid-cols-4">
           <div className="space-y-2 lg:col-span-2">
             <Label htmlFor="search">Search</Label>
