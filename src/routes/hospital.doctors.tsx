@@ -27,6 +27,14 @@ import {
   DropdownMenuSubContent
 } from "@/components/ui/dropdown-menu";
 
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+
 export const Route = createFileRoute("/hospital/doctors")({
   head: () => ({
     meta: [{ title: "Manage Doctors — Hospital Portal" }],
@@ -70,10 +78,15 @@ function HospitalDoctors() {
   // Create New Doctor State
   const [isCreating, setIsCreating] = useState(false);
 
-  const filteredDoctors = roster.filter((doc) =>
-    doc.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    doc.specialty.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const [filterBranch, setFilterBranch] = useState("all");
+  const today = new Date().toISOString().split('T')[0] as string;
+  const [filterDate, setFilterDate] = useState<string>(today);
+
+  const filteredDoctors = roster.filter((doc) => {
+    const matchesSearch = doc.name.toLowerCase().includes(searchTerm.toLowerCase()) || doc.specialty.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesBranch = filterBranch === "all" || doc.branch === filterBranch;
+    return matchesSearch && matchesBranch;
+  });
 
   const handleLinkDoctor = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -316,13 +329,34 @@ function HospitalDoctors() {
               <CardTitle className="text-base">Medical Staff Roster</CardTitle>
               <CardDescription>All doctors currently affiliated with your organization.</CardDescription>
             </div>
-            <div className="relative w-full sm:w-72">
-              <Search className="absolute left-2.5 top-2.5 size-4 text-muted-foreground" />
-              <Input
-                placeholder="Search by name or specialty..."
-                className="pl-9"
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
+            <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
+              <div className="relative w-full sm:w-64">
+                <Search className="absolute left-2.5 top-2.5 size-4 text-muted-foreground" />
+                <Input
+                  placeholder="Search by name..."
+                  className="pl-9"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                />
+              </div>
+              <Select value={filterBranch} onValueChange={setFilterBranch}>
+                <SelectTrigger className="w-full sm:w-48">
+                  <SelectValue placeholder="All Branches" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Branches</SelectItem>
+                  {branchesData.map((b) => (
+                    <SelectItem key={b.name} value={b.name}>
+                      {b.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <Input 
+                type="date" 
+                value={filterDate}
+                onChange={(e) => setFilterDate(e.target.value)}
+                className="w-full sm:w-40"
               />
             </div>
           </div>
@@ -364,15 +398,22 @@ function HospitalDoctors() {
                     {doc.branch}
                   </TableCell>
                   <TableCell>
-                    {doc.online ? (
-                      <Badge variant="outline" className="border-green-200 bg-green-50 text-green-700 dark:bg-green-900/20 dark:text-green-400 dark:border-green-800">
-                        Available
-                      </Badge>
-                    ) : (
-                      <Badge variant="outline" className="text-muted-foreground">
-                        Offline
-                      </Badge>
-                    )}
+                    {(() => {
+                      // Check for specific date availability, fallback to general online status
+                      const isAvailable = (doc as any).availability?.[filterDate] !== undefined 
+                        ? (doc as any).availability[filterDate] 
+                        : doc.online;
+                        
+                      return isAvailable ? (
+                        <Badge variant="outline" className="border-green-200 bg-green-50 text-green-700 dark:bg-green-900/20 dark:text-green-400 dark:border-green-800">
+                          Available
+                        </Badge>
+                      ) : (
+                        <Badge variant="outline" className="text-muted-foreground">
+                          Offline
+                        </Badge>
+                      );
+                    })()}
                   </TableCell>
                   <TableCell className="text-right">
                     <DropdownMenu>

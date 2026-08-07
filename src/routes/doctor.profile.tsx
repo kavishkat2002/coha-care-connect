@@ -224,6 +224,108 @@ function DoctorProfile() {
               </CardFooter>
             </Card>
           </form>
+
+          {/* Availability Scheduling Card */}
+          <Card className="mt-8 shadow-sm border-border">
+            <CardHeader>
+              <CardTitle className="text-lg flex items-center gap-2">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-primary"><rect width="18" height="18" x="3" y="4" rx="2" ry="2"/><line x1="16" x2="16" y1="2" y2="6"/><line x1="8" x2="8" y1="2" y2="6"/><line x1="3" x2="21" y1="10" y2="10"/></svg>
+                Availability Schedule
+              </CardTitle>
+              <CardDescription>
+                Set your availability for specific dates. Hospitals will see this status for your assigned branch.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="flex flex-col sm:flex-row gap-4 items-end">
+                {(() => {
+                  const today = new Date().toISOString().split('T')[0] as string;
+                  const [date, setDate] = useState<string>(today);
+                  const [status, setStatus] = useState<boolean>(true);
+
+                  useEffect(() => {
+                    const savedRoster = localStorage.getItem("mock_hospital_roster");
+                    if (savedRoster && session) {
+                      try {
+                        const roster = JSON.parse(savedRoster);
+                        const id = session.registration_id || `DOC-${session.id.substring(0, 6).toUpperCase()}`;
+                        const doc = roster.find((d: any) => d.id === id || d.name === session.name);
+                        
+                        if (doc) {
+                          // Check if specific date exists in availability map, else fallback to general 'online' status
+                          const isAvailable = doc.availability && doc.availability[date] !== undefined 
+                            ? doc.availability[date] 
+                            : doc.online;
+                          setStatus(isAvailable);
+                        }
+                      } catch (e) {}
+                    }
+                  }, [date, session]);
+
+                  const handleUpdateStatus = (newStatus: boolean) => {
+                    const savedRoster = localStorage.getItem("mock_hospital_roster");
+                    if (savedRoster && session) {
+                      try {
+                        const roster = JSON.parse(savedRoster);
+                        const id = session.registration_id || `DOC-${session.id.substring(0, 6).toUpperCase()}`;
+                        const updatedRoster = roster.map((d: any) => {
+                          if (d.id === id || d.name === session.name) {
+                            return {
+                              ...d,
+                              availability: {
+                                ...(d.availability || {}),
+                                [date]: newStatus
+                              }
+                            };
+                          }
+                          return d;
+                        });
+                        
+                        localStorage.setItem("mock_hospital_roster", JSON.stringify(updatedRoster));
+                        setStatus(newStatus);
+                        toast.success(`Marked as ${newStatus ? 'Available' : 'Offline'} for ${date}`);
+                        
+                        // Dispatch storage event to keep other tabs in sync if needed
+                        window.dispatchEvent(new Event('storage'));
+                      } catch (e) {}
+                    }
+                  };
+
+                  return (
+                    <>
+                      <div className="space-y-2 w-full sm:w-auto flex-1">
+                        <Label htmlFor="schedule-date">Select Date</Label>
+                        <Input 
+                          id="schedule-date" 
+                          type="date" 
+                          value={date} 
+                          onChange={(e) => setDate(e.target.value)} 
+                          min={today}
+                        />
+                      </div>
+                      <div className="flex gap-2 w-full sm:w-auto">
+                        <Button 
+                          type="button" 
+                          variant={status ? "default" : "outline"} 
+                          className={status ? "bg-green-600 hover:bg-green-700" : ""}
+                          onClick={() => handleUpdateStatus(true)}
+                        >
+                          Available
+                        </Button>
+                        <Button 
+                          type="button" 
+                          variant={!status ? "destructive" : "outline"}
+                          onClick={() => handleUpdateStatus(false)}
+                        >
+                          Offline
+                        </Button>
+                      </div>
+                    </>
+                  );
+                })()}
+              </div>
+            </CardContent>
+          </Card>
         </div>
       </div>
     </div>
