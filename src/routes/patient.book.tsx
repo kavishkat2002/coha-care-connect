@@ -155,20 +155,20 @@ function BookPage() {
       <div className="space-y-4">
         <h2 className="text-lg font-semibold text-[#0E3860] dark:text-blue-100">Quick Access</h2>
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
-          {[
+          {( [
             { id: "dl", label: "MedMind eCare", image: "/brain-care-icon-white-background-brain-care-icon-361728746.webp", isNew: false, color: "text-purple-500" },
             { id: "mfa", label: "MedDoc ePass", image: "/eSubscription.svg", isNew: false, color: "text-blue-500" },
             { id: "ayur", label: "eAyurveda", image: "/ayurvedic-medicine-illustration_1480904-73.avif", isNew: true, color: "text-green-500" },
             { id: "prem", label: "MedDoc ePremium", image: "/Screenshot 2026-08-08 at 01.56.15.png", isNew: false, color: "text-yellow-500" },
             { id: "hosp", label: "eHospital", image: "/images.png", isNew: true, color: "text-emerald-600" },
-            { id: "homec", label: "eHomeCare", image: "/images-1.png", isNew: true, color: "text-blue-400" },
-            { id: "pharm", label: "ePharmacy", image: "/images.jpg", isNew: false, color: "text-purple-500" },
+            { id: "homec", label: "eHomeCare", image: "/images.jpg", isNew: true, color: "text-blue-400" },
+            { id: "pharm", label: "ePharmacy", image: "/images-1.png", isNew: false, color: "text-purple-500" },
             { id: "diag", label: "eDiagnostics", image: "/eDiagnosis.svg", isNew: false, color: "text-red-600" },
             { id: "visa", label: "eNutritionist", image: "/eNutritionist.svg", isNew: true, color: "text-sky-500" },
-            { id: "dental", label: "eDental", icon: Smile, isNew: true, color: "text-indigo-500" },
-            { id: "skin", label: "eSkinCare", icon: Sparkles, isNew: true, color: "text-amber-500" },
-            { id: "homeo", label: "eHomeopathy", icon: Flower2, isNew: true, color: "text-green-600" },
-          ].map((item) => (
+            { id: "dental", label: "eDental", image: "/images-1.jpg", isNew: true, color: "text-indigo-500" },
+            { id: "skin", label: "eSkinCare", image: "/images-2.png", isNew: true, color: "text-amber-500" },
+            { id: "homeo", label: "eHomeopathy", image: "/images-2.jpg", isNew: true, color: "text-green-600" },
+          ] as any[] ).map((item) => (
             <div
               key={item.id}
               className="relative p-5 bg-card border border-border shadow-soft rounded-2xl flex flex-col items-center justify-center gap-4 hover:shadow-md transition-shadow cursor-pointer"
