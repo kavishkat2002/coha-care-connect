@@ -44,6 +44,7 @@ const SLOTS = ["09:00", "10:30", "12:00", "14:30", "16:30", "18:00"];
 function BookPage() {
   const navigate = useNavigate();
   const [query, setQuery] = useState("");
+  const [showSuggestions, setShowSuggestions] = useState(false);
   const [date, setDate] = useState("");
   const [specialty, setSpecialty] = useState("all");
   const [hospital, setHospital] = useState("all");
@@ -70,6 +71,13 @@ function BookPage() {
     return h ? h.branches : [];
   }, [hospital]);
 
+  const suggestions = useMemo(() => {
+    if (!query.trim()) return [];
+    const allDoctors = rosterDoctors.length > 0 ? rosterDoctors : doctors;
+    const uniqueNames = Array.from(new Set(allDoctors.map(d => d.name || "")));
+    return uniqueNames.filter(name => name && name.toLowerCase().includes(query.trim().toLowerCase()));
+  }, [query, rosterDoctors, doctors]);
+
   const results = useMemo(() => {
     // Use the live hospital roster if available, otherwise fallback to static mock doctors
     const allDoctors = rosterDoctors.length > 0 ? rosterDoctors : doctors;
@@ -78,10 +86,10 @@ function BookPage() {
       const q = query.trim().toLowerCase();
       const matchesQuery =
         !q ||
-        d.name.toLowerCase().includes(q) ||
-        d.hospital.toLowerCase().includes(q) ||
-        d.specialty.toLowerCase().includes(q) ||
-        d.city.toLowerCase().includes(q);
+        (d.name || "").toLowerCase().includes(q) ||
+        (d.hospital || "").toLowerCase().includes(q) ||
+        (d.specialty || "").toLowerCase().includes(q) ||
+        (d.city || "").toLowerCase().includes(q);
       return (
         matchesQuery &&
         (specialty === "all" || d.specialty === specialty) &&
@@ -212,17 +220,33 @@ function BookPage() {
               />
               <Input
                 id="search"
-                list="doctor-names"
+                autoComplete="off"
                 value={query}
-                onChange={(e) => setQuery(e.target.value)}
-                placeholder="Start typing..."
+                onChange={(e) => {
+                  setQuery(e.target.value);
+                  setShowSuggestions(true);
+                }}
+                onFocus={() => setShowSuggestions(true)}
+                onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
+                placeholder="Search doctor name"
                 className="pl-9"
               />
-              <datalist id="doctor-names">
-                {Array.from(new Set((rosterDoctors.length > 0 ? rosterDoctors : doctors).map(d => d.name))).map((name) => (
-                  <option key={name} value={name} />
-                ))}
-              </datalist>
+              {showSuggestions && query.trim().length > 0 && suggestions.length > 0 && (
+                <div className="absolute z-10 w-full bg-popover text-popover-foreground border border-border shadow-md rounded-md mt-1 max-h-60 overflow-y-auto">
+                  {suggestions.map((name) => (
+                    <div
+                      key={name}
+                      className="px-4 py-2 hover:bg-muted cursor-pointer text-sm"
+                      onClick={() => {
+                        setQuery(name);
+                        setShowSuggestions(false);
+                      }}
+                    >
+                      {name}
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
           <div className="space-y-2">
