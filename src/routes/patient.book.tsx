@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import {
   CalendarCheck, CheckCircle2, CreditCard, QrCode, Search,
   Car, FileText, Leaf, Award, Building2, Home, Pill, Activity, Plane, Smile, Sparkles, Flower2, Info, Brain
@@ -42,6 +42,7 @@ export const Route = createFileRoute("/patient/book")({
 const SLOTS = ["09:00", "10:30", "12:00", "14:30", "16:30", "18:00"];
 
 function BookPage() {
+  const navigate = useNavigate();
   const [query, setQuery] = useState("");
   const [specialty, setSpecialty] = useState("all");
   const [hospital, setHospital] = useState("all");
@@ -171,6 +172,11 @@ function BookPage() {
           ] as any[] ).map((item) => (
             <div
               key={item.id}
+              onClick={() => {
+                if (item.id === "hosp") {
+                  navigate({ to: "/patient/telemedicine" });
+                }
+              }}
               className="relative p-5 bg-card border border-border shadow-soft rounded-2xl flex flex-col items-center justify-center gap-4 hover:shadow-md transition-shadow cursor-pointer"
             >
               {item.isNew && (
