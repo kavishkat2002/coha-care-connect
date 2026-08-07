@@ -29,13 +29,20 @@ export function PortalShell({
   children: ReactNode;
 }) {
   const [session, setSession] = useState<Session | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
   const [open, setOpen] = useState(false);
   const navigate = useNavigate();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
 
   useEffect(() => {
-    getSession().then(setSession);
-    const unsubscribe = onAuthStateChange(setSession);
+    getSession().then((s) => {
+      setSession(s);
+      setIsLoading(false);
+    });
+    const unsubscribe = onAuthStateChange((s) => {
+      setSession(s);
+      setIsLoading(false);
+    });
     return () => {
       unsubscribe.unsubscribe();
     };
@@ -50,9 +57,15 @@ export function PortalShell({
     .join("")
     .toUpperCase();
 
+  const filteredNav = isLoading 
+    ? nav 
+    : session 
+      ? nav 
+      : nav.filter(item => item.label !== "Overview" && item.label !== "Profile");
+
   const links = (
     <nav className="flex flex-col gap-1" aria-label={`${portalLabel} navigation`}>
-      {nav.map((item) => {
+      {filteredNav.map((item) => {
         const active = pathname === item.to;
         return (
           <Link
