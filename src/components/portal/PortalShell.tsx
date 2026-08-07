@@ -61,7 +61,7 @@ export function PortalShell({
     ? nav 
     : session 
       ? nav 
-      : nav.filter(item => item.label !== "Overview" && item.label !== "Profile");
+      : nav.filter(item => item.label !== "Overview" && item.label !== "Profile" && item.label !== "Appointments");
 
   const links = (
     <nav className="flex flex-col gap-1" aria-label={`${portalLabel} navigation`}>
