@@ -44,6 +44,7 @@ const SLOTS = ["09:00", "10:30", "12:00", "14:30", "16:30", "18:00"];
 function BookPage() {
   const navigate = useNavigate();
   const [query, setQuery] = useState("");
+  const [date, setDate] = useState("");
   const [specialty, setSpecialty] = useState("all");
   const [hospital, setHospital] = useState("all");
   const [branch, setBranch] = useState("all");
@@ -202,8 +203,8 @@ function BookPage() {
 
       <Card className="shadow-soft mt-8">
         <CardContent className="grid gap-4 p-5 lg:grid-cols-4">
-          <div className="space-y-2 lg:col-span-2">
-            <Label htmlFor="search">Search</Label>
+          <div className="space-y-2">
+            <Label htmlFor="search">Doctor Name</Label>
             <div className="relative">
               <Search
                 className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground"
@@ -211,15 +212,21 @@ function BookPage() {
               />
               <Input
                 id="search"
+                list="doctor-names"
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
-                placeholder="Doctor, hospital or city"
+                placeholder="Start typing..."
                 className="pl-9"
               />
+              <datalist id="doctor-names">
+                {Array.from(new Set((rosterDoctors.length > 0 ? rosterDoctors : doctors).map(d => d.name))).map((name) => (
+                  <option key={name} value={name} />
+                ))}
+              </datalist>
             </div>
           </div>
           <div className="space-y-2">
-            <Label htmlFor="specialty">Specialty</Label>
+            <Label htmlFor="specialty">Specialization</Label>
             <Select value={specialty} onValueChange={setSpecialty}>
               <SelectTrigger id="specialty">
                 <SelectValue placeholder="All specialties" />
@@ -256,8 +263,18 @@ function BookPage() {
               </SelectContent>
             </Select>
           </div>
+          <div className="space-y-2">
+            <Label htmlFor="date">Date</Label>
+            <Input
+              id="date"
+              type="date"
+              value={date}
+              onChange={(e) => setDate(e.target.value)}
+              className="w-full"
+            />
+          </div>
           {branches.length ? (
-            <div className="space-y-2">
+            <div className="space-y-2 lg:col-span-4">
               <Label htmlFor="branch">Branch</Label>
               <Select value={branch} onValueChange={setBranch}>
                 <SelectTrigger id="branch">
