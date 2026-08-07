@@ -1,11 +1,13 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { Activity, CalendarCheck, FileText, Image as ImageIcon, Pill, Sparkles } from "lucide-react";
+import { useState, useEffect } from "react";
 
 import { PageHeader } from "@/components/shared/PageHeader";
 import { AiDisclaimer } from "@/components/shared/AiDisclaimer";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { timeline } from "@/data/mock";
+import { type TimelineItem } from "@/data/mock";
+import { patientService } from "@/services/patient.service";
 
 export const Route = createFileRoute("/patient/timeline")({
   head: () => ({
@@ -31,6 +33,16 @@ const icons = {
 } as const;
 
 function TimelinePage() {
+  const [timeline, setTimeline] = useState<TimelineItem[]>([]);
+
+  useEffect(() => {
+    async function load() {
+      const data = await patientService.getTimeline();
+      setTimeline(data);
+    }
+    load();
+  }, []);
+
   return (
     <div className="space-y-6">
       <PageHeader

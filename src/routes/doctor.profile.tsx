@@ -11,6 +11,8 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { getSession, signOut, type Session } from "@/services/auth.service";
+import { doctorService } from "@/services/doctor.service";
+import { type Doctor } from "@/data/mock";
 import { useNavigate } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/doctor/profile")({
@@ -140,15 +142,18 @@ function DoctorProfile() {
 
                   {(() => {
                     // Look up the doctor's real-time hospital and branch from the global roster
-                    const savedRoster = localStorage.getItem("mock_hospital_roster");
-                    let rosterDetails: any = null;
-                    if (savedRoster && session) {
-                      try {
-                        const roster = JSON.parse(savedRoster);
+                    const [rosterDetails, setRosterDetails] = useState<any>(null);
+                    
+                    useEffect(() => {
+                      if (!session) return;
+                      const fetchDetails = async () => {
+                        const data = await doctorService.getAllDoctors();
                         const id = session.registration_id || `DOC-${session.id.substring(0, 6).toUpperCase()}`;
-                        rosterDetails = roster.find((d: any) => d.id === id || d.name === session.name);
-                      } catch (e) {}
-                    }
+                        const match = data.find((d: any) => d.id === id || d.name === session.name);
+                        if (match) setRosterDetails(match);
+                      };
+                      fetchDetails();
+                    }, [session]);
                     
                     return (
                       <>
@@ -244,50 +249,45 @@ function DoctorProfile() {
                   const [status, setStatus] = useState<boolean>(true);
 
                   useEffect(() => {
-                    const savedRoster = localStorage.getItem("mock_hospital_roster");
-                    if (savedRoster && session) {
-                      try {
-                        const roster = JSON.parse(savedRoster);
-                        const id = session.registration_id || `DOC-${session.id.substring(0, 6).toUpperCase()}`;
-                        const doc = roster.find((d: any) => d.id === id || d.name === session.name);
-                        
-                        if (doc) {
-                          // Check if specific date exists in availability map, else fallback to general 'online' status
-                          const isAvailable = doc.availability && doc.availability[date] !== undefined 
-                            ? doc.availability[date] 
-                            : doc.online;
-                          setStatus(isAvailable);
-                        }
-                      } catch (e) {}
-                    }
+                    if (!session) return;
+                    const fetchStatus = async () => {
+                      const data = await doctorService.getAllDoctors();
+                      const id = session.registration_id || `DOC-${session.id.substring(0, 6).toUpperCase()}`;
+                      const doc = data.find((d: any) => d.id === id || d.name === session.name);
+                      
+                      if (doc) {
+                        const isAvailable = doc.availability && doc.availability[date] !== undefined 
+                          ? doc.availability[date] 
+                          : doc.online;
+                        setStatus(isAvailable);
+                      }
+                    };
+                    fetchStatus();
                   }, [date, session]);
 
-                  const handleUpdateStatus = (newStatus: boolean) => {
-                    const savedRoster = localStorage.getItem("mock_hospital_roster");
-                    if (savedRoster && session) {
-                      try {
-                        const roster = JSON.parse(savedRoster);
-                        const id = session.registration_id || `DOC-${session.id.substring(0, 6).toUpperCase()}`;
-                        const updatedRoster = roster.map((d: any) => {
-                          if (d.id === id || d.name === session.name) {
-                            return {
-                              ...d,
-                              availability: {
-                                ...(d.availability || {}),
-                                [date]: newStatus
-                              }
-                            };
-                          }
-                          return d;
-                        });
-                        
-                        localStorage.setItem("mock_hospital_roster", JSON.stringify(updatedRoster));
+                  const handleUpdateStatus = async (newStatus: boolean) => {
+                    if (!session) return;
+                    const data = await doctorService.getAllDoctors();
+                    const id = session.registration_id || `DOC-${session.id.substring(0, 6).toUpperCase()}`;
+                    const docIndex = data.findIndex((d: any) => d.id === id || d.name === session.name);
+                    
+                    if (docIndex > -1) {
+                      const currentDoc = data[docIndex] as Doctor;
+                      const updatedDoc: Doctor = {
+                        ...currentDoc,
+                        availability: {
+                          ...(currentDoc.availability || {}),
+                          [date]: newStatus
+                        }
+                      };
+                      
+                      const success = await doctorService.saveDoctor(updatedDoc);
+                      if (success) {
                         setStatus(newStatus);
                         toast.success(`Marked as ${newStatus ? 'Available' : 'Offline'} for ${date}`);
-                        
-                        // Dispatch storage event to keep other tabs in sync if needed
-                        window.dispatchEvent(new Event('storage'));
-                      } catch (e) {}
+                      } else {
+                        toast.error("Failed to update status");
+                      }
                     }
                   };
 

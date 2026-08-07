@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { Upload } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 import { PageHeader } from "@/components/shared/PageHeader";
 import { AiDisclaimer } from "@/components/shared/AiDisclaimer";
@@ -8,8 +8,9 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { reports } from "@/data/mock";
+import { type ReportItem } from "@/data/mock";
 import { analyseMedicalReport, type ReportAnalysis } from "@/services/ai.service";
+import { patientService } from "@/services/patient.service";
 
 export const Route = createFileRoute("/patient/reports")({
   head: () => ({
@@ -30,6 +31,15 @@ export const Route = createFileRoute("/patient/reports")({
 function ReportsPage() {
   const [busy, setBusy] = useState(false);
   const [result, setResult] = useState<ReportAnalysis | null>(null);
+  const [reports, setReports] = useState<ReportItem[]>([]);
+
+  useEffect(() => {
+    async function load() {
+      const data = await patientService.getReports();
+      setReports(data);
+    }
+    load();
+  }, []);
 
   return (
     <div className="space-y-6">

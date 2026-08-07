@@ -6,8 +6,9 @@ import { PageHeader } from "@/components/shared/PageHeader";
 import { StatCard } from "@/components/shared/StatCard";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { hospitals } from "@/data/mock";
+import { type Hospital } from "@/data/mock";
 import { getSession, type Session } from "@/services/auth.service";
+import { hospitalService } from "@/services/hospital.service";
 
 export const Route = createFileRoute("/hospital/")({
   head: () => ({
@@ -23,12 +24,22 @@ export const Route = createFileRoute("/hospital/")({
 
 function HospitalDashboard() {
   const [session, setSession] = useState<Session | null>(null);
+  const [h, setH] = useState<Hospital | null>(null);
   
   useEffect(() => {
     getSession().then(setSession);
+    async function load() {
+      const allHospitals = await hospitalService.getAllHospitals();
+      if (allHospitals.length > 0) {
+        setH(allHospitals[0]!);
+      }
+    }
+    load();
   }, []);
 
-  const h = hospitals[0]!; // Using mock data for stats and departments for now
+  if (!h) {
+    return <div className="p-8 text-center text-muted-foreground">Loading dashboard...</div>;
+  }
   
   return (
     <div className="space-y-8">

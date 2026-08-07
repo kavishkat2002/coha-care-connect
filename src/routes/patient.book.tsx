@@ -3,7 +3,7 @@ import {
   CalendarCheck, CheckCircle2, CreditCard, QrCode, Search,
   Car, FileText, Leaf, Award, Building2, Home, Pill, Activity, Plane, Smile, Sparkles, Flower2, Info, Brain
 } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import { toast } from "sonner";
 
 import { PageHeader } from "@/components/shared/PageHeader";
@@ -21,7 +21,9 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
-import { doctors, hospitals, SPECIALTIES, type Doctor } from "@/data/mock";
+import { doctors, SPECIALTIES, type Doctor, type Hospital } from "@/data/mock";
+import { doctorService } from "@/services/doctor.service";
+import { hospitalService } from "@/services/hospital.service";
 
 export const Route = createFileRoute("/patient/book")({
   head: () => ({
@@ -53,23 +55,30 @@ function BookPage() {
   const [slot, setSlot] = useState<string | null>(null);
   const [confirmed, setConfirmed] = useState(false);
 
-  // Load custom hospital roster from localStorage to sync with Hospital Portal
-  const [rosterDoctors] = useState<Doctor[]>(() => {
-    const saved = localStorage.getItem("mock_hospital_roster");
-    if (saved) {
-      try {
-        return JSON.parse(saved);
-      } catch (e) {
-        return [];
+  // Load custom hospital roster from Supabase
+  const [rosterDoctors, setRosterDoctors] = useState<Doctor[]>([]);
+  const [dbHospitals, setDbHospitals] = useState<Hospital[]>([]);
+  
+  useEffect(() => {
+    async function loadData() {
+      const [docs, hosps] = await Promise.all([
+        doctorService.getAllDoctors(),
+        hospitalService.getAllHospitals()
+      ]);
+      if (docs && docs.length > 0) {
+        setRosterDoctors(docs);
+      }
+      if (hosps && hosps.length > 0) {
+        setDbHospitals(hosps);
       }
     }
-    return [];
-  });
+    loadData();
+  }, []);
 
   const branches = useMemo(() => {
-    const h = hospitals.find((x) => x.name === hospital);
+    const h = dbHospitals.find((x) => x.name === hospital);
     return h ? h.branches : [];
-  }, [hospital]);
+  }, [hospital, dbHospitals]);
 
   const suggestions = useMemo(() => {
     if (!query.trim()) return [];
@@ -279,7 +288,7 @@ function BookPage() {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">All hospitals</SelectItem>
-                {hospitals.map((h) => (
+                {dbHospitals.map((h) => (
                   <SelectItem key={h.id} value={h.name}>
                     {h.name}
                   </SelectItem>

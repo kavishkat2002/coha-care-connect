@@ -1,4 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { useState, useEffect } from "react";
 import {
   Activity,
   Bot,
@@ -16,7 +17,8 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { appointments, patientProfile, reports, timeline } from "@/data/mock";
+import { type Appointment, type ReportItem, type TimelineItem } from "@/data/mock";
+import { patientService, type PatientProfile } from "@/services/patient.service";
 
 export const Route = createFileRoute("/patient/")({
   head: () => ({
@@ -42,7 +44,32 @@ const quickActions = [
 ];
 
 function PatientOverview() {
+  const [appointments, setAppointments] = useState<Appointment[]>([]);
+  const [patientProfile, setPatientProfile] = useState<PatientProfile | null>(null);
+  const [reports, setReports] = useState<ReportItem[]>([]);
+  const [timeline, setTimeline] = useState<TimelineItem[]>([]);
+
+  useEffect(() => {
+    async function loadData() {
+      const [appts, profile, rpts, tl] = await Promise.all([
+        patientService.getAppointments(),
+        patientService.getPatientProfile(),
+        patientService.getReports(),
+        patientService.getTimeline()
+      ]);
+      setAppointments(appts);
+      setPatientProfile(profile);
+      setReports(rpts);
+      setTimeline(tl);
+    }
+    loadData();
+  }, []);
+
   const upcoming = appointments.filter((a) => a.status !== "Completed" && a.status !== "Cancelled");
+
+  if (!patientProfile) {
+    return <div className="p-8 text-center text-muted-foreground">Loading dashboard...</div>;
+  }
 
   return (
     <div className="space-y-8">
@@ -54,7 +81,7 @@ function PatientOverview() {
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <StatCard icon={HeartPulse} label="Health score" value="82 / 100" hint="Stable this month" />
         <StatCard icon={CalendarCheck} label="Upcoming visits" value={String(upcoming.length)} hint="Next: 12 Aug" />
-        <StatCard icon={FileText} label="Reports analysed" value="2" hint="3 flagged values" />
+        <StatCard icon={FileText} label="Reports analysed" value={String(reports.length)} hint="3 flagged values" />
         <StatCard icon={Activity} label="Timeline events" value={String(timeline.length)} hint="Last 60 days" />
       </div>
 

@@ -15,6 +15,8 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { doctors as initialDoctors } from "@/data/mock";
 import { adminCreateAccount } from "@/services/auth.service";
+import { doctorService } from "@/services/doctor.service";
+import { type Doctor } from "@/data/mock";
 
 import {
   DropdownMenu,
@@ -44,17 +46,18 @@ export const Route = createFileRoute("/hospital/doctors")({
 
 function HospitalDoctors() {
   const [searchTerm, setSearchTerm] = useState("");
-  const [roster, setRoster] = useState<typeof initialDoctors>(() => {
-    const saved = localStorage.getItem("mock_hospital_roster");
-    if (saved) {
-      try {
-        return JSON.parse(saved);
-      } catch (e) {
-        return initialDoctors;
-      }
+  const [roster, setRoster] = useState<Doctor[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    async function loadRoster() {
+      const data = await doctorService.getAllDoctors();
+      // If db is empty, maybe fallback to initial mock, but let's just use what's there
+      setRoster(data.length > 0 ? data : initialDoctors);
+      setIsLoading(false);
     }
-    return initialDoctors;
-  });
+    loadRoster();
+  }, []);
 
   const [branchesData] = useState<{name: string, capacity: number}[]>(() => {
     const saved = localStorage.getItem("mock_hospital_branches_data");
@@ -64,10 +67,6 @@ function HospitalDoctors() {
     // Fallback to initial mock if branches weren't set yet
     return require("@/data/mock").hospitals[0].branches.map((b: string) => ({ name: b, capacity: 100 }));
   });
-
-  useEffect(() => {
-    localStorage.setItem("mock_hospital_roster", JSON.stringify(roster));
-  }, [roster]);
 
   
   // Dialog State
@@ -103,31 +102,32 @@ function HospitalDoctors() {
     setIsLinking(true);
     
     // Simulate API verification delay
-    setTimeout(() => {
-      const initials = (linkName || "Doctor").split(" ").map(p => p[0]).slice(0, 2).join("").toUpperCase();
+    setTimeout(async () => {
+      const initials = (linkName || "Doctor").split(" ").map(p => p[0]).slice(0, 2).join("").toUpperCase();      
       const newDoctor = {
         id: linkId,
-        name: linkName || "Linked Doctor", 
-        specialty: linkSpecialty || "General Medicine",
-        hospital: "Lakeside General Hospital",
+        name: linkName,
+        specialty: linkSpecialty,
+        hospital: "Lakeside General Hospital", // Mock current hospital context
         branch: branchesData[0]?.name || "Main Branch",
         rating: 0,
         reviews: 0,
         fee: 2000,
-        about: "Newly linked physician.",
+        about: "Transferred physician.",
         languages: ["English"],
         photoInitials: initials,
-        online: true,
+        online: false,
         city: "Colombo",
         distanceKm: 0,
         experienceYears: 5,
         queue: 0,
         nextSlot: "Available",
       };
-      
-      setRoster([newDoctor, ...roster]);
-      setIsLinking(false);
+
+      await doctorService.saveDoctor(newDoctor as Doctor);
+      setRoster([newDoctor as Doctor, ...roster]);
       setIsAddOpen(false);
+      setIsLinking(false);
       toast.success("Doctor successfully linked to your hospital roster!");
     }, 1500);
   };
@@ -168,7 +168,8 @@ function HospitalDoctors() {
         nextSlot: "Available",
       };
       
-      setRoster([newDoctor, ...roster]);
+      await doctorService.saveDoctor(newDoctor as Doctor);
+      setRoster([newDoctor as Doctor, ...roster]);
       setIsAddOpen(false);
       toast.success(`Account created for ${name} and added to roster.`);
     } catch (error: any) {
@@ -178,17 +179,21 @@ function HospitalDoctors() {
     }
   };
 
-  const handleRemoveDoctor = (id: string) => {
+  const handleRemoveDoctor = async (id: string) => {
     const doc = roster.find(d => d.id === id);
     if (!doc) return;
+    
+    await doctorService.deleteDoctor(id);
     setRoster(roster.filter(d => d.id !== id));
     toast.success(`${doc.name} was removed from your hospital roster.`);
   };
 
-  const handleReassignBranch = (id: string, newBranch: string) => {
-    setRoster(roster.map(d => d.id === id ? { ...d, branch: newBranch } : d));
-    const doc = roster.find(d => d.id === id);
+  const handleReassignBranch = async (id: string, newBranch: string) => {
+    const updatedDocs = roster.map(d => d.id === id ? { ...d, branch: newBranch } : d);
+    setRoster(updatedDocs);
+    const doc = updatedDocs.find(d => d.id === id);
     if (doc) {
+      await doctorService.saveDoctor(doc);
       toast.success(`${doc.name} reassigned to ${newBranch}`);
     }
   };

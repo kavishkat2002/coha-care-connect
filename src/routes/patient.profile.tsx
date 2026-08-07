@@ -1,9 +1,10 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { useState, useEffect } from "react";
 
 import { PageHeader } from "@/components/shared/PageHeader";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { patientProfile } from "@/data/mock";
+import { patientService, type PatientProfile } from "@/services/patient.service";
 
 export const Route = createFileRoute("/patient/profile")({
   head: () => ({
@@ -21,6 +22,7 @@ export const Route = createFileRoute("/patient/profile")({
 });
 
 function List({ title, items }: { title: string; items: string[] }) {
+  if (!items || items.length === 0) return null;
   return (
     <Card className="shadow-soft">
       <CardHeader>
@@ -38,7 +40,20 @@ function List({ title, items }: { title: string; items: string[] }) {
 }
 
 function ProfilePage() {
-  const p = patientProfile;
+  const [p, setP] = useState<PatientProfile | null>(null);
+
+  useEffect(() => {
+    async function load() {
+      const data = await patientService.getPatientProfile();
+      setP(data);
+    }
+    load();
+  }, []);
+
+  if (!p) {
+    return <div className="p-8 text-center text-muted-foreground">Loading profile...</div>;
+  }
+
   return (
     <div className="space-y-6">
       <PageHeader title="Health profile" description="Keep this current so recommendations stay accurate." />

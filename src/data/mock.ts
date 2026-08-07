@@ -18,6 +18,7 @@ export type Doctor = {
   nextSlot: string;
   photoInitials: string;
   about: string;
+  availability?: Record<string, boolean>;
 };
 
 export type Hospital = {

@@ -1,4 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { useState, useEffect } from "react";
 
 import { PageHeader } from "@/components/shared/PageHeader";
 import { Badge } from "@/components/ui/badge";
@@ -12,7 +13,8 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { appointments } from "@/data/mock";
+import { type Appointment } from "@/data/mock";
+import { patientService } from "@/services/patient.service";
 
 export const Route = createFileRoute("/patient/appointments")({
   head: () => ({
@@ -30,6 +32,16 @@ const variant = (status: string) =>
   status === "Confirmed" ? "secondary" : status === "Completed" ? "outline" : "outline";
 
 function AppointmentsPage() {
+  const [appointments, setAppointments] = useState<Appointment[]>([]);
+
+  useEffect(() => {
+    async function load() {
+      const data = await patientService.getAppointments();
+      setAppointments(data);
+    }
+    load();
+  }, []);
+
   return (
     <div className="space-y-6">
       <PageHeader

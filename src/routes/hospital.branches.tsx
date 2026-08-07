@@ -11,7 +11,9 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Slider } from "@/components/ui/slider";
-import { hospitals, doctors as initialDoctors } from "@/data/mock";
+import { type Doctor, type Hospital } from "@/data/mock";
+import { doctorService } from "@/services/doctor.service";
+import { hospitalService } from "@/services/hospital.service";
 
 export const Route = createFileRoute("/hospital/branches")({
   head: () => ({
@@ -26,34 +28,39 @@ type BranchData = {
 };
 
 function HospitalBranches() {
-  const h = hospitals[0]!;
-  
-  // Load Doctors Roster from localStorage to cross-reference
-  const [doctorRoster] = useState(() => {
-    const saved = localStorage.getItem("mock_hospital_roster");
-    if (saved) {
-      try { return JSON.parse(saved); } catch (e) { return initialDoctors; }
-    }
-    return initialDoctors;
-  });
-
-  // Load Branches
-  const [branches, setBranches] = useState<BranchData[]>(() => {
-    const saved = localStorage.getItem("mock_hospital_branches_data");
-    if (saved) {
-      try {
-        return JSON.parse(saved);
-      } catch (e) {
-        // Fallback or migration
-        return h.branches.map((b, i) => ({ name: b, capacity: 80 - (i % 4) * 10 }));
-      }
-    }
-    return h.branches.map((b, i) => ({ name: b, capacity: 80 - (i % 4) * 10 }));
-  });
+  // Load Doctors Roster from Supabase to cross-reference
+  const [doctorRoster, setDoctorRoster] = useState<Doctor[]>([]);
 
   useEffect(() => {
-    localStorage.setItem("mock_hospital_branches_data", JSON.stringify(branches));
-  }, [branches]);
+    async function loadRoster() {
+      const data = await doctorService.getAllDoctors();
+      setDoctorRoster(data);
+    }
+    loadRoster();
+  }, []);
+
+  // Load Branches
+  const [branches, setBranches] = useState<BranchData[]>([]);
+  const [h, setH] = useState<Hospital | null>(null);
+
+  useEffect(() => {
+    async function loadBranches() {
+      try {
+        const hospitalsData = await hospitalService.getAllHospitals();
+        const mainHospital = hospitalsData[0];
+        if (mainHospital) {
+          setH(mainHospital as Hospital);
+          if (mainHospital.branches) {
+            // Initialize with 100% capacity mock data for each branch name
+            setBranches(mainHospital.branches.map((b: string) => ({ name: b, capacity: 100 })));
+          }
+        }
+      } catch (err) {
+        console.error("Error fetching hospitals:", err);
+      }
+    }
+    loadBranches();
+  }, []);
 
   // Modals state
   const [isAddOpen, setIsAddOpen] = useState(false);
@@ -262,7 +269,7 @@ function HospitalBranches() {
                     {branch.name}
                   </CardTitle>
                   <CardDescription className="flex items-center gap-1 text-xs">
-                    <MapPin className="size-3" /> {h.city} Region
+                    <MapPin className="size-3" /> {h?.city} Region
                   </CardDescription>
                 </div>
                 <Button variant="ghost" size="icon" className="-mt-2 -mr-2 text-muted-foreground">
@@ -292,12 +299,12 @@ function HospitalBranches() {
               <div className="space-y-2">
                 <div className="text-xs font-medium text-muted-foreground">Key Departments</div>
                 <div className="flex flex-wrap gap-1.5">
-                  {h.departments.slice(0, 3 - (i % 2)).map(d => (
+                  {h?.departments?.slice(0, 3 - (i % 2)).map((d: string) => (
                     <Badge key={d} variant="secondary" className="text-[10px] px-2 py-0 h-5">
                       {d}
                     </Badge>
                   ))}
-                  {h.departments.length > 3 && (
+                  {h?.departments && h.departments.length > 3 && (
                     <Badge variant="outline" className="text-[10px] px-2 py-0 h-5 border-dashed">
                       +{h.departments.length - 3} more
                     </Badge>
