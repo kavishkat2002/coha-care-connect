@@ -10,12 +10,12 @@ import { timeline } from "@/data/mock";
 export const Route = createFileRoute("/patient/timeline")({
   head: () => ({
     meta: [
-      { title: "Health timeline — COHA AI" },
+      { title: "Health timeline — MedDoc" },
       {
         name: "description",
         content: "A chronological view of your visits, reports, image assessments and health insights.",
       },
-      { property: "og:title", content: "Health timeline — COHA AI" },
+      { property: "og:title", content: "Health timeline — MedDoc" },
       { property: "og:description", content: "Your care history in one chronological record." },
     ],
   }),

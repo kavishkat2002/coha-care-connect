@@ -78,14 +78,14 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "COHA AI — Intelligent Healthcare Platform" },
+      { title: "MedDoc — Intelligent Healthcare Platform" },
       {
         name: "description",
         content:
-          "COHA AI unifies appointment booking, an AI healthcare assistant, medical image and report analysis, and telemedicine in one platform.",
+          "MedDoc unifies appointment booking, an AI healthcare assistant, medical image and report analysis, and telemedicine in one platform.",
       },
-      { name: "author", content: "COHA AI" },
-      { property: "og:title", content: "COHA AI — Intelligent Healthcare Platform" },
+      { name: "author", content: "MedDoc" },
+      { property: "og:title", content: "MedDoc — Intelligent Healthcare Platform" },
       {
         property: "og:description",
         content:

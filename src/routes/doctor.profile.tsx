@@ -16,7 +16,7 @@ import { useNavigate } from "@tanstack/react-router";
 export const Route = createFileRoute("/doctor/profile")({
   head: () => ({
     meta: [
-      { title: "Doctor Profile — COHA AI" },
+      { title: "Doctor Profile — MedDoc" },
       { name: "description", content: "Manage your professional doctor profile and settings." },
     ],
   }),

@@ -15,7 +15,7 @@ import { getSession, signOut, type Session } from "@/services/auth.service";
 export const Route = createFileRoute("/hospital/profile")({
   head: () => ({
     meta: [
-      { title: "Hospital Profile — COHA AI" },
+      { title: "Hospital Profile — MedDoc" },
       { name: "description", content: "Manage your hospital profile, facilities, and contact details." },
     ],
   }),

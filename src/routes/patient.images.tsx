@@ -15,13 +15,13 @@ import { cn } from "@/lib/utils";
 export const Route = createFileRoute("/patient/images")({
   head: () => ({
     meta: [
-      { title: "Medical image analysis — COHA AI" },
+      { title: "Medical image analysis — MedDoc" },
       {
         name: "description",
         content:
           "Upload oral, skin, breast or eye images for an AI-assisted quality check, lesion highlighting and risk indication.",
       },
-      { property: "og:title", content: "Medical image analysis — COHA AI" },
+      { property: "og:title", content: "Medical image analysis — MedDoc" },
       { property: "og:description", content: "AI-assisted review of oral, skin, breast and eye images." },
     ],
   }),

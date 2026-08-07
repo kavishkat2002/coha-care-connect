@@ -19,13 +19,13 @@ import {
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "COHA AI — AI-Powered Healthcare & Early Cancer Screening" },
+      { title: "MedDoc — AI-Powered Healthcare & Early Cancer Screening" },
       {
         name: "description",
         content:
           "Book appointments, chat with an AI health assistant, analyse medical images and reports, and consult online — all in one healthcare platform.",
       },
-      { property: "og:title", content: "COHA AI — AI-Powered Healthcare & Early Cancer Screening" },
+      { property: "og:title", content: "MedDoc — AI-Powered Healthcare & Early Cancer Screening" },
       {
         property: "og:description",
         content:

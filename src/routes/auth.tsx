@@ -18,16 +18,16 @@ import { cn } from "@/lib/utils";
 export const Route = createFileRoute("/auth")({
   head: () => ({
     meta: [
-      { title: "Sign in — COHA AI" },
+      { title: "Sign in — MedDoc" },
       {
         name: "description",
         content:
-          "Sign in or create a COHA AI account as a patient, doctor or hospital to access your care portal.",
+          "Sign in or create a MedDoc account as a patient, doctor or hospital to access your care portal.",
       },
-      { property: "og:title", content: "Sign in — COHA AI" },
+      { property: "og:title", content: "Sign in — MedDoc" },
       {
         property: "og:description",
-        content: "Access your COHA AI patient, doctor or hospital portal.",
+        content: "Access your MedDoc patient, doctor or hospital portal.",
       },
     ],
   }),
@@ -149,7 +149,7 @@ function AuthPage() {
         </div>
         
         <p className="relative z-20 text-sm text-slate-500">
-          © {new Date().getFullYear()} COHA AI · Secure, consent-based health records
+          © {new Date().getFullYear()} MedDoc · Secure, consent-based health records
         </p>
       </div>
 
@@ -184,7 +184,7 @@ function AuthPage() {
                     <Card className="border-border shadow-sm bg-card rounded-xl">
                       <CardHeader className="space-y-1.5 pb-6 pt-8 px-8">
                         <CardTitle className="text-2xl font-semibold tracking-tight">Welcome back</CardTitle>
-                        <CardDescription className="text-base">Sign in to your COHA AI portal.</CardDescription>
+                        <CardDescription className="text-base">Sign in to your MedDoc portal.</CardDescription>
                       </CardHeader>
                       <CardContent className="px-8 pb-8">
                         <form
@@ -222,7 +222,7 @@ function AuthPage() {
                     <Card className="border-border shadow-sm bg-card rounded-xl">
                       <CardHeader className="space-y-1.5 pb-6 pt-8 px-8">
                         <CardTitle className="text-2xl font-semibold tracking-tight">Create account</CardTitle>
-                        <CardDescription className="text-base">Choose the role that matches how you will use COHA AI.</CardDescription>
+                        <CardDescription className="text-base">Choose the role that matches how you will use MedDoc.</CardDescription>
                       </CardHeader>
                       <CardContent className="px-8 pb-8">
                         <form

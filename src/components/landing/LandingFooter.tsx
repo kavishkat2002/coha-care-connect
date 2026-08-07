@@ -28,7 +28,7 @@ export function LandingFooter() {
         <div className="md:col-span-2">
           <Logo />
           <p className="mt-4 max-w-sm text-sm text-muted-foreground">
-            COHA AI supports earlier screening and better coordinated care. It assists clinical
+            MedDoc supports earlier screening and better coordinated care. It assists clinical
             decisions — it never replaces them.
           </p>
         </div>
@@ -52,7 +52,7 @@ export function LandingFooter() {
       </div>
       <div className="border-t border-border">
         <p className="mx-auto max-w-6xl px-4 py-6 text-xs text-muted-foreground sm:px-6">
-          © {new Date().getFullYear()} COHA AI. AI-assisted assessments are informational and do not
+          © {new Date().getFullYear()} MedDoc. AI-assisted assessments are informational and do not
           constitute a medical diagnosis.
         </p>
       </div>

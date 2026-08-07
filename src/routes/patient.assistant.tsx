@@ -18,13 +18,13 @@ import { cn } from "@/lib/utils";
 export const Route = createFileRoute("/patient/assistant")({
   head: () => ({
     meta: [
-      { title: "AI health assistant — COHA AI" },
+      { title: "AI health assistant — MedDoc" },
       {
         name: "description",
         content:
           "Describe your symptoms, attach images or reports, and receive an AI-assisted assessment with specialist recommendations.",
       },
-      { property: "og:title", content: "AI health assistant — COHA AI" },
+      { property: "og:title", content: "AI health assistant — MedDoc" },
       { property: "og:description", content: "AI-assisted symptom assessment and care recommendations." },
     ],
   }),

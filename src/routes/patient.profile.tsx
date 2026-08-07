@@ -8,12 +8,12 @@ import { patientProfile } from "@/data/mock";
 export const Route = createFileRoute("/patient/profile")({
   head: () => ({
     meta: [
-      { title: "My health profile — COHA AI" },
+      { title: "My health profile — MedDoc" },
       {
         name: "description",
         content: "Personal details, medical history, medications, allergies and family history.",
       },
-      { property: "og:title", content: "My health profile — COHA AI" },
+      { property: "og:title", content: "My health profile — MedDoc" },
       { property: "og:description", content: "Your digital health record in one place." },
     ],
   }),

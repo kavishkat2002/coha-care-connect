@@ -23,13 +23,13 @@ import { doctors, hospitals, SPECIALTIES, type Doctor } from "@/data/mock";
 export const Route = createFileRoute("/patient/book")({
   head: () => ({
     meta: [
-      { title: "Book an appointment — COHA AI" },
+      { title: "Book an appointment — MedDoc" },
       {
         name: "description",
         content:
           "Search doctors, hospitals, branches and specialties, compare ratings and availability, then confirm your appointment.",
       },
-      { property: "og:title", content: "Book an appointment — COHA AI" },
+      { property: "og:title", content: "Book an appointment — MedDoc" },
       { property: "og:description", content: "Find a specialist and confirm a slot in minutes." },
     ],
   }),

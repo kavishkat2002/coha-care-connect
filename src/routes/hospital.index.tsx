@@ -12,9 +12,9 @@ import { getSession, type Session } from "@/services/auth.service";
 export const Route = createFileRoute("/hospital/")({
   head: () => ({
     meta: [
-      { title: "Hospital dashboard — COHA AI" },
+      { title: "Hospital dashboard — MedDoc" },
       { name: "description", content: "Doctors, departments, appointments, revenue and ratings across your branches." },
-      { property: "og:title", content: "Hospital dashboard — COHA AI" },
+      { property: "og:title", content: "Hospital dashboard — MedDoc" },
       { property: "og:description", content: "Operational view of departments, staff and appointments." },
     ],
   }),

@@ -13,12 +13,12 @@ import { doctors } from "@/data/mock";
 export const Route = createFileRoute("/patient/telemedicine")({
   head: () => ({
     meta: [
-      { title: "Telemedicine — COHA AI" },
+      { title: "Telemedicine — MedDoc" },
       {
         name: "description",
         content: "Consult online doctors by video, voice or chat, with digital prescriptions and follow-ups.",
       },
-      { property: "og:title", content: "Telemedicine — COHA AI" },
+      { property: "og:title", content: "Telemedicine — MedDoc" },
       { property: "og:description", content: "Video, voice and chat consultations with online doctors." },
     ],
   }),

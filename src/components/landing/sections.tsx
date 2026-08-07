@@ -85,7 +85,7 @@ export function Hero() {
             Intelligent healthcare, from first symptom to the right specialist
           </h1>
           <p className="mt-6 max-w-xl text-lg text-muted-foreground">
-            COHA AI brings appointment booking, an AI health assistant, medical image and report
+            MedDoc brings appointment booking, an AI health assistant, medical image and report
             analysis, telemedicine and your digital health record into one calm, connected platform.
           </p>
           <div className="mt-8 flex flex-wrap gap-3">
@@ -188,7 +188,7 @@ const steps = [
   {
     step: "02",
     title: "Get an AI assessment",
-    body: "COHA AI identifies your intent, reviews attachments and returns possible conditions with a confidence score.",
+    body: "MedDoc identifies your intent, reviews attachments and returns possible conditions with a confidence score.",
   },
   {
     step: "03",
@@ -272,7 +272,7 @@ export function AiFeatures() {
       muted
       eyebrow="AI features"
       title="Assistive intelligence with clear boundaries"
-      description="COHA AI never claims to diagnose. It summarises, highlights and recommends — the clinician decides."
+      description="MedDoc never claims to diagnose. It summarises, highlights and recommends — the clinician decides."
     >
       <div className="grid gap-5 sm:grid-cols-2">
         {aiFeatures.map((f, i) => (
@@ -441,8 +441,8 @@ export function Testimonials() {
 
 const faqs = [
   {
-    q: "Does COHA AI diagnose disease?",
-    a: "No. COHA AI produces an AI-assisted assessment with possible conditions, a risk indication and a confidence score. Diagnosis is made by a licensed clinician.",
+    q: "Does MedDoc diagnose disease?",
+    a: "No. MedDoc produces an AI-assisted assessment with possible conditions, a risk indication and a confidence score. Diagnosis is made by a licensed clinician.",
   },
   {
     q: "What can I upload?",
@@ -542,7 +542,7 @@ export function Contact() {
             <div className="rounded-2xl border border-border bg-card p-5 shadow-soft">
               <p className="text-sm font-semibold">Emergencies</p>
               <p className="mt-1.5 text-sm text-muted-foreground">
-                COHA AI is not an emergency service. For urgent symptoms, contact your nearest
+                MedDoc is not an emergency service. For urgent symptoms, contact your nearest
                 emergency department immediately.
               </p>
               <ul className="mt-4 space-y-2 text-sm text-muted-foreground">

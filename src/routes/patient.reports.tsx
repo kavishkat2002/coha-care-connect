@@ -14,13 +14,13 @@ import { analyseMedicalReport, type ReportAnalysis } from "@/services/ai.service
 export const Route = createFileRoute("/patient/reports")({
   head: () => ({
     meta: [
-      { title: "Medical report analysis — COHA AI" },
+      { title: "Medical report analysis — MedDoc" },
       {
         name: "description",
         content:
           "Upload blood, MRI, CT, biopsy or laboratory reports and get abnormal values highlighted and explained in plain language.",
       },
-      { property: "og:title", content: "Medical report analysis — COHA AI" },
+      { property: "og:title", content: "Medical report analysis — MedDoc" },
       { property: "og:description", content: "Understand your medical reports in plain language." },
     ],
   }),

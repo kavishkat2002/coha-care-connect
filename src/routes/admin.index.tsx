@@ -17,10 +17,10 @@ import type { Role } from "@/data/mock";
 export const Route = createFileRoute("/admin/")({
   head: () => ({
     meta: [
-      { title: "Platform administration — COHA AI" },
+      { title: "Platform administration — MedDoc" },
       { name: "description", content: "Users, hospitals, appointments, AI monitoring and platform settings." },
-      { property: "og:title", content: "Platform administration — COHA AI" },
-      { property: "og:description", content: "Operational and AI monitoring for the COHA AI platform." },
+      { property: "og:title", content: "Platform administration — MedDoc" },
+      { property: "og:description", content: "Operational and AI monitoring for the MedDoc platform." },
     ],
   }),
   component: AdminDashboard,

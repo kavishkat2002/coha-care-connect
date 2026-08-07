@@ -11,9 +11,9 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 export const Route = createFileRoute("/doctor/")({
   head: () => ({
     meta: [
-      { title: "Doctor dashboard — COHA AI" },
+      { title: "Doctor dashboard — MedDoc" },
       { name: "description", content: "Today's appointments, patient queue and AI assessments awaiting review." },
-      { property: "og:title", content: "Doctor dashboard — COHA AI" },
+      { property: "og:title", content: "Doctor dashboard — MedDoc" },
       { property: "og:description", content: "Clinic queue, AI assessments and follow-ups." },
     ],
   }),

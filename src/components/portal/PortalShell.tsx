@@ -100,7 +100,7 @@ export function PortalShell({
                 <div className="mt-6">{links}</div>
               </SheetContent>
             </Sheet>
-            <span className="text-sm font-medium lg:hidden">COHA AI</span>
+            <span className="text-sm font-medium lg:hidden">MedDoc</span>
           </div>
 
           <div className="flex items-center gap-1.5">

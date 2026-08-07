@@ -17,9 +17,9 @@ import { appointments } from "@/data/mock";
 export const Route = createFileRoute("/patient/appointments")({
   head: () => ({
     meta: [
-      { title: "My appointments — COHA AI" },
+      { title: "My appointments — MedDoc" },
       { name: "description", content: "Upcoming and past appointments with status and QR tickets." },
-      { property: "og:title", content: "My appointments — COHA AI" },
+      { property: "og:title", content: "My appointments — MedDoc" },
       { property: "og:description", content: "Track upcoming and past consultations." },
     ],
   }),

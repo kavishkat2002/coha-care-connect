@@ -21,13 +21,13 @@ import { appointments, patientProfile, reports, timeline } from "@/data/mock";
 export const Route = createFileRoute("/patient/")({
   head: () => ({
     meta: [
-      { title: "Patient dashboard — COHA AI" },
+      { title: "Patient dashboard — MedDoc" },
       {
         name: "description",
         content:
           "Your health summary, upcoming appointments, recent reports and AI health insights in one place.",
       },
-      { property: "og:title", content: "Patient dashboard — COHA AI" },
+      { property: "og:title", content: "Patient dashboard — MedDoc" },
       { property: "og:description", content: "Health summary, appointments and AI insights." },
     ],
   }),
