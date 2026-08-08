@@ -172,8 +172,35 @@ export const patientService = {
       .single();
     
     if (error || !data) {
-      console.error("Error fetching patient profile from Supabase, falling back to mock:", error);
+      console.warn("Error fetching patient profile from Supabase, falling back to mock:", error);
+      try {
+        const local = localStorage.getItem(`mock_patient_profile_${id}`);
+        if (local) return JSON.parse(local);
+      } catch (e) {}
       return { id: "p1", ...mockPatientProfile } as PatientProfile;
+    }
+    
+    return data;
+  },
+
+  /**
+   * Update patient profile
+   */
+  async updatePatientProfile(profile: PatientProfile): Promise<PatientProfile | null> {
+    const { data, error } = await supabase
+      .from("patient_profiles")
+      .upsert(profile)
+      .select()
+      .single();
+    
+    if (error) {
+      console.warn("Supabase profile update failed, falling back to LocalStorage:", error);
+      try {
+        localStorage.setItem(`mock_patient_profile_${profile.id}`, JSON.stringify(profile));
+        return profile;
+      } catch (e) {
+        return null;
+      }
     }
     
     return data;

@@ -3,8 +3,12 @@ import { useState, useEffect } from "react";
 
 import { PageHeader } from "@/components/shared/PageHeader";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { patientService, type PatientProfile } from "@/services/patient.service";
+import { Pencil, Save, X, Loader2 } from "lucide-react";
+import { toast } from "sonner";
 
 export const Route = createFileRoute("/patient/profile")({
   head: () => ({
@@ -41,14 +45,38 @@ function List({ title, items }: { title: string; items: string[] }) {
 
 function ProfilePage() {
   const [p, setP] = useState<PatientProfile | null>(null);
+  const [isEditing, setIsEditing] = useState(false);
+  const [editData, setEditData] = useState<Partial<PatientProfile>>({});
+  const [saving, setSaving] = useState(false);
 
   useEffect(() => {
     async function load() {
       const data = await patientService.getPatientProfile();
       setP(data);
+      if (data) setEditData(data);
     }
     load();
   }, []);
+
+  const handleSave = async () => {
+    if (!p) return;
+    setSaving(true);
+    try {
+      const updated = { ...p, ...editData } as PatientProfile;
+      const result = await patientService.updatePatientProfile(updated);
+      if (result) {
+        setP(result);
+        setIsEditing(false);
+        toast.success("Profile updated successfully");
+      } else {
+        toast.error("Failed to update profile");
+      }
+    } catch (e) {
+      toast.error("An unexpected error occurred");
+    } finally {
+      setSaving(false);
+    }
+  };
 
   if (!p) {
     return <div className="p-8 text-center text-muted-foreground">Loading profile...</div>;
@@ -58,23 +86,52 @@ function ProfilePage() {
     <div className="space-y-6">
       <PageHeader title="Health profile" description="Keep this current so recommendations stay accurate." />
       <Card className="shadow-soft">
-        <CardHeader>
+        <CardHeader className="flex flex-row items-center justify-between">
           <CardTitle className="text-base">Personal information</CardTitle>
+          {!isEditing ? (
+            <Button variant="outline" size="sm" onClick={() => setIsEditing(true)}>
+              <Pencil className="size-3.5 mr-2" />
+              Edit
+            </Button>
+          ) : (
+            <div className="flex gap-2">
+              <Button variant="ghost" size="sm" onClick={() => setIsEditing(false)} disabled={saving}>
+                <X className="size-3.5 mr-2" />
+                Cancel
+              </Button>
+              <Button size="sm" onClick={handleSave} disabled={saving}>
+                {saving ? <Loader2 className="size-3.5 mr-2 animate-spin" /> : <Save className="size-3.5 mr-2" />}
+                Save
+              </Button>
+            </div>
+          )}
         </CardHeader>
         <CardContent>
           <dl className="grid gap-5 sm:grid-cols-3">
             {[
-              ["Name", p.name],
-              ["Age", `${p.age}`],
-              ["Gender", p.gender],
-              ["Blood group", p.bloodGroup],
-              ["City", p.city],
-              ["Phone", p.phone],
-              ["Email", p.email],
-            ].map(([label, value]) => (
-              <div key={label}>
-                <dt className="text-xs text-muted-foreground">{label}</dt>
-                <dd className="text-sm font-medium">{value}</dd>
+              { label: "Name", key: "name", type: "text" },
+              { label: "Age", key: "age", type: "number" },
+              { label: "Gender", key: "gender", type: "text" },
+              { label: "Blood group", key: "bloodGroup", type: "text" },
+              { label: "City", key: "city", type: "text" },
+              { label: "Phone", key: "phone", type: "text" },
+              { label: "Email", key: "email", type: "email" },
+            ].map(({ label, key, type }) => (
+              <div key={key}>
+                <dt className="text-xs text-muted-foreground mb-1">{label}</dt>
+                {isEditing ? (
+                  <Input 
+                    type={type}
+                    value={editData[key as keyof PatientProfile] as string | number || ""}
+                    onChange={(e) => setEditData({ 
+                      ...editData, 
+                      [key]: type === "number" ? parseInt(e.target.value) || 0 : e.target.value 
+                    })}
+                    className="h-8 text-sm"
+                  />
+                ) : (
+                  <dd className="text-sm font-medium">{p[key as keyof PatientProfile]}</dd>
+                )}
               </div>
             ))}
           </dl>
