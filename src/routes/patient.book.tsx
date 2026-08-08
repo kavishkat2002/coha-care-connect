@@ -600,22 +600,6 @@ function BookPage() {
                 </div>
 
                 <Separator />
-                <div className="space-y-1.5 text-sm">
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">Consultation fee</span>
-                    <span>LKR {selected.fee.toLocaleString()}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">Platform fee</span>
-                    <span>LKR 250</span>
-                  </div>
-                  <div className="flex justify-between font-semibold">
-                    <span>Total</span>
-                    <span>LKR {(selected.fee + 250).toLocaleString()}</span>
-                  </div>
-                </div>
-
-                <Separator />
                 <div className="space-y-3">
                   <p className="text-sm font-medium">Patient Details</p>
                   <Input placeholder="Patient Name" value={patientDetails.name} onChange={e => setPatientDetails({...patientDetails, name: e.target.value})} className="h-9 text-sm" />
@@ -626,6 +610,23 @@ function BookPage() {
                   <div className="grid grid-cols-2 gap-3">
                     <Input placeholder="Email Address" type="email" value={patientDetails.email} onChange={e => setPatientDetails({...patientDetails, email: e.target.value})} className="h-9 text-sm" />
                     <Input placeholder="Area / City" value={patientDetails.city} onChange={e => setPatientDetails({...patientDetails, city: e.target.value})} className="h-9 text-sm" />
+                  </div>
+                </div>
+
+                <Separator />
+                <div className="space-y-1.5 text-sm bg-muted/20 p-3 rounded-lg border border-border/50">
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">Consultation fee</span>
+                    <span>LKR {selected.fee.toLocaleString()}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">Platform fee</span>
+                    <span>LKR 250</span>
+                  </div>
+                  <Separator className="my-1.5" />
+                  <div className="flex justify-between font-semibold">
+                    <span>Total</span>
+                    <span>LKR {(selected.fee + 250).toLocaleString()}</span>
                   </div>
                 </div>
 
