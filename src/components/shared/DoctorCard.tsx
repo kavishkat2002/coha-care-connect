@@ -7,11 +7,20 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import type { Doctor } from "@/data/mock";
 
-export function DoctorCard({ doctor, compact = false }: { doctor: Doctor; compact?: boolean }) {
+export function DoctorCard({ doctor, compact = false, onProfileClick }: { doctor: Doctor; compact?: boolean; onProfileClick?: (doctor: Doctor) => void }) {
   return (
     <Card className="shadow-soft">
       <CardContent className="flex flex-col gap-4 p-5 sm:flex-row sm:items-center">
-        <Avatar className="size-12">
+        <Avatar 
+          className={`size-12 ${onProfileClick ? "cursor-pointer hover:opacity-80" : ""}`}
+          onClick={(e) => {
+            if (onProfileClick) {
+              e.preventDefault();
+              e.stopPropagation();
+              onProfileClick(doctor);
+            }
+          }}
+        >
           <AvatarFallback className="bg-accent text-sm font-semibold text-accent-foreground">
             {doctor.photoInitials}
           </AvatarFallback>
@@ -19,7 +28,18 @@ export function DoctorCard({ doctor, compact = false }: { doctor: Doctor; compac
 
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-2">
-            <h3 className="text-base font-semibold">{doctor.name}</h3>
+            <h3 
+              className={`text-base font-semibold ${onProfileClick ? "cursor-pointer hover:underline" : ""}`}
+              onClick={(e) => {
+                if (onProfileClick) {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  onProfileClick(doctor);
+                }
+              }}
+            >
+              {doctor.name}
+            </h3>
             {doctor.online ? (
               <Badge variant="outline" className="border-success/20 bg-success/10 text-success">
                 Online now
@@ -36,7 +56,19 @@ export function DoctorCard({ doctor, compact = false }: { doctor: Doctor; compac
             <div className="mt-3 flex flex-wrap gap-x-5 gap-y-1.5 text-xs text-muted-foreground">
               <span className="flex items-center gap-1.5">
                 <Star className="size-3.5 fill-primary text-primary" aria-hidden="true" />
-                {doctor.rating} ({doctor.reviews} reviews)
+                {doctor.rating}{" "}
+                <span 
+                  className={onProfileClick ? "cursor-pointer hover:underline" : ""} 
+                  onClick={(e) => {
+                    if (onProfileClick) {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      onProfileClick(doctor);
+                    }
+                  }}
+                >
+                  ({doctor.reviews} reviews)
+                </span>
               </span>
               <span className="flex items-center gap-1.5">
                 <MapPin className="size-3.5" aria-hidden="true" /> {doctor.distanceKm} km away

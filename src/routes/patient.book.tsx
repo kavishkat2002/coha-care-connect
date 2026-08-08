@@ -11,7 +11,7 @@ import { PageHeader } from "@/components/shared/PageHeader";
 import { DoctorCard } from "@/components/shared/DoctorCard";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -23,6 +23,7 @@ import {
 } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
 import { HospitalReviewsDialog } from "@/components/patient/HospitalReviewsDialog";
+import { DoctorProfileDialog } from "@/components/shared/DoctorProfileDialog";
 import { doctors, hospitals, SPECIALTIES, type Doctor, type Hospital } from "@/data/mock";
 import { doctorService } from "@/services/doctor.service";
 import { hospitalService } from "@/services/hospital.service";
@@ -57,6 +58,7 @@ function BookPage() {
   const [slot, setSlot] = useState<string | null>(null);
   const [confirmed, setConfirmed] = useState(false);
   const [showReviewsDialog, setShowReviewsDialog] = useState(false);
+  const [viewingDoctor, setViewingDoctor] = useState<Doctor | null>(null);
   
   // Dynamic slot and queue state
   const [selectedDate, setSelectedDate] = useState<string>(() => new Date().toISOString().split('T')[0] || "");
@@ -154,7 +156,7 @@ function BookPage() {
 
   const results = useMemo(() => {
     // If no search is performed, return empty array to hide the default list
-    if (!query.trim() && !hospital.trim() && specialty === "all") {
+    if (!query.trim() && !hospital.trim()) {
       return [];
     }
 
@@ -493,7 +495,7 @@ function BookPage() {
                                 (selected?.id === d.id ? "ring-2 ring-primary ring-offset-2" : "")
                               }
                             >
-                              <DoctorCard doctor={d} />
+                              <DoctorCard doctor={d} onProfileClick={setViewingDoctor} />
                             </button>
                           ))
                         ) : (
@@ -532,7 +534,7 @@ function BookPage() {
                       (selected?.id === d.id ? "ring-2 ring-primary ring-offset-2" : "")
                     }
                   >
-                    <DoctorCard doctor={d} />
+                    <DoctorCard doctor={d} onProfileClick={setViewingDoctor} />
                   </button>
                 ))}
               </div>
@@ -554,9 +556,9 @@ function BookPage() {
               {selected ? `${selected.name} · ${selected.branch}` : "Select a specialist to continue"}
             </CardDescription>
           </CardHeader>
-          <CardContent className="space-y-5">
-            {selected ? (
-              <>
+          {selected ? (
+            <>
+              <CardContent className="space-y-5">
                 <div>
                   <div className="flex items-center justify-between mb-3">
                     <p className="text-sm font-medium">Select Date & Time</p>
@@ -612,9 +614,10 @@ function BookPage() {
                     <Input placeholder="Area / City" value={patientDetails.city} onChange={e => setPatientDetails({...patientDetails, city: e.target.value})} className="h-9 text-sm" />
                   </div>
                 </div>
-
-                <Separator />
-                <div className="space-y-1.5 text-sm bg-muted/20 p-3 rounded-lg border border-border/50">
+              </CardContent>
+              
+              <CardFooter className="flex flex-col gap-4 bg-muted/20 border-t p-5">
+                <div className="w-full space-y-1.5 text-sm rounded-lg">
                   <div className="flex justify-between">
                     <span className="text-muted-foreground">Consultation fee</span>
                     <span>LKR {selected.fee.toLocaleString()}</span>
@@ -623,16 +626,17 @@ function BookPage() {
                     <span className="text-muted-foreground">Platform fee</span>
                     <span>LKR 250</span>
                   </div>
-                  <Separator className="my-1.5" />
+                  <Separator className="my-1.5 border-border/50" />
                   <div className="flex justify-between font-semibold">
                     <span>Total</span>
                     <span>LKR {(selected.fee + 250).toLocaleString()}</span>
                   </div>
                 </div>
 
-                <Badge variant="secondary" className="gap-1.5">
+                <Badge variant="secondary" className="gap-1.5 w-full justify-center">
                   <CreditCard className="size-3.5" /> Card payment on confirmation
                 </Badge>
+                
                 <Button 
                   className="w-full" 
                   size="lg" 
@@ -669,13 +673,15 @@ function BookPage() {
                 >
                   {isBooking ? "Booking..." : "Pay & confirm"}
                 </Button>
-              </>
-            ) : (
+              </CardFooter>
+            </>
+          ) : (
+            <CardContent className="space-y-5">
               <p className="text-sm text-muted-foreground">
                 Choose a specialist from the list to see their available times.
               </p>
-            )}
-          </CardContent>
+            </CardContent>
+          )}
         </Card>
       </div>
       
@@ -686,6 +692,12 @@ function BookPage() {
           onOpenChange={setShowReviewsDialog}
         />
       )}
+
+      <DoctorProfileDialog 
+        doctor={viewingDoctor}
+        open={!!viewingDoctor}
+        onOpenChange={(open) => !open && setViewingDoctor(null)}
+      />
     </div>
   );
 }

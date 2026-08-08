@@ -177,5 +177,58 @@ export const patientService = {
     }
     
     return data;
+  },
+
+  /**
+   * Fetch doctor reviews
+   */
+  async getDoctorReviews(doctorId: string) {
+    const { data, error } = await supabase
+      .from("doctor_reviews")
+      .select("*")
+      .eq("doctor_id", doctorId)
+      .order("created_at", { ascending: false });
+    
+    if (error) {
+      console.error("Error fetching doctor reviews:", error);
+      return [];
+    }
+    return data || [];
+  },
+
+  /**
+   * Add a new doctor review
+   */
+  async addDoctorReview(review: { doctor_id: string; patient_id: string; patient_name: string; rating: number; comment: string }) {
+    const { data, error } = await supabase
+      .from("doctor_reviews")
+      .insert([review])
+      .select()
+      .single();
+    
+    if (error) {
+      console.error("Error adding review:", error);
+      return null;
+    }
+    return data;
+  },
+
+  /**
+   * Check if patient has a previous booking with a doctor
+   */
+  async hasPreviousBooking(doctorId: string, patientId: string): Promise<boolean> {
+    const { count, error } = await supabase
+      .from("appointments")
+      .select("*", { count: "exact", head: true })
+      .eq("doctor_id", doctorId)
+      .eq("patient_id", patientId)
+      .in("status", ["Completed", "Confirmed"]); // allow Confirmed or Completed to leave a review
+    
+    if (error) {
+      console.error("Error checking previous bookings:", error);
+      return false;
+    }
+    
+    return count ? count > 0 : false;
   }
 };

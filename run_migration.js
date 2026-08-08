@@ -11,9 +11,7 @@ async function run() {
   try {
     await client.connect();
     console.log("Connected to database successfully!");
-    
-    const sql = fs.readFileSync('supabase_setup.sql', 'utf8');
-    
+    const sql = fs.readFileSync('/Users/kavishkathilakarathna/.gemini/antigravity-ide/brain/7666ba66-3c68-4f5c-af69-fe72b7be725e/doctor_reviews_migration.sql', 'utf8');
     console.log("Executing SQL migration...");
     await client.query(sql);
     
