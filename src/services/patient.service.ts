@@ -1,5 +1,5 @@
 import { supabase } from "@/lib/supabase";
-import { type Appointment, type ReportItem, type TimelineItem } from "@/data/mock";
+import { type Appointment, type ReportItem, type TimelineItem, patientProfile as mockPatientProfile } from "@/data/mock";
 
 // Type for the new Supabase appointment row
 export type DbAppointment = {
@@ -171,9 +171,9 @@ export const patientService = {
       .eq("id", id)
       .single();
     
-    if (error) {
-      console.error("Error fetching patient profile:", error);
-      return null;
+    if (error || !data) {
+      console.error("Error fetching patient profile from Supabase, falling back to mock:", error);
+      return { id: "p1", ...mockPatientProfile } as PatientProfile;
     }
     
     return data;
