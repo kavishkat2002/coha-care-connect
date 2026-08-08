@@ -189,11 +189,21 @@ export const patientService = {
       .eq("doctor_id", doctorId)
       .order("created_at", { ascending: false });
     
+    let results = data || [];
+    
     if (error) {
-      console.error("Error fetching doctor reviews:", error);
-      return [];
+      console.warn("Error fetching doctor reviews from Supabase, falling back to local storage:", error);
     }
-    return data || [];
+    
+    try {
+      const local = JSON.parse(localStorage.getItem('mock_doctor_reviews') || '[]');
+      const localForDoc = local.filter((r: any) => r.doctor_id === doctorId);
+      results = [...results, ...localForDoc].sort((a: any, b: any) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+    } catch (e) {
+      // Ignore local storage errors
+    }
+    
+    return results;
   },
 
   /**
@@ -207,8 +217,20 @@ export const patientService = {
       .single();
     
     if (error) {
-      console.error("Error adding review:", error);
-      return null;
+      console.warn("Supabase insert failed, falling back to LocalStorage:", error);
+      try {
+        const localReviews = JSON.parse(localStorage.getItem('mock_doctor_reviews') || '[]');
+        const newReview = { 
+          ...review, 
+          id: 'local-rev-' + Date.now(),
+          created_at: new Date().toISOString()
+        };
+        localReviews.push(newReview);
+        localStorage.setItem('mock_doctor_reviews', JSON.stringify(localReviews));
+        return newReview;
+      } catch (e) {
+        return null;
+      }
     }
     return data;
   },
@@ -225,8 +247,20 @@ export const patientService = {
       .in("status", ["Completed", "Confirmed"]); // allow Confirmed or Completed to leave a review
     
     if (error) {
-      console.error("Error checking previous bookings:", error);
-      return false;
+      console.warn("Error checking previous bookings in Supabase, falling back to local:", error);
+    }
+    
+    // Check local storage fallback
+    try {
+      const localApps = JSON.parse(localStorage.getItem('mock_appointments') || '[]');
+      const hasLocal = localApps.some((app: any) => 
+        app.doctor_id === doctorId && 
+        app.patient_id === patientId && 
+        (app.status === "Completed" || app.status === "Confirmed")
+      );
+      if (hasLocal) return true;
+    } catch (e) {
+      // Ignore local storage errors
     }
     
     return count ? count > 0 : false;

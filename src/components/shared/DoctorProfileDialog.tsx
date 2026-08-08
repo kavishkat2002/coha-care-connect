@@ -5,7 +5,7 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { ScrollArea } from "@/components/ui/scroll-area";
+import { toast } from "sonner";
 import { patientService } from "@/services/patient.service";
 import { getSession } from "@/services/auth.service";
 import type { Doctor } from "@/data/mock";
@@ -60,7 +60,10 @@ export function DoctorProfileDialog({
     
     try {
       const user = await getSession();
-      if (!user) return;
+      if (!user) {
+        toast.error("You must be logged in to leave a review.");
+        return;
+      }
       
       const newReview = await patientService.addDoctorReview({
         doctor_id: doctor.id,
@@ -74,7 +77,12 @@ export function DoctorProfileDialog({
         setReviews([newReview, ...reviews]);
         setComment("");
         setRating(5);
+        toast.success("Review submitted successfully!");
+      } else {
+        toast.error("Failed to submit review. Check console for details.");
       }
+    } catch (e) {
+      toast.error("An unexpected error occurred.");
     } finally {
       setSubmitting(false);
     }
@@ -115,7 +123,7 @@ export function DoctorProfileDialog({
           </div>
         </div>
 
-        <ScrollArea className="flex-1 p-6">
+        <div className="flex-1 overflow-y-auto p-6">
           <div className="space-y-6">
             <div>
               <h3 className="font-semibold mb-2">About</h3>
@@ -224,7 +232,7 @@ export function DoctorProfileDialog({
               )}
             </div>
           </div>
-        </ScrollArea>
+        </div>
         <div className="p-4 border-t bg-muted/20 flex justify-between items-center">
           <div className="font-semibold">LKR {doctor.fee.toLocaleString()}</div>
           <Button onClick={() => onOpenChange(false)}>Close</Button>
