@@ -153,6 +153,11 @@ function BookPage() {
   }, [query, rosterDoctors, doctors]);
 
   const results = useMemo(() => {
+    // If no search is performed, return empty array to hide the default list
+    if (!query.trim() && !hospital.trim() && specialty === "all") {
+      return [];
+    }
+
     // Use the live hospital roster if available, otherwise fallback to static mock doctors
     const allDoctors = rosterDoctors.length > 0 ? rosterDoctors : doctors;
 
@@ -407,16 +412,7 @@ function BookPage() {
               )}
             </div>
           </div>
-          <div className="space-y-2">
-            <Label htmlFor="date">Date</Label>
-            <Input
-              id="date"
-              type="date"
-              value={date}
-              onChange={(e) => setDate(e.target.value)}
-              className="w-full"
-            />
-          </div>
+
         </CardContent>
       </Card>
 
@@ -511,6 +507,13 @@ function BookPage() {
                 })}
               </div>
             </div>
+          ) : !query.trim() && !hospital.trim() && specialty === "all" ? (
+            <Card className="shadow-soft border-dashed">
+              <CardContent className="p-12 text-center text-sm text-muted-foreground flex flex-col items-center justify-center gap-3">
+                <Search className="size-8 text-muted-foreground/50" />
+                <p>Please enter a doctor name, select a specialization, or search for a hospital to see available specialists.</p>
+              </CardContent>
+            </Card>
           ) : (
             <>
               <p className="text-sm text-muted-foreground">{results.length} specialists available</p>
