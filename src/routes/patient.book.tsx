@@ -1,7 +1,8 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import {
   CalendarCheck, CheckCircle2, CreditCard, QrCode, Search,
-  Car, FileText, Leaf, Award, Building2, Home, Pill, Activity, Plane, Smile, Sparkles, Flower2, Info, Brain
+  Car, FileText, Leaf, Award, Building2, Home, Pill, Activity, Plane, Smile, Sparkles, Flower2, Info, Brain,
+  Phone, Star, MapPin
 } from "lucide-react";
 import { useMemo, useState, useEffect } from "react";
 import { toast } from "sonner";
@@ -21,7 +22,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
-import { doctors, SPECIALTIES, type Doctor, type Hospital } from "@/data/mock";
+import { doctors, hospitals, SPECIALTIES, type Doctor, type Hospital } from "@/data/mock";
 import { doctorService } from "@/services/doctor.service";
 import { hospitalService } from "@/services/hospital.service";
 
@@ -51,7 +52,6 @@ function BookPage() {
   const [specialty, setSpecialty] = useState("all");
   const [hospital, setHospital] = useState("");
   const [showHospitalSuggestions, setShowHospitalSuggestions] = useState(false);
-  const [branch, setBranch] = useState("all");
   const [selected, setSelected] = useState<Doctor | null>(null);
   const [slot, setSlot] = useState<string | null>(null);
   const [confirmed, setConfirmed] = useState(false);
@@ -75,6 +75,14 @@ function BookPage() {
     }
     loadData();
   }, []);
+
+  const selectedHospitalInfo = useMemo(() => {
+    const hQ = hospital.trim().toLowerCase();
+    if (!hQ) return null;
+    const dbMatch = dbHospitals.find((x) => x.name.toLowerCase() === hQ);
+    if (dbMatch) return dbMatch;
+    return hospitals.find((x) => x.name.toLowerCase() === hQ);
+  }, [hospital, dbHospitals]);
 
   const branches = useMemo(() => {
     const hQ = hospital.trim().toLowerCase();
@@ -122,11 +130,10 @@ function BookPage() {
       return (
         matchesQuery &&
         (specialty === "all" || d.specialty === specialty) &&
-        (!hQ || (d.hospital || "").toLowerCase().includes(hQ)) &&
-        (branch === "all" || d.branch === branch)
+        (!hQ || (d.hospital || "").toLowerCase().includes(hQ))
       );
     });
-  }, [query, specialty, hospital, branch, rosterDoctors, doctors]);
+  }, [query, specialty, hospital, rosterDoctors, doctors]);
 
   if (confirmed && selected) {
     return (
@@ -307,7 +314,6 @@ function BookPage() {
                 value={hospital}
                 onChange={(e) => {
                   setHospital(e.target.value);
-                  setBranch("all");
                   setShowHospitalSuggestions(true);
                 }}
                 onFocus={() => setShowHospitalSuggestions(true)}
@@ -323,7 +329,6 @@ function BookPage() {
                       className="px-4 py-2 hover:bg-muted cursor-pointer text-sm"
                       onClick={() => {
                         setHospital(name);
-                        setBranch("all");
                         setShowHospitalSuggestions(false);
                       }}
                     >
@@ -344,54 +349,125 @@ function BookPage() {
               className="w-full"
             />
           </div>
-          {branches.length ? (
-            <div className="space-y-2 lg:col-span-4">
-              <Label htmlFor="branch">Branch</Label>
-              <Select value={branch} onValueChange={setBranch}>
-                <SelectTrigger id="branch">
-                  <SelectValue placeholder="All branches" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All branches</SelectItem>
-                  {branches.map((b) => (
-                    <SelectItem key={b} value={b}>
-                      {b}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          ) : null}
         </CardContent>
       </Card>
 
       <div className="grid gap-6 lg:grid-cols-3">
-        <div className="space-y-3 lg:col-span-2">
-          <p className="text-sm text-muted-foreground">{results.length} specialists available</p>
-          {results.map((d) => (
-            <button
-              key={d.id}
-              type="button"
-              onClick={() => {
-                setSelected(d);
-                setSlot(null);
-              }}
-              aria-pressed={selected?.id === d.id}
-              className={
-                "block w-full rounded-2xl text-left transition-shadow " +
-                (selected?.id === d.id ? "ring-2 ring-primary ring-offset-2" : "")
-              }
-            >
-              <DoctorCard doctor={d} />
-            </button>
-          ))}
-          {!results.length ? (
-            <Card className="shadow-soft">
-              <CardContent className="p-8 text-center text-sm text-muted-foreground">
-                No specialists match these filters.
-              </CardContent>
-            </Card>
-          ) : null}
+        <div className="space-y-4 lg:col-span-2">
+          {selectedHospitalInfo ? (
+            <div className="space-y-6">
+              <Card className="shadow-soft border-primary/20 bg-primary/5">
+                <CardContent className="p-5 sm:p-6">
+                  <div className="flex items-start gap-4">
+                    <div className="p-3 bg-primary/10 rounded-xl text-primary shrink-0 hidden sm:block">
+                      <Building2 className="size-6" />
+                    </div>
+                    <div className="space-y-4 flex-1">
+                      <div>
+                        <h3 className="font-semibold text-lg">{selectedHospitalInfo.name}</h3>
+                        <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-muted-foreground mt-1.5">
+                          <span className="flex items-center gap-1.5"><MapPin className="size-3.5" /> {selectedHospitalInfo.city}</span>
+                          <span className="flex items-center gap-1.5"><Star className="size-3.5 fill-yellow-400 text-yellow-500" /> {selectedHospitalInfo.rating} ({selectedHospitalInfo.reviews} reviews)</span>
+                          <span className="flex items-center gap-1.5"><Phone className="size-3.5" /> {selectedHospitalInfo.phone}</span>
+                        </div>
+                      </div>
+                      
+                      <div className="grid sm:grid-cols-2 gap-4 text-sm pt-2 border-t border-border/50">
+                        <div>
+                          <span className="font-medium flex items-center gap-1.5 mb-2 text-foreground"><Activity className="size-4" /> Departments</span>
+                          <div className="flex flex-wrap gap-1.5">
+                            {selectedHospitalInfo.departments.map(d => (
+                              <Badge key={d} variant="secondary" className="font-normal bg-background/50">{d}</Badge>
+                            ))}
+                          </div>
+                        </div>
+                        <div>
+                          <span className="font-medium flex items-center gap-1.5 mb-2 text-foreground"><Building2 className="size-4" /> Facilities</span>
+                          <div className="flex flex-wrap gap-1.5">
+                            {selectedHospitalInfo.facilities.map(f => (
+                              <Badge key={f} variant="outline" className="font-normal bg-background/50 border-border/50">{f}</Badge>
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <div className="space-y-6 mt-2">
+                <h3 className="font-semibold text-lg px-1">Available Branches</h3>
+                {branches.map(b => {
+                  const branchDoctors = results.filter(d => d.branch === b);
+                  return (
+                    <Card key={b} className="shadow-soft overflow-hidden border-border/50">
+                      <div className="bg-muted/50 px-5 py-3 border-b border-border/50 font-medium flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <MapPin className="size-4 text-primary" /> {b} Branch
+                        </div>
+                        <Badge variant="secondary" className="bg-background">{branchDoctors.length} Specialists</Badge>
+                      </div>
+                      <div className="p-4 space-y-3">
+                        {branchDoctors.length > 0 ? (
+                          branchDoctors.map((d) => (
+                            <button
+                              key={d.id}
+                              type="button"
+                              onClick={() => {
+                                setSelected(d);
+                                setSlot(null);
+                              }}
+                              aria-pressed={selected?.id === d.id}
+                              className={
+                                "block w-full rounded-2xl text-left transition-shadow " +
+                                (selected?.id === d.id ? "ring-2 ring-primary ring-offset-2" : "")
+                              }
+                            >
+                              <DoctorCard doctor={d} />
+                            </button>
+                          ))
+                        ) : (
+                          <p className="text-sm text-muted-foreground text-center py-4">
+                            No specialists match your filters at this branch.
+                          </p>
+                        )}
+                      </div>
+                    </Card>
+                  );
+                })}
+              </div>
+            </div>
+          ) : (
+            <>
+              <p className="text-sm text-muted-foreground">{results.length} specialists available</p>
+              <div className="space-y-3">
+                {results.map((d) => (
+                  <button
+                    key={d.id}
+                    type="button"
+                    onClick={() => {
+                      setSelected(d);
+                      setSlot(null);
+                    }}
+                    aria-pressed={selected?.id === d.id}
+                    className={
+                      "block w-full rounded-2xl text-left transition-shadow " +
+                      (selected?.id === d.id ? "ring-2 ring-primary ring-offset-2" : "")
+                    }
+                  >
+                    <DoctorCard doctor={d} />
+                  </button>
+                ))}
+              </div>
+              {!results.length ? (
+                <Card className="shadow-soft">
+                  <CardContent className="p-8 text-center text-sm text-muted-foreground">
+                    No specialists match these filters.
+                  </CardContent>
+                </Card>
+              ) : null}
+            </>
+          )}
         </div>
 
         <Card className="h-fit shadow-soft lg:sticky lg:top-24">
