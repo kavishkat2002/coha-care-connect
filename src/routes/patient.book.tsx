@@ -22,6 +22,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
+import { HospitalReviewsDialog } from "@/components/patient/HospitalReviewsDialog";
 import { doctors, hospitals, SPECIALTIES, type Doctor, type Hospital } from "@/data/mock";
 import { doctorService } from "@/services/doctor.service";
 import { hospitalService } from "@/services/hospital.service";
@@ -55,6 +56,7 @@ function BookPage() {
   const [selected, setSelected] = useState<Doctor | null>(null);
   const [slot, setSlot] = useState<string | null>(null);
   const [confirmed, setConfirmed] = useState(false);
+  const [showReviewsDialog, setShowReviewsDialog] = useState(false);
 
   // Load custom hospital roster from Supabase
   const [rosterDoctors, setRosterDoctors] = useState<Doctor[]>([]);
@@ -367,7 +369,13 @@ function BookPage() {
                         <h3 className="font-semibold text-lg">{selectedHospitalInfo.name}</h3>
                         <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-muted-foreground mt-1.5">
                           <span className="flex items-center gap-1.5"><MapPin className="size-3.5" /> {selectedHospitalInfo.city}</span>
-                          <span className="flex items-center gap-1.5"><Star className="size-3.5 fill-yellow-400 text-yellow-500" /> {selectedHospitalInfo.rating} ({selectedHospitalInfo.reviews} reviews)</span>
+                          <button 
+                            onClick={() => setShowReviewsDialog(true)}
+                            className="flex items-center gap-1.5 hover:underline decoration-muted-foreground/50 transition-colors"
+                          >
+                            <Star className="size-3.5 fill-yellow-400 text-yellow-500" /> 
+                            {selectedHospitalInfo.rating} ({selectedHospitalInfo.reviews} reviews)
+                          </button>
                           <span className="flex items-center gap-1.5"><Phone className="size-3.5" /> {selectedHospitalInfo.phone}</span>
                         </div>
                       </div>
@@ -533,6 +541,14 @@ function BookPage() {
           </CardContent>
         </Card>
       </div>
+      
+      {selectedHospitalInfo && (
+        <HospitalReviewsDialog 
+          hospital={selectedHospitalInfo}
+          isOpen={showReviewsDialog}
+          onOpenChange={setShowReviewsDialog}
+        />
+      )}
     </div>
   );
 }
