@@ -49,7 +49,8 @@ function BookPage() {
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [date, setDate] = useState("");
   const [specialty, setSpecialty] = useState("all");
-  const [hospital, setHospital] = useState("all");
+  const [hospital, setHospital] = useState("");
+  const [showHospitalSuggestions, setShowHospitalSuggestions] = useState(false);
   const [branch, setBranch] = useState("all");
   const [selected, setSelected] = useState<Doctor | null>(null);
   const [slot, setSlot] = useState<string | null>(null);
@@ -76,9 +77,27 @@ function BookPage() {
   }, []);
 
   const branches = useMemo(() => {
-    const h = dbHospitals.find((x) => x.name === hospital);
-    return h ? h.branches : [];
-  }, [hospital, dbHospitals]);
+    const hQ = hospital.trim().toLowerCase();
+    const h = dbHospitals.find((x) => x.name.toLowerCase() === hQ);
+    if (h && h.branches && h.branches.length > 0) return h.branches;
+
+    // Fallback: get branches from doctors data if not in dbHospitals
+    const allDocs = rosterDoctors.length > 0 ? rosterDoctors : doctors;
+    const docBranches = allDocs
+      .filter((d) => (d.hospital || "").toLowerCase() === hQ)
+      .map((d) => d.branch)
+      .filter(Boolean);
+    return Array.from(new Set(docBranches));
+  }, [hospital, dbHospitals, rosterDoctors, doctors]);
+
+  const hospitalSuggestions = useMemo(() => {
+    if (!hospital.trim()) return [];
+    const q = hospital.trim().toLowerCase();
+    const dbHospitalNames = dbHospitals.map(h => h.name);
+    const docHospitalNames = (rosterDoctors.length > 0 ? rosterDoctors : doctors).map(d => d.hospital || "");
+    const uniqueNames = Array.from(new Set([...dbHospitalNames, ...docHospitalNames])).filter(Boolean);
+    return uniqueNames.filter(name => name.toLowerCase().includes(q));
+  }, [hospital, dbHospitals, rosterDoctors, doctors]);
 
   const suggestions = useMemo(() => {
     if (!query.trim()) return [];
@@ -93,6 +112,7 @@ function BookPage() {
 
     return allDoctors.filter((d) => {
       const q = query.trim().toLowerCase();
+      const hQ = hospital.trim().toLowerCase();
       const matchesQuery =
         !q ||
         (d.name || "").toLowerCase().includes(q) ||
@@ -102,7 +122,7 @@ function BookPage() {
       return (
         matchesQuery &&
         (specialty === "all" || d.specialty === specialty) &&
-        (hospital === "all" || d.hospital === hospital) &&
+        (!hQ || (d.hospital || "").toLowerCase().includes(hQ)) &&
         (branch === "all" || d.branch === branch)
       );
     });
@@ -276,25 +296,43 @@ function BookPage() {
           </div>
           <div className="space-y-2">
             <Label htmlFor="hospital">Hospital</Label>
-            <Select
-              value={hospital}
-              onValueChange={(v) => {
-                setHospital(v);
-                setBranch("all");
-              }}
-            >
-              <SelectTrigger id="hospital">
-                <SelectValue placeholder="All hospitals" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All hospitals</SelectItem>
-                {dbHospitals.map((h) => (
-                  <SelectItem key={h.id} value={h.name}>
-                    {h.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <div className="relative">
+              <Search
+                className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground"
+                aria-hidden="true"
+              />
+              <Input
+                id="hospital"
+                autoComplete="off"
+                value={hospital}
+                onChange={(e) => {
+                  setHospital(e.target.value);
+                  setBranch("all");
+                  setShowHospitalSuggestions(true);
+                }}
+                onFocus={() => setShowHospitalSuggestions(true)}
+                onBlur={() => setTimeout(() => setShowHospitalSuggestions(false), 200)}
+                placeholder="Search hospital"
+                className="pl-9"
+              />
+              {showHospitalSuggestions && hospital.trim().length > 0 && hospitalSuggestions.length > 0 && (
+                <div className="absolute z-10 w-full bg-popover text-popover-foreground border border-border shadow-md rounded-md mt-1 max-h-60 overflow-y-auto">
+                  {hospitalSuggestions.map((name) => (
+                    <div
+                      key={name}
+                      className="px-4 py-2 hover:bg-muted cursor-pointer text-sm"
+                      onClick={() => {
+                        setHospital(name);
+                        setBranch("all");
+                        setShowHospitalSuggestions(false);
+                      }}
+                    >
+                      {name}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
           <div className="space-y-2">
             <Label htmlFor="date">Date</Label>
