@@ -29,6 +29,8 @@ export function DoctorProfileDialog({
   const [submitting, setSubmitting] = useState(false);
   const [currentUser, setCurrentUser] = useState<any>(null);
   const [editingReviewId, setEditingReviewId] = useState<string | null>(null);
+  const [realNextSlot, setRealNextSlot] = useState<string | null>(null);
+  const [realQueue, setRealQueue] = useState<number | null>(null);
 
   useEffect(() => {
     if (open && doctor) {
@@ -49,6 +51,33 @@ export function DoctorProfileDialog({
         // Assume patient profile ID is same as user ID for now, or just use user ID
         const hasBooking = await patientService.hasPreviousBooking(doctor.id, user.id);
         setCanReview(hasBooking);
+      }
+
+      // Fetch real-time availability and queue for today
+      const today = new Date().toISOString().split('T')[0]!;
+      const slots = await patientService.getDoctorAvailability(doctor.id, today);
+      
+      const now = new Date();
+      const currentMinutes = now.getHours() * 60 + now.getMinutes();
+      
+      let next = slots.find((s: string) => {
+        const parts = s.split(':').map(Number);
+        const h = parts[0] ?? 0;
+        const m = parts[1] ?? 0;
+        return (h * 60 + m) > currentMinutes;
+      });
+      
+      if (!next && slots.length > 0) {
+        next = slots[0]; // fallback
+      }
+
+      if (next) {
+        setRealNextSlot(next);
+        const qCount = await patientService.getSlotQueueCount(doctor.id, today, next);
+        setRealQueue(qCount);
+      } else {
+        setRealNextSlot("None");
+        setRealQueue(0);
       }
     } catch (err) {
       console.error(err);
@@ -177,12 +206,16 @@ export function DoctorProfileDialog({
             <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
               <div className="rounded-lg border p-3 text-center">
                 <Users className="size-4 mx-auto mb-1 text-primary" />
-                <div className="text-sm font-semibold">{doctor.queue}</div>
+                <div className="text-sm font-semibold">{realQueue !== null ? realQueue : doctor.queue}</div>
                 <div className="text-[10px] text-muted-foreground uppercase tracking-wider">Queue</div>
               </div>
               <div className="rounded-lg border p-3 text-center">
                 <Clock className="size-4 mx-auto mb-1 text-primary" />
-                <div className="text-sm font-semibold">{doctor.nextSlot}</div>
+                <div className="text-sm font-semibold">
+                  {realNextSlot !== null 
+                    ? (realNextSlot === "None" ? "None" : `Today · ${realNextSlot}`) 
+                    : doctor.nextSlot}
+                </div>
                 <div className="text-[10px] text-muted-foreground uppercase tracking-wider">Next Slot</div>
               </div>
               <div className="rounded-lg border p-3 text-center">

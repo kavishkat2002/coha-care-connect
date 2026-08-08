@@ -1,5 +1,7 @@
 import { Clock, MapPin, Star, Users } from "lucide-react";
 import { Link } from "@tanstack/react-router";
+import { useEffect, useState } from "react";
+import { patientService } from "@/services/patient.service";
 
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
@@ -8,6 +10,44 @@ import { Card, CardContent } from "@/components/ui/card";
 import type { Doctor } from "@/data/mock";
 
 export function DoctorCard({ doctor, compact = false, onProfileClick }: { doctor: Doctor; compact?: boolean; onProfileClick?: (doctor: Doctor) => void }) {
+  const [realNextSlot, setRealNextSlot] = useState<string | null>(null);
+  const [realQueue, setRealQueue] = useState<number | null>(null);
+
+  useEffect(() => {
+    let isMounted = true;
+    async function fetchStats() {
+      try {
+        const today = new Date().toISOString().split('T')[0]!;
+        const slots = await patientService.getDoctorAvailability(doctor.id, today);
+        const now = new Date();
+        const currentMinutes = now.getHours() * 60 + now.getMinutes();
+        let next = slots.find((s: string) => {
+          const parts = s.split(':').map(Number);
+          const h = parts[0] ?? 0;
+          const m = parts[1] ?? 0;
+          return (h * 60 + m) > currentMinutes;
+        });
+        
+        if (!next && slots.length > 0) next = slots[0];
+
+        if (!isMounted) return;
+
+        if (next) {
+          setRealNextSlot(next);
+          const qCount = await patientService.getSlotQueueCount(doctor.id, today, next);
+          if (isMounted) setRealQueue(qCount);
+        } else {
+          setRealNextSlot("None");
+          setRealQueue(0);
+        }
+      } catch (e) {
+        // silently fallback
+      }
+    }
+    fetchStats();
+    return () => { isMounted = false; };
+  }, [doctor.id]);
+
   return (
     <Card className="shadow-soft">
       <CardContent className="flex flex-col gap-4 p-5 sm:flex-row sm:items-center">
@@ -74,10 +114,13 @@ export function DoctorCard({ doctor, compact = false, onProfileClick }: { doctor
                 <MapPin className="size-3.5" aria-hidden="true" /> {doctor.distanceKm} km away
               </span>
               <span className="flex items-center gap-1.5">
-                <Users className="size-3.5" aria-hidden="true" /> {doctor.queue} in queue
+                <Users className="size-3.5" aria-hidden="true" /> {realQueue !== null ? realQueue : doctor.queue} in queue
               </span>
               <span className="flex items-center gap-1.5">
-                <Clock className="size-3.5" aria-hidden="true" /> {doctor.nextSlot}
+                <Clock className="size-3.5" aria-hidden="true" /> 
+                {realNextSlot !== null 
+                  ? (realNextSlot === "None" ? "None" : `Today · ${realNextSlot}`) 
+                  : doctor.nextSlot}
               </span>
               <span>{doctor.languages.join(", ")}</span>
             </div>
