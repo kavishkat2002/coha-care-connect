@@ -13,8 +13,8 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { type Appointment } from "@/data/mock";
-import { patientService } from "@/services/patient.service";
+import { type Appointment, doctors, hospitals, SPECIALTIES } from "@/data/mock";
+import { patientService, type DbAppointment } from "@/services/patient.service";
 
 export const Route = createFileRoute("/patient/appointments")({
   head: () => ({
@@ -32,7 +32,7 @@ const variant = (status: string) =>
   status === "Confirmed" ? "secondary" : status === "Completed" ? "outline" : "outline";
 
 function AppointmentsPage() {
-  const [appointments, setAppointments] = useState<Appointment[]>([]);
+  const [appointments, setAppointments] = useState<DbAppointment[]>([]);
 
   useEffect(() => {
     async function load() {
@@ -67,25 +67,30 @@ function AppointmentsPage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {appointments.map((a) => (
-                <TableRow key={a.id}>
-                  <TableCell className="font-medium">{a.doctor}</TableCell>
-                  <TableCell className="hidden sm:table-cell text-muted-foreground">
-                    {a.specialty}
-                  </TableCell>
-                  <TableCell className="hidden md:table-cell text-muted-foreground">
-                    {a.hospital}
-                  </TableCell>
-                  <TableCell>
-                    {a.date}
-                    <span className="block text-xs text-muted-foreground">{a.time}</span>
-                  </TableCell>
-                  <TableCell className="hidden sm:table-cell text-muted-foreground">{a.mode}</TableCell>
-                  <TableCell className="text-right">
-                    <Badge variant={variant(a.status)}>{a.status}</Badge>
-                  </TableCell>
-                </TableRow>
-              ))}
+              {appointments.map((a) => {
+                const doc = doctors.find(d => d.id === a.doctor_id);
+                const hosp = hospitals.find(h => h.id === a.hospital_id);
+                
+                return (
+                  <TableRow key={a.id}>
+                    <TableCell className="font-medium">{doc ? doc.name : a.doctor_id}</TableCell>
+                    <TableCell className="hidden sm:table-cell text-muted-foreground">
+                      {doc ? doc.specialty : "General"}
+                    </TableCell>
+                    <TableCell className="hidden md:table-cell text-muted-foreground">
+                      {hosp ? hosp.name : a.hospital_id}
+                    </TableCell>
+                    <TableCell>
+                      {a.date}
+                      <span className="block text-xs text-muted-foreground">{a.time}</span>
+                    </TableCell>
+                    <TableCell className="hidden sm:table-cell text-muted-foreground">In-person</TableCell>
+                    <TableCell className="text-right">
+                      <Badge variant={variant(a.status)}>{a.status}</Badge>
+                    </TableCell>
+                  </TableRow>
+                );
+              })}
             </TableBody>
           </Table>
         </CardContent>

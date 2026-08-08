@@ -39,7 +39,7 @@ export const patientService = {
   /**
    * Fetch all appointments from Supabase
    */
-  async getAppointments(): Promise<Appointment[]> {
+  async getAppointments(): Promise<DbAppointment[]> {
     const { data, error } = await supabase
       .from("appointments")
       .select("*");

@@ -17,8 +17,15 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { type Appointment, type ReportItem, type TimelineItem } from "@/data/mock";
-import { patientService, type PatientProfile } from "@/services/patient.service";
+import {
+  type Appointment,
+  type ReportItem,
+  type TimelineItem,
+  doctors,
+  hospitals,
+  SPECIALTIES
+} from "@/data/mock";
+import { patientService, type DbAppointment, type PatientProfile } from "@/services/patient.service";
 
 export const Route = createFileRoute("/patient/")({
   head: () => ({
@@ -44,7 +51,7 @@ const quickActions = [
 ];
 
 function PatientOverview() {
-  const [appointments, setAppointments] = useState<Appointment[]>([]);
+  const [appointments, setAppointments] = useState<DbAppointment[]>([]);
   const [patientProfile, setPatientProfile] = useState<PatientProfile | null>(null);
   const [reports, setReports] = useState<ReportItem[]>([]);
   const [timeline, setTimeline] = useState<TimelineItem[]>([]);
@@ -92,27 +99,32 @@ function PatientOverview() {
             <CardDescription>Confirmed and pending visits</CardDescription>
           </CardHeader>
           <CardContent className="space-y-3">
-            {upcoming.map((a) => (
-              <div
-                key={a.id}
-                className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-border p-4"
-              >
-                <div>
-                  <p className="text-sm font-medium">{a.doctor}</p>
-                  <p className="text-xs text-muted-foreground">
-                    {a.specialty} · {a.hospital}
-                  </p>
+            {upcoming.map((a) => {
+              const doc = doctors.find(d => d.id === a.doctor_id);
+              const hosp = hospitals.find(h => h.id === a.hospital_id);
+              
+              return (
+                <div
+                  key={a.id}
+                  className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-border p-4"
+                >
+                  <div>
+                    <p className="text-sm font-medium">{doc ? doc.name : a.doctor_id}</p>
+                    <p className="text-xs text-muted-foreground">
+                      {doc ? doc.specialty : "General"} · {hosp ? hosp.name : a.hospital_id}
+                    </p>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-sm font-medium">
+                      {a.date} · {a.time}
+                    </p>
+                    <Badge variant={a.status === "Confirmed" ? "secondary" : "outline"} className="mt-1">
+                      {a.status}
+                    </Badge>
+                  </div>
                 </div>
-                <div className="text-right">
-                  <p className="text-sm font-medium">
-                    {a.date} · {a.time}
-                  </p>
-                  <Badge variant={a.status === "Confirmed" ? "secondary" : "outline"} className="mt-1">
-                    {a.status}
-                  </Badge>
-                </div>
-              </div>
-            ))}
+              );
+            })}
             <Button asChild variant="outline" size="sm">
               <Link to="/patient/appointments">View appointment history</Link>
             </Button>

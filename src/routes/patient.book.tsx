@@ -248,12 +248,10 @@ function BookPage() {
             <Button
               variant="outline"
               onClick={() => {
-                setConfirmed(false);
-                setSelected(null);
-                setSlot(null);
+                navigate({ to: "/patient" });
               }}
             >
-              Book another appointment
+              Back to Home
             </Button>
           </CardContent>
         </Card>
@@ -657,6 +655,7 @@ function BookPage() {
                     
                     if (newAppointment) {
                       setAssignedQueue(newAppointment.queue_number);
+                      toast.success(`Digital receipt sent to ${patientDetails.email || 'your email'}`);
                       setConfirmed(true);
                     } else {
                       toast.error("Failed to book appointment");
