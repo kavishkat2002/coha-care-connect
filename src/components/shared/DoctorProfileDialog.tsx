@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Star, MapPin, Users, Clock, Loader2, MessageSquare, ThumbsUp } from "lucide-react";
+import { Star, MapPin, Users, Clock, Loader2, MessageSquare, ThumbsUp, Pencil, Trash2, X } from "lucide-react";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
@@ -27,6 +27,8 @@ export function DoctorProfileDialog({
   const [rating, setRating] = useState(5);
   const [comment, setComment] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const [currentUser, setCurrentUser] = useState<any>(null);
+  const [editingReviewId, setEditingReviewId] = useState<string | null>(null);
 
   useEffect(() => {
     if (open && doctor) {
@@ -43,6 +45,7 @@ export function DoctorProfileDialog({
 
       const user = await getSession();
       if (user) {
+        setCurrentUser(user);
         // Assume patient profile ID is same as user ID for now, or just use user ID
         const hasBooking = await patientService.hasPreviousBooking(doctor.id, user.id);
         setCanReview(hasBooking);
@@ -59,33 +62,71 @@ export function DoctorProfileDialog({
     setSubmitting(true);
     
     try {
-      const user = await getSession();
+      const user = currentUser || await getSession();
       if (!user) {
         toast.error("You must be logged in to leave a review.");
         return;
       }
       
-      const newReview = await patientService.addDoctorReview({
-        doctor_id: doctor.id,
-        patient_id: user.id,
-        patient_name: user.name || "Anonymous Patient",
-        rating,
-        comment: comment.trim()
-      });
-      
-      if (newReview) {
-        setReviews([newReview, ...reviews]);
-        setComment("");
-        setRating(5);
-        toast.success("Review submitted successfully!");
+      if (editingReviewId) {
+        const updated = await patientService.updateDoctorReview(editingReviewId, rating, comment.trim());
+        if (updated) {
+          setReviews(reviews.map(r => r.id === editingReviewId ? { ...r, rating, comment: comment.trim() } : r));
+          setComment("");
+          setRating(5);
+          setEditingReviewId(null);
+          toast.success("Review updated successfully!");
+        } else {
+          toast.error("Failed to update review.");
+        }
       } else {
-        toast.error("Failed to submit review. Check console for details.");
+        const newReview = await patientService.addDoctorReview({
+          doctor_id: doctor.id,
+          patient_id: user.id,
+          patient_name: user.name || "Anonymous Patient",
+          rating,
+          comment: comment.trim()
+        });
+        
+        if (newReview) {
+          setReviews([newReview, ...reviews]);
+          setComment("");
+          setRating(5);
+          toast.success("Review submitted successfully!");
+        } else {
+          toast.error("Failed to submit review.");
+        }
       }
     } catch (e) {
       toast.error("An unexpected error occurred.");
     } finally {
       setSubmitting(false);
     }
+  };
+
+  const handleDeleteReview = async (reviewId: string) => {
+    if (!confirm("Are you sure you want to delete this review?")) return;
+    
+    const success = await patientService.deleteDoctorReview(reviewId);
+    if (success) {
+      setReviews(reviews.filter(r => r.id !== reviewId));
+      toast.success("Review deleted.");
+    } else {
+      toast.error("Failed to delete review.");
+    }
+  };
+
+  const handleEditClick = (review: any) => {
+    setEditingReviewId(review.id);
+    setRating(review.rating);
+    setComment(review.comment);
+    // Scroll to form if needed
+  };
+
+  const handleCancelEdit = () => {
+    setEditingReviewId(null);
+    setRating(5);
+    setComment("");
   };
 
   if (!doctor) return null;
@@ -169,8 +210,15 @@ export function DoctorProfileDialog({
               ) : (
                 <>
                   {canReview && (
-                    <div className="bg-muted/50 rounded-lg p-4 space-y-3 mb-6">
-                      <h4 className="text-sm font-medium">Write a Review</h4>
+                    <div className={`bg-muted/50 rounded-lg p-4 space-y-3 mb-6 ${editingReviewId ? 'ring-2 ring-primary/50' : ''}`}>
+                      <div className="flex items-center justify-between mb-2">
+                        <h4 className="text-sm font-medium">{editingReviewId ? "Edit Your Review" : "Write a Review"}</h4>
+                        {editingReviewId && (
+                          <Button variant="ghost" size="icon" className="size-6 text-muted-foreground" onClick={handleCancelEdit}>
+                            <X className="size-4" />
+                          </Button>
+                        )}
+                      </div>
                       <div className="flex items-center gap-2 mb-2">
                         {[1, 2, 3, 4, 5].map((star) => (
                           <Star 
@@ -194,7 +242,7 @@ export function DoctorProfileDialog({
                           disabled={!comment.trim() || submitting}
                         >
                           {submitting ? <Loader2 className="size-4 animate-spin mr-2" /> : null}
-                          Submit Review
+                          {editingReviewId ? "Update Review" : "Submit Review"}
                         </Button>
                       </div>
                     </div>
@@ -208,12 +256,24 @@ export function DoctorProfileDialog({
                       </div>
                     ) : (
                       reviews.map((review) => (
-                        <div key={review.id} className="border-b pb-4 last:border-0 last:pb-0">
+                        <div key={review.id} className="border-b pb-4 last:border-0 last:pb-0 group">
                           <div className="flex items-center justify-between mb-1">
                             <span className="font-medium text-sm">{review.patient_name}</span>
-                            <span className="text-xs text-muted-foreground">
-                              {new Date(review.created_at).toLocaleDateString()}
-                            </span>
+                            <div className="flex items-center gap-2">
+                              <span className="text-xs text-muted-foreground">
+                                {new Date(review.created_at).toLocaleDateString()}
+                              </span>
+                              {currentUser && currentUser.id === review.patient_id && (
+                                <div className="flex items-center gap-1 opacity-60 group-hover:opacity-100 transition-opacity">
+                                  <button onClick={() => handleEditClick(review)} className="p-1 hover:text-primary hover:bg-muted rounded-sm" title="Edit">
+                                    <Pencil className="size-3" />
+                                  </button>
+                                  <button onClick={() => handleDeleteReview(review.id)} className="p-1 hover:text-destructive hover:bg-muted rounded-sm" title="Delete">
+                                    <Trash2 className="size-3" />
+                                  </button>
+                                </div>
+                              )}
+                            </div>
                           </div>
                           <div className="flex items-center gap-0.5 mb-2">
                             {[1, 2, 3, 4, 5].map((star) => (

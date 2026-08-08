@@ -236,6 +236,58 @@ export const patientService = {
   },
 
   /**
+   * Update an existing doctor review
+   */
+  async updateDoctorReview(reviewId: string, rating: number, comment: string) {
+    const { data, error } = await supabase
+      .from("doctor_reviews")
+      .update({ rating, comment })
+      .eq("id", reviewId)
+      .select()
+      .single();
+    
+    if (error) {
+      console.warn("Supabase update failed, falling back to LocalStorage:", error);
+      try {
+        const localReviews = JSON.parse(localStorage.getItem('mock_doctor_reviews') || '[]');
+        const index = localReviews.findIndex((r: any) => r.id === reviewId);
+        if (index > -1) {
+          localReviews[index] = { ...localReviews[index], rating, comment };
+          localStorage.setItem('mock_doctor_reviews', JSON.stringify(localReviews));
+          return localReviews[index];
+        }
+        return null;
+      } catch (e) {
+        return null;
+      }
+    }
+    return data;
+  },
+
+  /**
+   * Delete a doctor review
+   */
+  async deleteDoctorReview(reviewId: string) {
+    const { error } = await supabase
+      .from("doctor_reviews")
+      .delete()
+      .eq("id", reviewId);
+      
+    if (error) {
+      console.warn("Supabase delete failed, falling back to LocalStorage:", error);
+      try {
+        const localReviews = JSON.parse(localStorage.getItem('mock_doctor_reviews') || '[]');
+        const filtered = localReviews.filter((r: any) => r.id !== reviewId);
+        localStorage.setItem('mock_doctor_reviews', JSON.stringify(filtered));
+        return true;
+      } catch (e) {
+        return false;
+      }
+    }
+    return true;
+  },
+
+  /**
    * Check if patient has a previous booking with a doctor
    */
   async hasPreviousBooking(doctorId: string, patientId: string): Promise<boolean> {
