@@ -1,6 +1,20 @@
 import { supabase } from "@/lib/supabase";
 import { type Appointment, type ReportItem, type TimelineItem } from "@/data/mock";
 
+// Type for the new Supabase appointment row
+export type DbAppointment = {
+  id?: string;
+  patient_id: string;
+  doctor_id: string;
+  hospital_id: string;
+  date: string;
+  time: string;
+  queue_number: number;
+  status: string;
+  fee: number;
+  created_at?: string;
+};
+
 export type PatientProfile = {
   id: string;
   name: string;
@@ -31,6 +45,82 @@ export const patientService = {
     }
     
     return data || [];
+  },
+
+  /**
+   * Fetch custom time slots for a doctor on a specific date, or fallback to defaults
+   */
+  async getDoctorAvailability(doctorId: string, date: string): Promise<string[]> {
+    const { data, error } = await supabase
+      .from("doctor_availability")
+      .select("time_slots")
+      .eq("doctor_id", doctorId)
+      .eq("date", date)
+      .single();
+
+    if (error || !data || !data.time_slots || data.time_slots.length === 0) {
+      // Fallback default slots if doctor hasn't configured manually
+      return ["09:00", "10:30", "12:00", "14:30", "16:30", "18:00"];
+    }
+    return data.time_slots;
+  },
+
+  /**
+   * Fetch how many patients are booked for a specific doctor, date, and time slot
+   */
+  async getSlotQueueCount(doctorId: string, date: string, time: string): Promise<number> {
+    const { count, error } = await supabase
+      .from("appointments")
+      .select("*", { count: "exact", head: true })
+      .eq("doctor_id", doctorId)
+      .eq("date", date)
+      .eq("time", time);
+
+    if (error) {
+      console.warn("Supabase count failed, falling back to LocalStorage:", error);
+      try {
+        const localApps = JSON.parse(localStorage.getItem('mock_appointments') || '[]');
+        return localApps.filter((a: any) => a.doctor_id === doctorId && a.date === date && a.time === time).length;
+      } catch (e) {
+        return 0;
+      }
+    }
+    return count || 0;
+  },
+
+  /**
+   * Securely book an appointment and return the assigned queue number
+   */
+  async bookAppointment(appointment: Omit<DbAppointment, "id" | "created_at" | "queue_number">): Promise<DbAppointment | null> {
+    // 1. Get the current queue count to assign the NEXT number
+    const currentQueueCount = await this.getSlotQueueCount(
+      appointment.doctor_id, 
+      appointment.date, 
+      appointment.time
+    );
+    const assignedQueueNumber = currentQueueCount + 1;
+
+    // 2. Insert the appointment
+    const { data, error } = await supabase
+      .from("appointments")
+      .insert([{ ...appointment, queue_number: assignedQueueNumber }])
+      .select()
+      .single();
+
+    if (error) {
+      console.warn("Supabase insert failed, falling back to LocalStorage:", error);
+      try {
+        const localApps = JSON.parse(localStorage.getItem('mock_appointments') || '[]');
+        const newApp = { ...appointment, queue_number: assignedQueueNumber, id: 'local-' + Date.now() };
+        localApps.push(newApp);
+        localStorage.setItem('mock_appointments', JSON.stringify(localApps));
+        return newApp;
+      } catch (e) {
+        return null;
+      }
+    }
+
+    return data;
   },
 
   /**

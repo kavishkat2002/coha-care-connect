@@ -26,6 +26,8 @@ import { HospitalReviewsDialog } from "@/components/patient/HospitalReviewsDialo
 import { doctors, hospitals, SPECIALTIES, type Doctor, type Hospital } from "@/data/mock";
 import { doctorService } from "@/services/doctor.service";
 import { hospitalService } from "@/services/hospital.service";
+import { patientService } from "@/services/patient.service";
+import { getSession } from "@/services/auth.service";
 
 export const Route = createFileRoute("/patient/book")({
   head: () => ({
@@ -43,8 +45,6 @@ export const Route = createFileRoute("/patient/book")({
   component: BookPage,
 });
 
-const SLOTS = ["09:00", "10:30", "12:00", "14:30", "16:30", "18:00"];
-
 function BookPage() {
   const navigate = useNavigate();
   const [query, setQuery] = useState("");
@@ -57,6 +57,13 @@ function BookPage() {
   const [slot, setSlot] = useState<string | null>(null);
   const [confirmed, setConfirmed] = useState(false);
   const [showReviewsDialog, setShowReviewsDialog] = useState(false);
+  
+  // Dynamic slot and queue state
+  const [selectedDate, setSelectedDate] = useState<string>(() => new Date().toISOString().split('T')[0] || "");
+  const [availableSlots, setAvailableSlots] = useState<string[]>([]);
+  const [slotQueues, setSlotQueues] = useState<Record<string, number>>({});
+  const [assignedQueue, setAssignedQueue] = useState<number | null>(null);
+  const [isBooking, setIsBooking] = useState(false);
 
   // Load custom hospital roster from Supabase
   const [rosterDoctors, setRosterDoctors] = useState<Doctor[]>([]);
@@ -77,6 +84,28 @@ function BookPage() {
     }
     loadData();
   }, []);
+
+  // Fetch dynamic slots and queues when date or doctor changes
+  useEffect(() => {
+    async function fetchSlots() {
+      if (!selected || !selectedDate) {
+        setAvailableSlots([]);
+        setSlotQueues({});
+        return;
+      }
+      
+      const slots = await patientService.getDoctorAvailability(selected.id, selectedDate);
+      setAvailableSlots(slots);
+      
+      const queues: Record<string, number> = {};
+      for (const s of slots) {
+        const count = await patientService.getSlotQueueCount(selected.id, selectedDate, s);
+        queues[s] = count;
+      }
+      setSlotQueues(queues);
+    }
+    fetchSlots();
+  }, [selected, selectedDate]);
 
   const selectedHospitalInfo = useMemo(() => {
     const hQ = hospital.trim().toLowerCase();
@@ -156,7 +185,7 @@ function BookPage() {
             <dl className="grid gap-3 text-sm sm:grid-cols-2">
               <div>
                 <dt className="text-muted-foreground">Date</dt>
-                <dd className="font-medium">Today</dd>
+                <dd className="font-medium">{selectedDate}</dd>
               </div>
               <div>
                 <dt className="text-muted-foreground">Time</dt>
@@ -170,6 +199,12 @@ function BookPage() {
                 <dt className="text-muted-foreground">Paid</dt>
                 <dd className="font-medium">LKR {selected.fee.toLocaleString()}</dd>
               </div>
+              {assignedQueue && (
+                <div className="sm:col-span-2">
+                  <dt className="text-muted-foreground font-semibold text-primary">Your Queue Number</dt>
+                  <dd className="font-bold text-lg text-primary">Patient #{assignedQueue}</dd>
+                </div>
+              )}
             </dl>
             <div className="flex items-center gap-4 rounded-2xl border border-border bg-muted/40 p-5">
               <QrCode className="size-16 text-foreground" aria-hidden="true" />
@@ -489,21 +524,47 @@ function BookPage() {
             {selected ? (
               <>
                 <div>
-                  <p className="mb-2 text-sm font-medium">Today's slots</p>
-                  <div className="grid grid-cols-3 gap-2">
-                    {SLOTS.map((s) => (
-                      <Button
-                        key={s}
-                        type="button"
-                        size="sm"
-                        variant={slot === s ? "default" : "outline"}
-                        onClick={() => setSlot(s)}
-                      >
-                        {s}
-                      </Button>
-                    ))}
+                  <div className="flex items-center justify-between mb-3">
+                    <p className="text-sm font-medium">Select Date & Time</p>
+                    <Input 
+                      type="date" 
+                      value={selectedDate} 
+                      onChange={(e) => {
+                        setSelectedDate(e.target.value);
+                        setSlot(null);
+                      }} 
+                      min={new Date().toISOString().split('T')[0]} 
+                      className="h-8 w-[140px] text-xs"
+                    />
                   </div>
+                  {availableSlots.length > 0 ? (
+                    <div className="grid grid-cols-3 gap-2">
+                      {availableSlots.map((s) => {
+                        const queue = slotQueues[s] || 0;
+                        return (
+                          <Button
+                            key={s}
+                            type="button"
+                            size="sm"
+                            variant={slot === s ? "default" : "outline"}
+                            onClick={() => setSlot(s)}
+                            className="flex flex-col gap-0.5 h-auto py-2"
+                          >
+                            <span>{s}</span>
+                            <span className="text-[10px] font-normal opacity-70">
+                              {queue} in queue
+                            </span>
+                          </Button>
+                        );
+                      })}
+                    </div>
+                  ) : (
+                    <div className="text-sm text-muted-foreground py-4 text-center bg-muted/20 rounded-md">
+                      Loading slots...
+                    </div>
+                  )}
                 </div>
+
                 <Separator />
                 <div className="space-y-1.5 text-sm">
                   <div className="flex justify-between">
@@ -522,15 +583,40 @@ function BookPage() {
                 <Badge variant="secondary" className="gap-1.5">
                   <CreditCard className="size-3.5" /> Card payment on confirmation
                 </Badge>
-                <Button
-                  className="w-full"
-                  disabled={!slot}
-                  onClick={() => {
-                    setConfirmed(true);
-                    toast.success("Appointment confirmed");
+                <Button 
+                  className="w-full" 
+                  size="lg" 
+                  disabled={!slot || isBooking}
+                  onClick={async () => {
+                    setIsBooking(true);
+                    
+                    const session = await getSession();
+                    if (!session) {
+                      toast.error("Please log in to book an appointment.");
+                      setIsBooking(false);
+                      return;
+                    }
+
+                    const newAppointment = await patientService.bookAppointment({
+                      patient_id: session.id,
+                      doctor_id: selected.id,
+                      hospital_id: selectedHospitalInfo?.id || selected.hospital || "",
+                      date: selectedDate,
+                      time: slot!,
+                      status: "Confirmed",
+                      fee: selected.fee,
+                    });
+                    
+                    if (newAppointment) {
+                      setAssignedQueue(newAppointment.queue_number);
+                      setConfirmed(true);
+                    } else {
+                      toast.error("Failed to book appointment");
+                    }
+                    setIsBooking(false);
                   }}
                 >
-                  <CalendarCheck className="mr-2 size-4" /> Pay & confirm
+                  {isBooking ? "Booking..." : "Pay & confirm"}
                 </Button>
               </>
             ) : (

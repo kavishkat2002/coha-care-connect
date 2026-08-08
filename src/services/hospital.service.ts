@@ -54,8 +54,13 @@ export const hospitalService = {
       .order("created_at", { ascending: false });
 
     if (error) {
-      console.error("Error fetching hospital reviews:", error);
-      return [];
+      console.warn("Error fetching hospital reviews from Supabase, falling back to LocalStorage:", error);
+      try {
+        const localReviews = JSON.parse(localStorage.getItem('mock_hospital_reviews') || '[]');
+        return localReviews.filter((r: any) => r.hospital_id === hospitalId);
+      } catch (e) {
+        return [];
+      }
     }
     return data || [];
   },
@@ -69,8 +74,15 @@ export const hospitalService = {
       .insert([review]);
 
     if (error) {
-      console.error("Error adding hospital review:", error);
-      return false;
+      console.warn("Error adding hospital review to Supabase, falling back to LocalStorage:", error);
+      try {
+        const localReviews = JSON.parse(localStorage.getItem('mock_hospital_reviews') || '[]');
+        localReviews.push({ ...review, id: 'local-' + Date.now(), created_at: new Date().toISOString() });
+        localStorage.setItem('mock_hospital_reviews', JSON.stringify(localReviews));
+        return true;
+      } catch (e) {
+        return false;
+      }
     }
     return true;
   }
