@@ -64,6 +64,13 @@ function BookPage() {
   const [slotQueues, setSlotQueues] = useState<Record<string, number>>({});
   const [assignedQueue, setAssignedQueue] = useState<number | null>(null);
   const [isBooking, setIsBooking] = useState(false);
+  const [patientDetails, setPatientDetails] = useState({
+    name: "",
+    email: "",
+    mobile: "",
+    nic: "",
+    city: ""
+  });
 
   // Load custom hospital roster from Supabase
   const [rosterDoctors, setRosterDoctors] = useState<Doctor[]>([]);
@@ -199,10 +206,36 @@ function BookPage() {
                 <dt className="text-muted-foreground">Paid</dt>
                 <dd className="font-medium">LKR {selected.fee.toLocaleString()}</dd>
               </div>
+              <div className="sm:col-span-2">
+                <Separator className="my-2" />
+                <dt className="text-sm font-semibold mb-2">Patient Details</dt>
+                <div className="grid grid-cols-2 gap-y-2 text-sm">
+                  <div>
+                    <span className="text-muted-foreground">Name: </span>
+                    <span className="font-medium">{patientDetails.name}</span>
+                  </div>
+                  <div>
+                    <span className="text-muted-foreground">NIC: </span>
+                    <span className="font-medium">{patientDetails.nic}</span>
+                  </div>
+                  <div>
+                    <span className="text-muted-foreground">Mobile: </span>
+                    <span className="font-medium">{patientDetails.mobile}</span>
+                  </div>
+                  <div>
+                    <span className="text-muted-foreground">City: </span>
+                    <span className="font-medium">{patientDetails.city}</span>
+                  </div>
+                  <div className="col-span-2">
+                    <span className="text-muted-foreground">Email: </span>
+                    <span className="font-medium">{patientDetails.email}</span>
+                  </div>
+                </div>
+              </div>
               {assignedQueue && (
-                <div className="sm:col-span-2">
-                  <dt className="text-muted-foreground font-semibold text-primary">Your Queue Number</dt>
-                  <dd className="font-bold text-lg text-primary">Patient #{assignedQueue}</dd>
+                <div className="sm:col-span-2 mt-2 bg-primary/10 p-3 rounded-lg border border-primary/20">
+                  <dt className="text-primary font-semibold">Your Queue Number</dt>
+                  <dd className="font-bold text-2xl text-primary">Patient #{assignedQueue}</dd>
                 </div>
               )}
             </dl>
@@ -580,25 +613,40 @@ function BookPage() {
                     <span>LKR {(selected.fee + 250).toLocaleString()}</span>
                   </div>
                 </div>
+
+                <Separator />
+                <div className="space-y-3">
+                  <p className="text-sm font-medium">Patient Details</p>
+                  <Input placeholder="Patient Name" value={patientDetails.name} onChange={e => setPatientDetails({...patientDetails, name: e.target.value})} className="h-9 text-sm" />
+                  <div className="grid grid-cols-2 gap-3">
+                    <Input placeholder="Mobile Number" value={patientDetails.mobile} onChange={e => setPatientDetails({...patientDetails, mobile: e.target.value})} className="h-9 text-sm" />
+                    <Input placeholder="NIC Number" value={patientDetails.nic} onChange={e => setPatientDetails({...patientDetails, nic: e.target.value})} className="h-9 text-sm" />
+                  </div>
+                  <div className="grid grid-cols-2 gap-3">
+                    <Input placeholder="Email Address" type="email" value={patientDetails.email} onChange={e => setPatientDetails({...patientDetails, email: e.target.value})} className="h-9 text-sm" />
+                    <Input placeholder="Area / City" value={patientDetails.city} onChange={e => setPatientDetails({...patientDetails, city: e.target.value})} className="h-9 text-sm" />
+                  </div>
+                </div>
+
                 <Badge variant="secondary" className="gap-1.5">
                   <CreditCard className="size-3.5" /> Card payment on confirmation
                 </Badge>
                 <Button 
                   className="w-full" 
                   size="lg" 
-                  disabled={!slot || isBooking}
+                  disabled={!slot || !patientDetails.name || !patientDetails.mobile || !patientDetails.nic || isBooking}
                   onClick={async () => {
                     setIsBooking(true);
                     
                     const session = await getSession();
-                    if (!session) {
-                      toast.error("Please log in to book an appointment.");
-                      setIsBooking(false);
-                      return;
-                    }
 
                     const newAppointment = await patientService.bookAppointment({
-                      patient_id: session.id,
+                      patient_id: session ? session.id : null,
+                      patient_name: patientDetails.name,
+                      patient_mobile: patientDetails.mobile,
+                      patient_nic: patientDetails.nic,
+                      patient_email: patientDetails.email,
+                      patient_city: patientDetails.city,
                       doctor_id: selected.id,
                       hospital_id: selectedHospitalInfo?.id || selected.hospital || "",
                       date: selectedDate,

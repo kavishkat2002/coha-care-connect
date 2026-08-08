@@ -4,7 +4,12 @@ import { type Appointment, type ReportItem, type TimelineItem } from "@/data/moc
 // Type for the new Supabase appointment row
 export type DbAppointment = {
   id?: string;
-  patient_id: string;
+  patient_id?: string | null;
+  patient_name?: string;
+  patient_mobile?: string;
+  patient_nic?: string;
+  patient_email?: string;
+  patient_city?: string;
   doctor_id: string;
   hospital_id: string;
   date: string;
