@@ -19,6 +19,36 @@ export const doctorService = {
   },
 
   /**
+   * Fetch doctors by specialty, ordered by rating and distance
+   */
+  async getDoctorsBySpecialty(specialty: string): Promise<Doctor[]> {
+    // Fuzzy matching: e.g. "Dermatologist" -> "Derma"
+    const searchPrefix = specialty ? specialty.slice(0, 5).toLowerCase() : "";
+    const searchTerm = searchPrefix ? `%${searchPrefix}%` : "%";
+    
+    const { data, error } = await supabase
+      .from("doctors_roster")
+      .select("*")
+      .ilike("specialty", searchTerm)
+      .order("rating", { ascending: false })
+      .order("distanceKm", { ascending: true })
+      .limit(3);
+      
+    if (error || !data || data.length === 0) {
+      console.warn("Falling back to mock doctors for specialty:", specialty);
+      const { doctors: mockDoctors } = await import("@/data/mock");
+      const matched = mockDoctors.filter(d => 
+        searchPrefix ? d.specialty.toLowerCase().includes(searchPrefix) : true
+      );
+      return matched
+        .sort((a, b) => b.rating - a.rating || a.distanceKm - b.distanceKm)
+        .slice(0, 3);
+    }
+    
+    return data;
+  },
+
+  /**
    * Save a single doctor to Supabase (insert or update)
    */
   async saveDoctor(doctor: Doctor): Promise<boolean> {

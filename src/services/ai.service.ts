@@ -193,6 +193,7 @@ export type ImageAnalysis = {
   confidence: number;
   explanation: string;
   recommendation: string[];
+  suggestedSpecialty: string;
   boundingBox?: [number, number, number, number]; // [x, y, width, height] as percentages (0.0 to 1.0)
   disclaimer: string;
 };
@@ -228,6 +229,7 @@ Return ONLY a valid JSON object matching this strict structure (and absolutely n
   "confidence": number (0-100),
   "explanation": "A clinical explanation of what you see (e.g. asymmetry, border irregularity, color distribution, etc.)",
   "recommendation": ["action item 1", "action item 2"],
+  "suggestedSpecialty": "The best medical specialty suited to treat this (e.g. Dermatologist, Ophthalmologist, Dentist)",
   "boundingBox": [x, y, width, height] (Array of 4 numbers between 0.0 and 1.0 representing the bounding box of the primary lesion. e.g. [0.4, 0.5, 0.2, 0.2])
 }`
                 },
@@ -286,6 +288,7 @@ Return ONLY a valid JSON object matching this strict structure (and absolutely n
         confidence: 0,
         explanation: `DEBUG ERROR: ${e.message}`,
         recommendation: ["Please report this error to the administrator."],
+        suggestedSpecialty: "General Medicine",
         disclaimer: AI_DISCLAIMER,
       };
     }
@@ -305,6 +308,7 @@ Return ONLY a valid JSON object matching this strict structure (and absolutely n
       "Monitor the area for 14 days and re-capture an image",
       `Book a ${region.toLowerCase()} specialist review if it grows or changes colour`,
     ],
+    suggestedSpecialty: region === "Skin" ? "Dermatologist" : region === "Eye" ? "Ophthalmologist" : "General Medicine",
     disclaimer: AI_DISCLAIMER,
   };
 }

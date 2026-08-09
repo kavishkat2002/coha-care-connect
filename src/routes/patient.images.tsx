@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { Eye, HeartPulse, ScanLine, Sparkles, Upload } from "lucide-react";
 import { useState } from "react";
 
@@ -10,7 +10,10 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { analyseMedicalImage, type ImageAnalysis } from "@/services/ai.service";
+import { doctorService } from "@/services/doctor.service";
+import { type Doctor } from "@/data/mock";
 import { cn } from "@/lib/utils";
+import { MapPin, Star, UserPlus } from "lucide-react";
 
 export const Route = createFileRoute("/patient/images")({
   head: () => ({
@@ -49,6 +52,7 @@ function ImagesPage() {
   const [busy, setBusy] = useState(false);
   const [result, setResult] = useState<ImageAnalysis | null>(null);
   const [imageBase64, setImageBase64] = useState<string | null>(null);
+  const [recommendedDoctors, setRecommendedDoctors] = useState<Doctor[]>([]);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -92,7 +96,17 @@ function ImagesPage() {
   const run = async () => {
     setBusy(true);
     setResult(null);
-    setResult(await analyseMedicalImage(region, imageBase64 || undefined));
+    setRecommendedDoctors([]);
+    try {
+      const res = await analyseMedicalImage(region, imageBase64 || undefined);
+      setResult(res);
+      if (res.suggestedSpecialty) {
+        const doctors = await doctorService.getDoctorsBySpecialty(res.suggestedSpecialty);
+        setRecommendedDoctors(doctors);
+      }
+    } catch (e) {
+      console.error(e);
+    }
     setBusy(false);
   };
 
@@ -218,6 +232,40 @@ function ImagesPage() {
                     ))}
                   </ul>
                 </div>
+                
+                {recommendedDoctors.slice(0, 1).map(doctor => (
+                  <div key={doctor.id} className="rounded-2xl border border-border overflow-hidden">
+                    <div className="bg-muted/40 p-3 px-4 border-b border-border">
+                      <p className="text-sm font-medium">Recommended Specialist Nearby</p>
+                    </div>
+                    <div className="p-4 flex gap-4 items-start">
+                      <div className="size-12 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-lg shrink-0">
+                        {doctor.photoInitials}
+                      </div>
+                      <div className="flex-1 space-y-1">
+                        <p className="font-semibold">{doctor.name}</p>
+                        <p className="text-sm text-muted-foreground">{doctor.specialty}</p>
+                        <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-muted-foreground mt-1">
+                          <span className="flex items-center gap-1">
+                            <MapPin className="size-3" />
+                            {doctor.distanceKm} km away
+                          </span>
+                          <span className="flex items-center gap-1 text-amber-500 font-medium">
+                            <Star className="size-3 fill-current" />
+                            {doctor.rating} ({doctor.reviews})
+                          </span>
+                        </div>
+                      </div>
+                      <Link to="/patient/book" className="shrink-0">
+                        <Button size="sm" variant="outline" className="gap-2 w-full">
+                          <UserPlus className="size-3" />
+                          Book
+                        </Button>
+                      </Link>
+                    </div>
+                  </div>
+                ))}
+                
                 <AiDisclaimer />
               </>
             ) : null}
