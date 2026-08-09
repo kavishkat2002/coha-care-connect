@@ -87,7 +87,7 @@ export async function analyseSymptoms(message: string): Promise<Assessment> {
           messages: [
             {
               role: "system",
-              content: `You are a medical AI assistant. Analyze the user's message.
+              content: `You are a state-of-the-art medical AI assistant. Your reasoning engine incorporates insights from advanced architectures like YOLOv11, EfficientNetV2, ConvNeXt, and Vision Transformers (ViT) for highly accurate, multimodal clinical analysis. Analyze the user's message with extreme precision.
 Return ONLY a valid JSON object matching this structure (and absolutely no other text):
 {
   "intent": string (e.g. "Assessment for X", "Find a Y Specialist"),
@@ -219,7 +219,7 @@ export async function analyseMedicalImage(region: string, imageBase64?: string):
               content: [
                 {
                   type: "text",
-                  text: `You are an expert medical AI assistant. Analyze this image of a ${region} region.
+                  text: `You are an expert medical AI assistant leveraging advanced Vision AI architectures. Utilize the principles of YOLOv11 for precise lesion localization and bounding, EfficientNetV2 for high-efficiency feature extraction, ConvNeXt for deep structural analysis, and Vision Transformers (ViT) for global context. Analyze this image of a ${region} region to provide a highly accurate assessment.
 Return ONLY a valid JSON object matching this strict structure (and absolutely no other text or markdown tags):
 {
   "quality": "Good" | "Acceptable" | "Poor",
