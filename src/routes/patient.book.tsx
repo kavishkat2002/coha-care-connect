@@ -288,7 +288,7 @@ function BookPage() {
             { id: "visa", label: "eNutritionist", image: "/eNutritionist.svg", isNew: true, color: "text-sky-500" },
             { id: "dental", label: "eDental", image: "/images-1.jpg", isNew: true, color: "text-indigo-500" },
             { id: "skin", label: "eSkinCare", image: "/images-2.png", isNew: true, color: "text-amber-500" },
-            { id: "homeo", label: "eHomeopathy", image: "/images-2.jpg", isNew: true, color: "text-green-600" },
+            { id: "homeo", label: "MediFit", image: "/healthcare-trackers-wearables-sensors-abstract-concept-illustration_335657-2181.avif", isNew: true, color: "text-green-600" },
           ] as any[] ).map((item) => (
             <div
               key={item.id}
