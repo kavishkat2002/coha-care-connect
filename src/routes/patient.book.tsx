@@ -30,7 +30,18 @@ import { hospitalService } from "@/services/hospital.service";
 import { patientService } from "@/services/patient.service";
 import { getSession } from "@/services/auth.service";
 
+type BookSearch = {
+  doctorId?: string;
+};
+
 export const Route = createFileRoute("/patient/book")({
+  validateSearch: (search: Record<string, unknown>): BookSearch => {
+    const doctorId = search["doctorId"];
+    if (typeof doctorId === "string" && doctorId) {
+      return { doctorId };
+    }
+    return {};
+  },
   head: () => ({
     meta: [
       { title: "Book an appointment — MedDoc" },
@@ -47,6 +58,7 @@ export const Route = createFileRoute("/patient/book")({
 });
 
 function BookPage() {
+  const { doctorId } = Route.useSearch();
   const navigate = useNavigate();
   const [query, setQuery] = useState("");
   const [showSuggestions, setShowSuggestions] = useState(false);
@@ -90,9 +102,20 @@ function BookPage() {
       if (hosps && hosps.length > 0) {
         setDbHospitals(hosps);
       }
+      
+      // Auto-select doctor if doctorId is provided
+      if (doctorId) {
+        const allDocs = docs && docs.length > 0 ? docs : doctors;
+        const autoSelectedDoctor = allDocs.find(d => d.id === doctorId);
+        if (autoSelectedDoctor) {
+          setSelected(autoSelectedDoctor);
+          setQuery(autoSelectedDoctor.name);
+          setSpecialty(autoSelectedDoctor.specialty);
+        }
+      }
     }
     loadData();
-  }, []);
+  }, [doctorId]);
 
   // Fetch dynamic slots and queues when date or doctor changes
   useEffect(() => {

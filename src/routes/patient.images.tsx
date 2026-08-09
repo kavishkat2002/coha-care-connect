@@ -256,7 +256,7 @@ function ImagesPage() {
                           </span>
                         </div>
                       </div>
-                      <Link to="/patient/book" className="shrink-0">
+                      <Link to="/patient/book" search={{ doctorId: doctor.id }} className="shrink-0">
                         <Button size="sm" variant="outline" className="gap-2 w-full">
                           <UserPlus className="size-3" />
                           Book
