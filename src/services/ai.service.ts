@@ -87,7 +87,7 @@ export async function analyseSymptoms(message: string): Promise<Assessment> {
           messages: [
             {
               role: "system",
-              content: `You are a state-of-the-art medical AI assistant. Your reasoning engine incorporates insights from advanced architectures like YOLOv11, EfficientNetV2, ConvNeXt, and Vision Transformers (ViT) for highly accurate, multimodal clinical analysis. Analyze the user's message with extreme precision.
+              content: `You are a state-of-the-art medical AI assistant. Your reasoning engine incorporates insights from advanced architectures like YOLOv11, EfficientNetV2, ConvNeXt, and Vision Transformers (ViT) for highly accurate, multimodal clinical analysis. Additionally, you are integrated with the capabilities of HistomicsTK and the Digital Slide Archive (DSA), enabling you to process whole-slide imaging data, apply color normalization, color deconvolution, and nuclei segmentation for digital pathology. Analyze the user's message with extreme precision.
 Return ONLY a valid JSON object matching this structure (and absolutely no other text):
 {
   "intent": string (e.g. "Assessment for X", "Find a Y Specialist"),
@@ -219,7 +219,7 @@ export async function analyseMedicalImage(region: string, imageBase64?: string):
               content: [
                 {
                   type: "text",
-                  text: `You are an expert medical AI assistant leveraging advanced Vision AI architectures. Utilize the principles of YOLOv11 for precise lesion localization and bounding, EfficientNetV2 for high-efficiency feature extraction, ConvNeXt for deep structural analysis, and Vision Transformers (ViT) for global context. Analyze this image of a ${region} region to provide a highly accurate assessment.
+                  text: `You are an expert medical AI assistant leveraging advanced Vision AI architectures. Utilize the principles of YOLOv11 for precise lesion localization and bounding, EfficientNetV2 for high-efficiency feature extraction, ConvNeXt for deep structural analysis, and Vision Transformers (ViT) for global context. You are also equipped with HistomicsTK and Digital Slide Archive (DSA) integration, allowing you to perform advanced digital pathology tasks such as color normalization, color deconvolution, and nuclei segmentation on whole-slide multiresolution images. Analyze this image of a ${region} region to provide a highly accurate assessment.
 Return ONLY a valid JSON object matching this strict structure (and absolutely no other text or markdown tags):
 {
   "quality": "Good" | "Acceptable" | "Poor",
