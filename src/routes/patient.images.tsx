@@ -48,11 +48,51 @@ function ImagesPage() {
   const [region, setRegion] = useState("Skin");
   const [busy, setBusy] = useState(false);
   const [result, setResult] = useState<ImageAnalysis | null>(null);
+  const [imageBase64, setImageBase64] = useState<string | null>(null);
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        const img = new Image();
+        img.onload = () => {
+          const canvas = document.createElement("canvas");
+          const max_size = 800;
+          let width = img.width;
+          let height = img.height;
+
+          if (width > height) {
+            if (width > max_size) {
+              height *= max_size / width;
+              width = max_size;
+            }
+          } else {
+            if (height > max_size) {
+              width *= max_size / height;
+              height = max_size;
+            }
+          }
+
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext("2d");
+          ctx?.drawImage(img, 0, 0, width, height);
+          
+          // Compress and convert to base64
+          const dataUrl = canvas.toDataURL("image/jpeg", 0.7);
+          setImageBase64(dataUrl);
+        };
+        img.src = reader.result as string;
+      };
+      reader.readAsDataURL(file);
+    }
+  };
 
   const run = async () => {
     setBusy(true);
     setResult(null);
-    setResult(await analyseMedicalImage(region));
+    setResult(await analyseMedicalImage(region, imageBase64 || undefined));
     setBusy(false);
   };
 
@@ -90,12 +130,36 @@ function ImagesPage() {
               ))}
             </div>
 
-            <label className="flex cursor-pointer flex-col items-center justify-center gap-2 rounded-2xl border border-dashed border-border bg-muted/40 p-10 text-center">
-              <Upload className="size-6 text-muted-foreground" aria-hidden="true" />
-              <span className="text-sm font-medium">Choose an image or drop it here</span>
-              <span className="text-xs text-muted-foreground">JPG or PNG · up to 20 MB</span>
-              <input type="file" accept="image/*" className="sr-only" />
-            </label>
+            {imageBase64 ? (
+              <label className="relative block cursor-pointer rounded-2xl border border-border overflow-hidden group">
+                <img src={imageBase64} alt="Uploaded" className="w-full h-auto object-contain" />
+                {result?.boundingBox && (
+                  <div 
+                    className="absolute rounded-lg border-2 border-orange-500 bg-orange-500/30 shadow-[0_0_25px_rgba(249,115,22,0.8)] backdrop-blur-[2px] transition-all duration-1000 ease-in-out"
+                    style={{
+                      left: `${result.boundingBox[0] * 100}%`,
+                      top: `${result.boundingBox[1] * 100}%`,
+                      width: `${result.boundingBox[2] * 100}%`,
+                      height: `${result.boundingBox[3] * 100}%`,
+                    }}
+                  />
+                )}
+                <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/40 opacity-0 transition-opacity group-hover:opacity-100 text-white">
+                  <Upload className="size-8 mb-2" aria-hidden="true" />
+                  <span className="text-sm font-medium">Change image</span>
+                </div>
+                <input type="file" accept="image/*" className="sr-only" onChange={handleFileChange} />
+              </label>
+            ) : (
+              <label className="flex cursor-pointer flex-col items-center justify-center gap-2 rounded-2xl border border-dashed border-border bg-muted/40 p-10 text-center overflow-hidden relative hover:bg-muted/80 transition-colors">
+                <div className="z-10 flex flex-col items-center gap-2">
+                  <Upload className="size-6 text-muted-foreground" aria-hidden="true" />
+                  <span className="text-sm font-medium">Choose an image or drop it here</span>
+                  <span className="text-xs text-muted-foreground">JPG or PNG · up to 20 MB</span>
+                </div>
+                <input type="file" accept="image/*" className="sr-only" onChange={handleFileChange} />
+              </label>
+            )}
 
             <Button className="w-full" onClick={() => void run()} disabled={busy}>
               {busy ? "Analysing…" : `Run ${region.toLowerCase()} assessment`}
@@ -137,8 +201,9 @@ function ImagesPage() {
                 <div className="rounded-2xl border border-border bg-muted/40 p-4">
                   <p className="text-sm font-medium">Heatmap overlay</p>
                   <p className="mt-1 text-xs text-muted-foreground">
-                    A highlighted overlay is generated on the uploaded image to show the region the
-                    model attended to. Overlay rendering activates with the live model.
+                    {result.boundingBox 
+                      ? "A heatmap overlay was successfully generated over the affected region on your image."
+                      : "A highlighted overlay is generated on the uploaded image to show the region the model attended to."}
                   </p>
                 </div>
                 <div>

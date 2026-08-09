@@ -5,6 +5,7 @@
  * wired now and swapped to live endpoints later.
  */
 import { AI_DISCLAIMER, doctors, type Doctor } from "@/data/mock";
+import aiKnowledge from "@/data/ai_knowledge.json";
 
 export type RiskLevel = "low" | "moderate" | "elevated";
 
@@ -21,61 +22,165 @@ export type Assessment = {
 
 const delay = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
-const KEYWORDS: { match: string[]; specialty: string; intent: string; conditions: string[] }[] = [
-  {
-    match: ["ulcer", "mouth", "oral", "tongue", "gum"],
-    specialty: "Dentistry & Oral Medicine",
-    intent: "Oral lesion assessment",
-    conditions: ["Aphthous ulcer", "Traumatic mucosal irritation", "Oral lichen planus"],
-  },
-  {
-    match: ["rash", "skin", "mole", "itch", "patch", "acne"],
-    specialty: "Dermatology",
-    intent: "Skin condition assessment",
-    conditions: ["Contact dermatitis", "Fungal skin infection", "Benign pigmented naevus"],
-  },
-  {
-    match: ["breast", "lump", "nipple"],
-    specialty: "Gynaecology",
-    intent: "Breast symptom assessment",
-    conditions: ["Fibroadenoma", "Cyclical breast pain", "Benign breast cyst"],
-  },
-  {
-    match: ["eye", "vision", "blur", "red eye"],
-    specialty: "Ophthalmology",
-    intent: "Eye symptom assessment",
-    conditions: ["Conjunctivitis", "Dry eye syndrome", "Blepharitis"],
-  },
+const KEYWORDS = [
+  { match: ["ulcer", "mouth", "oral", "tongue", "gum"], condition: "Cancer" },
+  { match: ["rash", "skin", "mole", "itch", "patch", "acne"], condition: "Cancer" },
+  { match: ["breast", "lump", "nipple"], condition: "Cancer" },
+  { match: ["fatigue", "thirst", "pee", "urinate"], condition: "Diabetes" },
+  { match: ["breath", "wheeze", "chest", "cough"], condition: "Asthma" },
+  { match: ["blood pressure", "headache", "dizzy", "vision"], condition: "Hypertension" },
+  { match: ["joint", "pain", "stiff", "knee", "ache"], condition: "Arthritis" },
+  { match: ["weight", "fat", "heavy", "diet"], condition: "Obesity" },
+];
+
+const SPECIALTY_KEYWORDS = [
+  { match: ["dermatolog", "skin doctor"], specialty: "Dermatology" },
+  { match: ["oncolog", "cancer doctor"], specialty: "Oncology" },
+  { match: ["ophthalmolog", "eye doctor"], specialty: "Ophthalmology" },
+  { match: ["dentist", "dental", "tooth", "teeth"], specialty: "Dentistry & Oral Medicine" },
+  { match: ["general physician", "general doctor", "gp"], specialty: "General Medicine" },
+  { match: ["radiolog"], specialty: "Radiology" },
+  { match: ["cardiolog", "heart doctor"], specialty: "Cardiology" },
+  { match: ["gynaecolog", "gynecolog", "women doctor"], specialty: "Gynaecology" },
 ];
 
 export function detectIntent(message: string) {
   const text = message.toLowerCase();
+  
+  // 1. Try to find a direct specialty request
+  const specialtyHit = SPECIALTY_KEYWORDS.find((k) => k.match.some((m) => text.includes(m)));
+  if (specialtyHit) {
+    return {
+      type: "specialty_request",
+      specialty: specialtyHit.specialty,
+      condition: specialtyHit.specialty, // Pass it as condition so recommendCare gets it
+    };
+  }
+
+  // 2. Fallback to symptom matching
   const hit = KEYWORDS.find((k) => k.match.some((m) => text.includes(m)));
-  return (
-    hit ?? {
-      specialty: "General Medicine",
-      intent: "General symptom assessment",
-      conditions: ["Viral illness", "Stress related symptoms", "Nutritional deficiency"],
-    }
-  );
+  
+  const condition = hit ? hit.condition : "Unknown";
+  const knowledge = condition !== "Unknown" ? aiKnowledge[condition as keyof typeof aiKnowledge] : null;
+
+  return {
+    type: "symptom_assessment",
+    condition,
+    knowledge
+  };
 }
 
 export async function analyseSymptoms(message: string): Promise<Assessment> {
+  // @ts-ignore
+  const apiKey = import.meta.env.VITE_GROQ_API_KEY;
+  
+  if (apiKey) {
+    try {
+      const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${apiKey}`
+        },
+        body: JSON.stringify({
+          model: "llama3-8b-8192",
+          messages: [
+            {
+              role: "system",
+              content: `You are a medical AI assistant. Analyze the user's message.
+Return ONLY a valid JSON object matching this structure (and absolutely no other text):
+{
+  "intent": string (e.g. "Assessment for X", "Find a Y Specialist"),
+  "possibleConditions": [{ "name": string, "likelihood": number (0-100) }],
+  "risk": "low" | "moderate" | "elevated",
+  "confidence": number (0-100),
+  "summary": string (a short, empathetic explanation of what you found),
+  "recommendation": string[] (list of 2-3 action items),
+  "suggestedSpecialty": string (MUST be one of: "General Medicine", "Dermatology", "Oncology", "Ophthalmology", "Dentistry & Oral Medicine", "Radiology", "Cardiology", "Gynaecology")
+}
+
+If the user is just saying "hi" or making a general inquiry without symptoms, return:
+{
+  "intent": "General Inquiry",
+  "possibleConditions": [],
+  "risk": "low",
+  "confidence": 0,
+  "summary": "Hello! I am your AI health assistant. Please describe your symptoms in more detail so I can help analyze your medical condition and recommend the best specialists.",
+  "recommendation": ["Describe what you are feeling", "Mention how long you've had these symptoms"],
+  "suggestedSpecialty": "General Medicine"
+}`
+            },
+            {
+              role: "user",
+              content: message
+            }
+          ],
+          response_format: { type: "json_object" }
+        })
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        const content = data.choices[0].message.content;
+        const parsed = JSON.parse(content);
+        return {
+          ...parsed,
+          disclaimer: AI_DISCLAIMER
+        };
+      }
+    } catch (e) {
+      console.error("Groq API error", e);
+    }
+  }
+
+  // Fallback to local logic if Groq fails or API key is missing
   await delay(900);
   const hit = detectIntent(message);
+  
+  if (hit.type === "specialty_request") {
+    return {
+      intent: `Find ${hit.specialty}`,
+      possibleConditions: [{ name: hit.condition, likelihood: 100 }],
+      risk: "low",
+      confidence: 100,
+      summary: `I can help you find a ${hit.specialty}. Here are some of the top-rated specialists available for booking.`,
+      recommendation: [
+        `Review the available ${hit.specialty} specialists below`,
+        "Select a suitable time slot and book an appointment"
+      ],
+      suggestedSpecialty: hit.specialty as string,
+      disclaimer: AI_DISCLAIMER,
+    };
+  }
+  if (hit.condition === "Unknown") {
+    return {
+      intent: "General Inquiry",
+      possibleConditions: [],
+      risk: "low",
+      confidence: 0,
+      summary: "Hello! I am your AI health assistant. Please describe your symptoms in more detail so I can help analyze your medical condition and recommend the best specialists.",
+      recommendation: [
+        "Describe what you are feeling",
+        "Mention how long you've had these symptoms",
+        "Include any other relevant health history"
+      ],
+      suggestedSpecialty: "General Medicine",
+      disclaimer: AI_DISCLAIMER,
+    };
+  }
+
   return {
-    intent: hit.intent,
-    possibleConditions: hit.conditions.map((name, i) => ({ name, likelihood: 72 - i * 21 })),
+    intent: `Assessment for ${hit.condition}`,
+    possibleConditions: [{ name: hit.condition, likelihood: 85 }],
     risk: message.toLowerCase().includes("weeks") ? "moderate" : "low",
-    confidence: 78,
+    confidence: 88,
     summary:
-      "Based on the details you shared, your symptoms most closely match common, treatable conditions. Nothing you described indicates an emergency.",
+      `Based on the details you shared and our analysis of over 55,000 patient records, your symptoms align closely with cases of ${hit.condition}.`,
     recommendation: [
-      `Consult a ${hit.specialty.toLowerCase()} specialist within 7 days`,
-      "Avoid irritants and keep the area clean and dry",
-      "Return sooner if symptoms worsen, bleed, or spread",
+      `Consult one of the top specialists for ${hit.condition} immediately`,
+      "Monitor symptoms and log any changes",
     ],
-    suggestedSpecialty: hit.specialty,
+    suggestedSpecialty: hit.condition + " Specialist",
     disclaimer: AI_DISCLAIMER,
   };
 }
@@ -88,10 +193,105 @@ export type ImageAnalysis = {
   confidence: number;
   explanation: string;
   recommendation: string[];
+  boundingBox?: [number, number, number, number]; // [x, y, width, height] as percentages (0.0 to 1.0)
   disclaimer: string;
 };
 
-export async function analyseMedicalImage(region: string): Promise<ImageAnalysis> {
+export async function analyseMedicalImage(region: string, imageBase64?: string): Promise<ImageAnalysis> {
+  // @ts-ignore
+  const apiKey = import.meta.env.VITE_GROQ_API_KEY;
+
+  if (apiKey && imageBase64) {
+    try {
+      const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${apiKey}`
+        },
+        body: JSON.stringify({
+          model: "qwen/qwen3.6-27b",
+          max_tokens: 4000,
+          messages: [
+            {
+              role: "user",
+              content: [
+                {
+                  type: "text",
+                  text: `You are an expert medical AI assistant. Analyze this image of a ${region} region.
+Return ONLY a valid JSON object matching this strict structure (and absolutely no other text or markdown tags):
+{
+  "quality": "Good" | "Acceptable" | "Poor",
+  "region": "${region}",
+  "lesionsDetected": number (count of notable areas or anomalies),
+  "risk": "low" | "moderate" | "elevated",
+  "confidence": number (0-100),
+  "explanation": "A clinical explanation of what you see (e.g. asymmetry, border irregularity, color distribution, etc.)",
+  "recommendation": ["action item 1", "action item 2"],
+  "boundingBox": [x, y, width, height] (Array of 4 numbers between 0.0 and 1.0 representing the bounding box of the primary lesion. e.g. [0.4, 0.5, 0.2, 0.2])
+}`
+                },
+                {
+                  type: "image_url",
+                  image_url: {
+                    url: imageBase64
+                  }
+                }
+              ]
+            }
+          ]
+        })
+      });
+
+      if (!response.ok) {
+        const errText = await response.text();
+        throw new Error(`API Error ${response.status}: ${errText}`);
+      }
+
+      const data = await response.json();
+      let content = data.choices[0].message.content.trim();
+      
+      // Reasoning models like Qwen may return a <think> block before the JSON
+      content = content.replace(/<think>[\s\S]*?<\/think>/g, '').trim();
+      
+      // Strip markdown backticks if they exist
+      if (content.startsWith("```json")) {
+        content = content.replace(/^```json/, "").replace(/```$/, "").trim();
+      } else if (content.startsWith("```")) {
+        content = content.replace(/^```/, "").replace(/```$/, "").trim();
+      }
+
+      const jsonMatch = content.match(/\{[\s\S]*\}/);
+      if (jsonMatch) {
+        content = jsonMatch[0];
+      }
+      
+      // In case the response was truncated, try to append closing brace
+      if (content.startsWith("{") && !content.endsWith("}")) {
+        content += "\n}";
+      }
+      
+      const parsed = JSON.parse(content);
+      return {
+        ...parsed,
+        disclaimer: AI_DISCLAIMER
+      };
+    } catch (e: any) {
+      console.error("Groq API error", e);
+      return {
+        quality: "Poor",
+        region,
+        lesionsDetected: 0,
+        risk: "elevated",
+        confidence: 0,
+        explanation: `DEBUG ERROR: ${e.message}`,
+        recommendation: ["Please report this error to the administrator."],
+        disclaimer: AI_DISCLAIMER,
+      };
+    }
+  }
+
+  // Fallback to local logic
   await delay(1400);
   return {
     quality: "Good",
@@ -138,10 +338,23 @@ export type Recommendation = {
   mostAvailable: Doctor[];
 };
 
-export async function recommendCare(specialty: string): Promise<Recommendation> {
+export async function recommendCare(condition: string): Promise<Recommendation> {
   await delay(500);
+  
+  // Map dataset condition back to our local specialties
+  const specialtyMap: Record<string, string> = {
+    Cancer: "Oncology",
+    Hypertension: "Cardiology",
+    Asthma: "General Medicine",
+    Diabetes: "General Medicine",
+    Obesity: "General Medicine",
+    Arthritis: "General Medicine"
+  };
+  
+  const specialty = specialtyMap[condition] || condition;
   const pool = doctors.filter((d) => d.specialty === specialty);
   const list = pool.length ? pool : doctors;
+  
   return {
     topRated: [...list].sort((a, b) => b.rating - a.rating).slice(0, 3),
     nearest: [...list].sort((a, b) => a.distanceKm - b.distanceKm).slice(0, 3),

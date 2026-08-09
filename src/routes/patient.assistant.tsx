@@ -74,15 +74,28 @@ function AssistantPage() {
 
     const result = await analyseSymptoms(text);
     setAssessment(result);
-    setCare(await recommendCare(result.suggestedSpecialty));
-    setMessages((m) => [
-      ...m,
-      {
-        id: `a${Date.now()}`,
-        role: "assistant",
-        text: `${result.summary} I have prepared an assessment on the right, including possible conditions and the specialist I would suggest (${result.suggestedSpecialty}).`,
-      },
-    ]);
+    
+    if (result.possibleConditions.length > 0) {
+      setCare(await recommendCare(result.suggestedSpecialty || ""));
+      setMessages((m) => [
+        ...m,
+        {
+          id: `a${Date.now()}`,
+          role: "assistant",
+          text: `${result.summary} I have prepared an assessment on the right, including possible conditions and the specialist I would suggest (${result.suggestedSpecialty}).`,
+        },
+      ]);
+    } else {
+      setCare(null);
+      setMessages((m) => [
+        ...m,
+        {
+          id: `a${Date.now()}`,
+          role: "assistant",
+          text: result.summary,
+        },
+      ]);
+    }
     setBusy(false);
   };
 

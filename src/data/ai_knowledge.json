@@ -1,0 +1,182 @@
+{
+  "Cancer": {
+    "doctors": [
+      {
+        "name": "Michael Johnson",
+        "count": 6
+      },
+      {
+        "name": "Mark Johnson",
+        "count": 5
+      },
+      {
+        "name": "Christopher Williams",
+        "count": 5
+      }
+    ],
+    "hospitals": [
+      {
+        "name": "PLC Williams",
+        "count": 10
+      },
+      {
+        "name": "Smith Group",
+        "count": 10
+      },
+      {
+        "name": "Johnson Inc",
+        "count": 10
+      }
+    ]
+  },
+  "Obesity": {
+    "doctors": [
+      {
+        "name": "Andrew Williams",
+        "count": 7
+      },
+      {
+        "name": "Robert Brown",
+        "count": 5
+      },
+      {
+        "name": "Robert Smith",
+        "count": 5
+      }
+    ],
+    "hospitals": [
+      {
+        "name": "Ltd Smith",
+        "count": 11
+      },
+      {
+        "name": "Smith Group",
+        "count": 10
+      },
+      {
+        "name": "Johnson Inc",
+        "count": 8
+      }
+    ]
+  },
+  "Diabetes": {
+    "doctors": [
+      {
+        "name": "Christopher Brown",
+        "count": 6
+      },
+      {
+        "name": "Michael Smith",
+        "count": 6
+      },
+      {
+        "name": "David Smith",
+        "count": 5
+      }
+    ],
+    "hospitals": [
+      {
+        "name": "LLC Smith",
+        "count": 11
+      },
+      {
+        "name": "Group Smith",
+        "count": 10
+      },
+      {
+        "name": "PLC Brown",
+        "count": 10
+      }
+    ]
+  },
+  "Asthma": {
+    "doctors": [
+      {
+        "name": "Amanda Williams",
+        "count": 5
+      },
+      {
+        "name": "David Smith",
+        "count": 5
+      },
+      {
+        "name": "Robert Smith",
+        "count": 5
+      }
+    ],
+    "hospitals": [
+      {
+        "name": "Johnson PLC",
+        "count": 9
+      },
+      {
+        "name": "Johnson Inc",
+        "count": 9
+      },
+      {
+        "name": "PLC Williams",
+        "count": 8
+      }
+    ]
+  },
+  "Hypertension": {
+    "doctors": [
+      {
+        "name": "Michael Smith",
+        "count": 7
+      },
+      {
+        "name": "Stephanie Smith",
+        "count": 6
+      },
+      {
+        "name": "James Johnson",
+        "count": 6
+      }
+    ],
+    "hospitals": [
+      {
+        "name": "LLC Smith",
+        "count": 11
+      },
+      {
+        "name": "Johnson Group",
+        "count": 9
+      },
+      {
+        "name": "Inc Williams",
+        "count": 8
+      }
+    ]
+  },
+  "Arthritis": {
+    "doctors": [
+      {
+        "name": "John Smith",
+        "count": 8
+      },
+      {
+        "name": "Daniel Jones",
+        "count": 5
+      },
+      {
+        "name": "Jennifer Johnson",
+        "count": 5
+      }
+    ],
+    "hospitals": [
+      {
+        "name": "Smith PLC",
+        "count": 12
+      },
+      {
+        "name": "Smith LLC",
+        "count": 11
+      },
+      {
+        "name": "Ltd Smith",
+        "count": 9
+      }
+    ]
+  }
+}
