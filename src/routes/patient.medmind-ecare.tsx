@@ -439,8 +439,13 @@ function MedMindECare() {
     return (
       <div className="space-y-6 max-w-4xl mx-auto py-8">
         <div className="text-center space-y-2 mb-10">
-          <h1 className="text-3xl font-bold text-[#0E3860] dark:text-blue-100">MedMind eCare</h1>
-          <p className="text-muted-foreground">Choose a psychological doctor to start your live voice session.</p>
+          <div className="flex items-center justify-center gap-2.5">
+            <h1 className="text-3xl font-bold text-[#0E3860] dark:text-blue-100">MedMind eCare</h1>
+            <Badge variant="outline" className="bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/30 text-xs font-semibold px-2.5 py-0.5 uppercase tracking-wider rounded-md">
+              BETA
+            </Badge>
+          </div>
+          <p className="text-muted-foreground">Choose a character to start your live voice session.</p>
         </div>
         
         <div className="grid md:grid-cols-3 gap-6">
@@ -511,8 +516,8 @@ function MedMindECare() {
                 className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-4">
-                <Button size="sm" className="w-full rounded-full gap-2 bg-amber-500 hover:bg-amber-600 text-slate-950 font-semibold text-xs">
-                  <Sparkles className="size-3.5" /> Talk to Bestie Kavi
+                <Button size="sm" className="w-full rounded-full bg-amber-500 hover:bg-amber-600 text-slate-950 font-semibold text-xs">
+                  Talk to Bestie Kavi
                 </Button>
               </div>
             </div>
@@ -644,7 +649,7 @@ function MedMindECare() {
           <div className="z-10 flex flex-col items-center gap-2 max-w-lg w-full">
             {isSpeaking ? (
               <div className="flex items-center gap-2 bg-emerald-500/10 border border-emerald-500/30 px-5 py-1.5 rounded-full text-emerald-400 font-semibold text-xs md:text-sm animate-pulse">
-                <Volume2 className="size-4 animate-bounce" /> Dr. {selectedDoctor} is speaking...
+                <Volume2 className="size-4 animate-bounce" /> {selectedDoctor === "Kavi" ? "Kavi" : `Dr. ${selectedDoctor}`} is speaking...
               </div>
             ) : isListening ? (
               <div className="flex items-center gap-2 bg-blue-500/10 border border-blue-500/30 px-5 py-1.5 rounded-full text-blue-400 font-semibold text-xs md:text-sm animate-pulse">
@@ -723,8 +728,10 @@ function MedMindECare() {
                 className="w-full h-full object-cover" 
               />
             </div>
-            <h2 className="mt-4 text-xl font-bold">Dr. {selectedDoctor}</h2>
-            <p className="text-xs text-muted-foreground mb-6">Senior Psychological Doctor</p>
+            <h2 className="mt-4 text-xl font-bold">{selectedDoctor === "Kavi" ? "Kavi" : `Dr. ${selectedDoctor}`}</h2>
+            <p className="text-xs text-muted-foreground mb-6">
+              {selectedDoctor === "Kavi" ? "Your Best Friend & Mood Booster" : "Senior Psychological Doctor"}
+            </p>
 
             <Button 
               size="lg"
