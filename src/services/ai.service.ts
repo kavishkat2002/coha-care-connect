@@ -25,6 +25,7 @@ export type Assessment = {
   recommendation: string[];
   suggestedSpecialty: string;
   disclaimer: string;
+  reasoning?: string;
 };
 
 const delay = (ms: number) => new Promise((r) => setTimeout(r, ms));
@@ -45,7 +46,7 @@ const KEYWORDS = [
   // Hypertension / Cardiovascular
   { match: ["blood pressure", "headache", "dizzy", "dizziness", "palpitation", "heart racing", "high bp", "hypertension", "migraine", "fainting", "nosebleed"], condition: "Hypertension", specialty: "Cardiology" },
   // Arthritis / Musculoskeletal
-  { match: ["joint", "stiff", "knee", "ache", "swelling", "inflammation", "arthritis", "back pain", "hip pain", "shoulder pain", "muscle pain", "cramp"], condition: "Arthritis", specialty: "General Medicine" },
+  { match: ["stiff joint", "arthritis", "rheumatism", "osteoarthritis", "rheumatoid", "joint pain"], condition: "Arthritis", specialty: "General Medicine" },
   // Obesity / Metabolic
   { match: ["weight", "fat", "heavy", "diet", "bmi", "overweight", "obese", "belly fat", "appetite"], condition: "Obesity", specialty: "General Medicine" },
   // Eye
@@ -113,37 +114,35 @@ export function detectIntent(message: string) {
 
 // ──────────────────── Groq system prompt ────────────────────
 
-const SYMPTOM_SYSTEM_PROMPT = `You are an advanced AI health assistant built into a medical platform called MedDoc / Coha Care Connect. You provide accurate, empathetic, evidence-based health assessments.
+const SYMPTOM_SYSTEM_PROMPT = `You are an advanced AI health assistant built into a medical platform called MedDoc / Coha Care Connect. You provide accurate, empathetic, evidence-based health assessments by conducting a step-by-step clinical interview.
 
 CLINICAL REASONING PROTOCOL:
-1. Analyze the full conversation history — each follow-up answer from the user should refine your diagnosis.
-2. Consider symptom combinations, duration, severity, and risk factors.
-3. PREVENT PREMATURE DIAGNOSIS: If the user has only provided a brief initial complaint (e.g. "I have a rash" or "My head hurts") without sufficient context (duration, triggers, severity, other symptoms), DO NOT provide a high-confidence diagnosis. Instead:
+1. Conduct an interactive, multi-turn clinical interview. Do NOT provide a final diagnosis or assessment immediately unless the user's initial message is extremely detailed.
+2. PREVENT PREMATURE DIAGNOSIS: If the user has not provided sufficient clinical context (duration, triggers, severity, specific symptom characteristics, relevant medical history, medications, or family history), DO NOT provide a high-confidence diagnosis. Instead:
    - Set confidence LOW (< 30%).
-   - Leave possibleConditions empty OR list broad possibilities with very low likelihoods.
-   - Make the 'plainLanguageSummary' state that you need more information to give an accurate assessment.
-   - Provide 2-3 highly relevant 'followUpQuestions' to gather the missing context.
-4. Only provide a firm, high-confidence diagnosis and actionable recommendations when you have gathered sufficient clinical information from the user through follow-ups.
-5. Assess risk level based on symptom urgency: "low" (routine), "moderate" (see a doctor soon), "elevated" (seek immediate care).
+   - Leave possibleConditions empty.
+   - In the 'plainLanguageSummary', ask EXACTLY ONE highly relevant follow-up question to gather missing context. For example: "How long have you had these symptoms?" or "Have you noticed any changes in your urine?"
+   - DO NOT list a block of questions. Ask one natural question at a time to keep the conversation flowing naturally.
+3. Only when you have collected all necessary information (e.g. fatigue, swelling, urine changes, medical history), generate the final assessment with a firm, high-confidence diagnosis and actionable recommendations.
+4. Assess risk level based on symptom urgency: "low" (routine), "moderate" (see a doctor soon), "elevated" (seek immediate care).
 
 RESPONSE FORMAT:
 Return ONLY a valid JSON object matching this exact structure (no other text, no markdown):
 {
   "intent": string (e.g. "Initial Assessment for Skin Lesion", "Find a Dermatologist"),
-  "possibleConditions": [{ "name": string, "likelihood": number (0-100) }] (up to 3 conditions, ranked by likelihood),
+  "possibleConditions": [{ "name": string, "likelihood": number (0-100) }] (up to 3 conditions; ONLY populate this if you have finished gathering context),
   "risk": "low" | "moderate" | "elevated",
   "confidence": number (0-100, be honest — lower when info is incomplete),
   "summary": string (a detailed, clinical explanation of your assessment or why more info is needed),
-  "plainLanguageSummary": string (a simple, empathetic explanation written for a non-medical person — no jargon. If more info is needed, explicitly state that here.),
-  "followUpQuestions": string[] (1-3 questions to ask the user to improve accuracy; empty array ONLY if you have full clinical context),
-  "recommendation": string[] (2-4 specific next steps, or simply "Please answer the follow-up questions" if more info is needed),
+  "plainLanguageSummary": string (a simple, empathetic explanation written for a non-medical person. If more info is needed, explicitly ask your NEXT follow-up question here.),
+  "followUpQuestions": string[] (Optional: 1-3 suggested quick-reply options the user might click to answer your question),
+  "recommendation": string[] (2-4 specific next steps, or simply "Please answer the follow-up question" if more info is needed),
   "suggestedSpecialty": string (MUST be one of: "General Medicine", "Dermatology", "Oncology", "Ophthalmology", "Dentistry & Oral Medicine", "Radiology", "Cardiology", "Gynaecology")
 }
 
 SPECIAL CASES:
-- If the user greets you without symptoms, return intent "General Inquiry", empty possibleConditions, confidence 0, and ask them to describe their symptoms.
-- If the user asks for a specific type of doctor, return intent "Find [Specialty]" and set suggestedSpecialty accordingly.
-- Always be empathetic and reassuring while being accurate.`;
+- Severe red flags (e.g., no urine, severe chest pain, fainting): Immediately suggest urgent medical care, bypassing the interview.
+- Always be empathetic and reassuring.`;
 
 export async function analyseSymptoms(conversationHistory: ChatMessage[]): Promise<Assessment> {
   // @ts-ignore
@@ -152,6 +151,7 @@ export async function analyseSymptoms(conversationHistory: ChatMessage[]): Promi
   if (apiKey && conversationHistory.length > 0) {
     try {
       const hasImages = conversationHistory.some(m => !!m.imageBase64);
+      const latestText = conversationHistory.length > 0 ? conversationHistory[conversationHistory.length - 1]!.content : "";
       
       const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
         method: "POST",
@@ -160,7 +160,7 @@ export async function analyseSymptoms(conversationHistory: ChatMessage[]): Promi
           "Authorization": `Bearer ${apiKey}`
         },
         body: JSON.stringify({
-          model: hasImages ? "qwen/qwen3.6-27b" : "llama3-8b-8192",
+          model: hasImages ? "llama-3.2-11b-vision-preview" : "llama-3.3-70b-versatile",
           messages: [
             { role: "system", content: SYMPTOM_SYSTEM_PROMPT },
             ...conversationHistory.map((m) => {
@@ -176,7 +176,7 @@ export async function analyseSymptoms(conversationHistory: ChatMessage[]): Promi
               return { role: m.role, content: m.content };
             })
           ],
-          ...(hasImages ? {} : { response_format: { type: "json_object" } })
+          response_format: { type: "json_object" }
         })
       });
 
@@ -184,10 +184,35 @@ export async function analyseSymptoms(conversationHistory: ChatMessage[]): Promi
         const data = await response.json();
         let content = data.choices[0].message.content.trim();
         
-        // Handle reasoning model think tags
-        content = content.replace(/<think>[\s\S]*?<\/think>/g, '').trim();
-        if (content.includes('<think>')) {
-          content = content.replace(/<think>[\s\S]*/g, '').trim();
+        let reasoningText = "";
+        
+        // Extract reasoning model think tags
+        const thinkMatch = content.match(/<think>([\s\S]*?)<\/think>/);
+        if (thinkMatch) {
+          reasoningText = thinkMatch[1].trim();
+          content = content.replace(/<think>[\s\S]*?<\/think>/g, '').trim();
+        } else if (content.includes('<think>')) {
+          const split = content.split('<\/think>');
+          if (split.length > 1) {
+            reasoningText = split[0].replace('<think>', '').trim();
+            content = split[1].trim();
+          } else {
+            reasoningText = content.replace('<think>', '').trim();
+            content = "";
+          }
+        }
+        
+        // Strip markdown backticks if they exist
+        if (content.startsWith("```json")) {
+          content = content.replace(/^```json/, "").replace(/```$/, "").trim();
+        } else if (content.startsWith("```")) {
+          content = content.replace(/^```/, "").replace(/```$/, "").trim();
+        }
+
+        // Extract the JSON object from any surrounding text
+        const jsonMatch = content.match(/\{[\s\S]*\}/);
+        if (jsonMatch) {
+          content = jsonMatch[0];
         }
         
         const parsed = JSON.parse(content);
@@ -202,6 +227,7 @@ export async function analyseSymptoms(conversationHistory: ChatMessage[]): Promi
           recommendation: parsed.recommendation || [],
           suggestedSpecialty: parsed.suggestedSpecialty || "General Medicine",
           disclaimer: AI_DISCLAIMER,
+          reasoning: reasoningText,
         };
       }
     } catch (e) {
@@ -677,4 +703,24 @@ export async function transcribeAudio(audioBlob: Blob): Promise<string> {
   // Fallback if API key is missing or request fails
   await delay(1000);
   return "I have a headache and a slight fever.";
+}
+
+export async function searchMedicalInformation(query: string): Promise<string> {
+  try {
+    const response = await fetch(`https://en.wikipedia.org/w/api.php?action=query&list=search&srsearch=${encodeURIComponent(query)}&utf8=&format=json&origin=*`);
+    if (response.ok) {
+      const data = await response.json();
+      if (data.query && data.query.search && data.query.search.length > 0) {
+        // Map the top 3 search results, strip HTML tags from snippets
+        return data.query.search.slice(0, 3).map((result: any) => {
+          const cleanSnippet = result.snippet.replace(/<[^>]+>/g, '');
+          return `Title: ${result.title}\nSummary: ${cleanSnippet}`;
+        }).join("\n\n");
+      }
+    }
+    return "No internet resources found for this query.";
+  } catch (e) {
+    console.error("Wikipedia Search API error:", e);
+    return "Internet search failed.";
+  }
 }

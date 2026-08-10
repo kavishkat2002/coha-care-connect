@@ -12,6 +12,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input";
 import { Progress } from "@/components/ui/progress";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import { BrainCircuit } from "lucide-react";
 import { analyseSymptoms, recommendCare, transcribeAudio, type Assessment, type Recommendation, type ChatMessage } from "@/services/ai.service";
 import { cn } from "@/lib/utils";
 
@@ -31,7 +33,7 @@ export const Route = createFileRoute("/patient/assistant")({
   component: AssistantPage,
 });
 
-type Message = { id: string; role: "user" | "assistant"; text: string; attachment?: string; imageBase64?: string };
+type Message = { id: string; role: "user" | "assistant"; text: string; attachment?: string; imageBase64?: string; reasoning?: string };
 
 const suggestions = [
   "I have a mouth ulcer that has not healed in three weeks.",
@@ -196,25 +198,19 @@ function AssistantPage() {
 
     if (result.possibleConditions.length > 0) {
       setCare(await recommendCare(result.suggestedSpecialty || ""));
-      setMessages((m) => [
-        ...m,
-        {
-          id: `a${Date.now()}`,
-          role: "assistant",
-          text: `${result.summary} I have prepared an assessment on the right, including possible conditions and the specialist I would suggest (${result.suggestedSpecialty}).`,
-        },
-      ]);
     } else {
       setCare(null);
-      setMessages((m) => [
-        ...m,
-        {
-          id: `a${Date.now()}`,
-          role: "assistant",
-          text: result.summary,
-        },
-      ]);
     }
+
+    setMessages((m) => [
+      ...m,
+      {
+        id: `a${Date.now()}`,
+        role: "assistant",
+        text: result.plainLanguageSummary || result.summary,
+        ...(result.reasoning ? { reasoning: result.reasoning } : {}),
+      },
+    ]);
     setBusy(false);
   };
 
@@ -259,7 +255,20 @@ function AssistantPage() {
                   {m.imageBase64 && (
                     <img src={m.imageBase64} alt="User upload" className="rounded-xl w-48 h-auto object-cover border border-black/10 dark:border-white/10" />
                   )}
-                  {m.text && <span>{m.text}</span>}
+                  {m.reasoning && (
+                    <Accordion type="single" collapsible className="w-full mb-1">
+                      <AccordionItem value="reasoning" className="border-none">
+                        <AccordionTrigger className="py-1 px-3 rounded-lg bg-black/5 dark:bg-white/5 hover:bg-black/10 dark:hover:bg-white/10 text-xs font-medium flex items-center justify-start gap-2 h-8 w-fit [&>svg]:size-3">
+                          <BrainCircuit className="size-3 text-muted-foreground" />
+                          <span className="text-muted-foreground">Thought Process</span>
+                        </AccordionTrigger>
+                        <AccordionContent className="p-3 text-xs text-muted-foreground whitespace-pre-wrap font-mono leading-relaxed bg-black/5 dark:bg-white/5 rounded-lg mt-2">
+                          {m.reasoning}
+                        </AccordionContent>
+                      </AccordionItem>
+                    </Accordion>
+                  )}
+                  {m.text && <span className="leading-relaxed">{m.text}</span>}
                   {(m.attachment && !m.imageBase64) ? (
                     <span className="mt-1 block text-xs opacity-80">Attached: {m.attachment}</span>
                   ) : null}
