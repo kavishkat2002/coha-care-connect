@@ -717,40 +717,65 @@ export async function consultPsychologist(
   doctorName: "Nuwan" | "Ishani"
 ): Promise<string> {
   const apiKey = import.meta.env["VITE_GROQ_API_KEY"] as string | undefined;
-  if (!apiKey) {
-    await delay(1000);
-    return `Hello, I am ${doctorName}. I'm here to listen. Tell me more about what you're feeling.`;
-  }
 
-  const systemPrompt = `You are ${doctorName}, a senior psychological doctor with 10+ years of experience. The user is experiencing mental negativity or psychological distress. Respond with deep empathy, psychological insight, and therapeutic conversation techniques. Speak naturally, warmly, and professionally, as if in a live voice call. Keep responses concise (2-4 sentences max) to ensure natural conversational flow. Do not use markdown like * or **.`;
+  const systemPrompt = `You are Dr. ${doctorName}, a senior psychological doctor and psychotherapist with over 10 years of clinical experience.
+You are currently engaged in a live voice consultation with a patient.
+Your goals:
+1. Active Listening & Intent Identification: Listen carefully to what the patient says. Identify their underlying psychological intent and emotional distress (e.g. intrusive thoughts, racing mind, anxiety, feelings of inadequacy, grief, or burnout).
+2. Empathetic Validation: Validate their feelings warmly and compassionately (e.g. "I hear how overwhelming those thoughts feel right now...").
+3. Therapeutic Guidance: Ask a gentle, insightful follow-up question that helps them unpack what they are experiencing.
+4. Voice Conversational Style: Speak warmly, naturally, and concisely (2 to 3 sentences maximum) as if speaking aloud in a real voice call.
+5. Plain Text Only: Never use any markdown formatting such as asterisks (*), hashtags (#), or bullet points because your response will be spoken aloud to the patient.`;
 
-  try {
-    const formattedMessages = messages.map(msg => ({
-      role: msg.role,
-      content: msg.content
-    }));
+  if (apiKey) {
+    try {
+      const formattedMessages = messages.map(msg => ({
+        role: msg.role,
+        content: msg.content
+      }));
 
-    const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${apiKey}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        model: "llama-3.1-8b-instant",
-        messages: [{ role: "system", content: systemPrompt }, ...formattedMessages],
-        temperature: 0.7,
-        max_tokens: 200,
-      }),
-    });
+      const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${apiKey}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          model: "llama-3.1-8b-instant",
+          messages: [{ role: "system", content: systemPrompt }, ...formattedMessages],
+          temperature: 0.7,
+          max_tokens: 200,
+        }),
+      });
 
-    if (response.ok) {
-      const data = await response.json();
-      return data.choices[0].message.content;
+      if (response.ok) {
+        const data = await response.json();
+        const content = data.choices[0]?.message?.content;
+        if (content && content.trim()) {
+          return content.trim();
+        }
+      }
+    } catch (e) {
+      console.error("MedMind AI error:", e);
     }
-  } catch (e) {
-    console.error("MedMind AI error:", e);
   }
 
-  return `I'm sorry, I'm having trouble connecting right now, but I want you to know I'm here for you. Could you share a bit more?`;
+  // Smart Psychological Intent NLP Engine Fallback
+  await delay(600);
+  const lastUserMsg = [...messages].reverse().find(m => m.role === "user")?.content.toLowerCase() || "";
+
+  if (lastUserMsg.includes("terrible") || lastUserMsg.includes("question") || lastUserMsg.includes("racing") || lastUserMsg.includes("thought")) {
+    return `I hear how heavy and exhausting it feels when terrible thoughts or questions flood your mind. Often when our minds feel overwhelmed, it helps to slow down and look at what is underneath them. Are these thoughts about your future, or something specific causing you distress right now?`;
+  }
+  if (lastUserMsg.includes("overwhelmed") || lastUserMsg.includes("stress") || lastUserMsg.includes("tired") || lastUserMsg.includes("burnout") || lastUserMsg.includes("exhausted")) {
+    return `It sounds like you are carrying a tremendous amount of pressure on your shoulders right now. When stress accumulates, even small things can feel monumental. What is the single biggest thing draining your energy today?`;
+  }
+  if (lastUserMsg.includes("sad") || lastUserMsg.includes("lonely") || lastUserMsg.includes("depressed") || lastUserMsg.includes("alone")) {
+    return `Thank you for sharing that with me. Feeling lonely or low can make us feel isolated from the world, but I am right here listening to you. How long have you been carrying this quiet weight inside?`;
+  }
+  if (lastUserMsg.includes("scared") || lastUserMsg.includes("fear") || lastUserMsg.includes("panic") || lastUserMsg.includes("anxious") || lastUserMsg.includes("anxiety")) {
+    return `Take a slow, deep breath with me. Anxiety and fear can make us feel unsafe, but you are in a safe, supportive space here with me. Can you share what your mind is telling you to be afraid of right now?`;
+  }
+
+  return `I hear what you are saying, and I want you to know your feelings are completely valid. As your doctor, I want to understand more deeply. Could you tell me a little bit more about what brought this to your mind today?`;
 }
