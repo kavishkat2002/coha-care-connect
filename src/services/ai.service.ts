@@ -134,6 +134,7 @@ Return ONLY a valid JSON object matching this exact structure (no other text, no
   "risk": "low" | "moderate" | "elevated",
   "confidence": number (0-100, be honest — lower when info is incomplete),
   "summary": string (a detailed, clinical explanation of your assessment or why more info is needed),
+  "reasoning": string (Optional: if this is a complex general medical question, explain your step-by-step thought process or summarize the internet search results here),
   "plainLanguageSummary": string (a simple, empathetic explanation written for a non-medical person. If more info is needed, explicitly ask your NEXT follow-up question here.),
   "followUpQuestions": string[] (Optional: 1-3 suggested quick-reply options the user might click to answer your question),
   "recommendation": string[] (2-4 specific next steps, or simply "Please answer the follow-up question" if more info is needed),
@@ -153,6 +154,14 @@ export async function analyseSymptoms(conversationHistory: ChatMessage[]): Promi
       const hasImages = conversationHistory.some(m => !!m.imageBase64);
       const latestText = conversationHistory.length > 0 ? conversationHistory[conversationHistory.length - 1]!.content : "";
       
+      // Conditionally search the web only for complex, general medical questions
+      const isGeneralQuestion = /^(what|how|why|can|is it|explain|causes|treatment|symptoms)\b/i.test(latestText.trim()) && !/\b(i|my|me)\b/i.test(latestText);
+      let searchContext = "";
+      if (isGeneralQuestion && latestText.length > 5 && !hasImages) {
+        const searchResults = await searchMedicalInformation(latestText);
+        searchContext = `\n\nINTERNET SEARCH RESULTS FOR CONTEXT:\n${searchResults}\n(Use these results to inform your clinical reasoning. Summarize what you found in your 'reasoning' field.)`;
+      }
+      
       const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
         method: "POST",
         headers: {
@@ -162,7 +171,7 @@ export async function analyseSymptoms(conversationHistory: ChatMessage[]): Promi
         body: JSON.stringify({
           model: hasImages ? "llama-3.2-11b-vision-preview" : "llama-3.3-70b-versatile",
           messages: [
-            { role: "system", content: SYMPTOM_SYSTEM_PROMPT },
+            { role: "system", content: SYMPTOM_SYSTEM_PROMPT + searchContext },
             ...conversationHistory.map((m) => {
               if (m.imageBase64) {
                 return {
@@ -184,31 +193,6 @@ export async function analyseSymptoms(conversationHistory: ChatMessage[]): Promi
         const data = await response.json();
         let content = data.choices[0].message.content.trim();
         
-        let reasoningText = "";
-        
-        // Extract reasoning model think tags
-        const thinkMatch = content.match(/<think>([\s\S]*?)<\/think>/);
-        if (thinkMatch) {
-          reasoningText = thinkMatch[1].trim();
-          content = content.replace(/<think>[\s\S]*?<\/think>/g, '').trim();
-        } else if (content.includes('<think>')) {
-          const split = content.split('<\/think>');
-          if (split.length > 1) {
-            reasoningText = split[0].replace('<think>', '').trim();
-            content = split[1].trim();
-          } else {
-            reasoningText = content.replace('<think>', '').trim();
-            content = "";
-          }
-        }
-        
-        // Strip markdown backticks if they exist
-        if (content.startsWith("```json")) {
-          content = content.replace(/^```json/, "").replace(/```$/, "").trim();
-        } else if (content.startsWith("```")) {
-          content = content.replace(/^```/, "").replace(/```$/, "").trim();
-        }
-
         // Extract the JSON object from any surrounding text
         const jsonMatch = content.match(/\{[\s\S]*\}/);
         if (jsonMatch) {
@@ -227,7 +211,7 @@ export async function analyseSymptoms(conversationHistory: ChatMessage[]): Promi
           recommendation: parsed.recommendation || [],
           suggestedSpecialty: parsed.suggestedSpecialty || "General Medicine",
           disclaimer: AI_DISCLAIMER,
-          reasoning: reasoningText,
+          reasoning: parsed.reasoning || "",
         };
       }
     } catch (e) {
