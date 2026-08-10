@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { Bot, Paperclip, Send, Sparkles, User } from "lucide-react";
+import { Bot, Paperclip, Send, Sparkles, User, Mic } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 
 import { PageHeader } from "@/components/shared/PageHeader";
@@ -12,7 +12,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input";
 import { Progress } from "@/components/ui/progress";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { analyseSymptoms, recommendCare, type Assessment, type Recommendation, type ChatMessage } from "@/services/ai.service";
+import { analyseSymptoms, recommendCare, transcribeAudio, type Assessment, type Recommendation, type ChatMessage } from "@/services/ai.service";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/patient/assistant")({
@@ -55,12 +55,57 @@ function AssistantPage() {
   const [assessment, setAssessment] = useState<Assessment | null>(null);
   const [care, setCare] = useState<Recommendation | null>(null);
   const [dynamicSuggestions, setDynamicSuggestions] = useState<string[]>([]);
+  const [isListening, setIsListening] = useState(false);
+  const [isTranscribing, setIsTranscribing] = useState(false);
   const endRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+  const audioChunksRef = useRef<Blob[]>([]);
 
   useEffect(() => {
     endRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
   }, [messages, busy]);
+
+  const toggleListen = async () => {
+    if (isListening && mediaRecorderRef.current) {
+      mediaRecorderRef.current.stop();
+      setIsListening(false);
+    } else {
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        const mediaRecorder = new MediaRecorder(stream);
+        mediaRecorderRef.current = mediaRecorder;
+        audioChunksRef.current = [];
+
+        mediaRecorder.ondataavailable = (event) => {
+          if (event.data.size > 0) {
+            audioChunksRef.current.push(event.data);
+          }
+        };
+
+        mediaRecorder.onstop = async () => {
+          const audioBlob = new Blob(audioChunksRef.current, { type: "audio/webm" });
+          
+          // Stop all audio tracks to release the microphone
+          stream.getTracks().forEach(track => track.stop());
+          
+          setIsTranscribing(true);
+          const transcript = await transcribeAudio(audioBlob);
+          setIsTranscribing(false);
+          
+          if (transcript) {
+            setInput((prev) => (prev ? prev + " " : "") + transcript.trim());
+          }
+        };
+
+        mediaRecorder.start();
+        setIsListening(true);
+      } catch (err) {
+        console.error("Error accessing microphone:", err);
+        alert("Microphone access is required to use voice input.");
+      }
+    }
+  };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -226,9 +271,9 @@ function AssistantPage() {
                 ) : null}
               </div>
             ))}
-            {busy ? (
+            {busy || isTranscribing ? (
               <p className="text-sm text-muted-foreground" role="status">
-                Analysing your message…
+                {isTranscribing ? "Transcribing your voice…" : "Analysing your message…"}
               </p>
             ) : null}
             <div ref={endRef} />
@@ -300,6 +345,17 @@ function AssistantPage() {
                 onClick={() => fileInputRef.current?.click()}
               >
                 <Paperclip className="size-4" />
+              </Button>
+              <Button
+                type="button"
+                variant={isListening ? "default" : "outline"}
+                size="icon"
+                aria-label={isListening ? "Stop recording" : "Start voice input"}
+                onClick={toggleListen}
+                className={isListening ? "bg-red-500 hover:bg-red-600 animate-pulse text-white" : ""}
+                disabled={isTranscribing}
+              >
+                <Mic className="size-4" />
               </Button>
               <Input
                 value={input}

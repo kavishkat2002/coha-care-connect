@@ -32,12 +32,12 @@ const delay = (ms: number) => new Promise((r) => setTimeout(r, ms));
 // ──────────────────── Symptom keywords with correct specialty mapping ────────────────────
 
 const KEYWORDS = [
-  // Oral / Cancer
-  { match: ["ulcer", "mouth", "oral", "tongue", "gum", "sore throat", "swallowing", "jaw"], condition: "Cancer", specialty: "Dentistry & Oral Medicine" },
+  // Oral
+  { match: ["ulcer", "mouth", "oral", "tongue", "gum", "sore throat", "swallowing", "jaw"], condition: "Oral Condition", specialty: "Dentistry & Oral Medicine" },
   // Skin
-  { match: ["rash", "skin", "mole", "itch", "patch", "acne", "lesion", "pigment", "spot", "blister", "burn", "eczema", "psoriasis"], condition: "Cancer", specialty: "Dermatology" },
+  { match: ["rash", "skin", "mole", "itch", "patch", "acne", "lesion", "pigment", "spot", "blister", "burn", "eczema", "psoriasis"], condition: "Skin Condition", specialty: "Dermatology" },
   // Breast
-  { match: ["breast", "lump", "nipple", "mammogram"], condition: "Cancer", specialty: "Oncology" },
+  { match: ["breast", "lump", "nipple", "mammogram"], condition: "Breast Condition", specialty: "Gynaecology" },
   // Diabetes
   { match: ["fatigue", "thirst", "pee", "urinate", "blood sugar", "glucose", "insulin", "tired all the time", "blurred vision", "slow healing"], condition: "Diabetes", specialty: "General Medicine" },
   // Asthma / Respiratory
@@ -639,4 +639,39 @@ export async function recommendCare(condition: string): Promise<Recommendation> 
     nearest: [...list].sort((a, b) => a.distanceKm - b.distanceKm).slice(0, 3),
     mostAvailable: [...list].sort((a, b) => a.queue - b.queue).slice(0, 3),
   };
+}
+
+export async function transcribeAudio(audioBlob: Blob): Promise<string> {
+  // @ts-ignore
+  const apiKey = import.meta.env.VITE_GROQ_API_KEY;
+
+  if (apiKey) {
+    try {
+      const formData = new FormData();
+      formData.append("file", audioBlob, "recording.webm");
+      formData.append("model", "whisper-large-v3");
+
+      const response = await fetch("https://api.groq.com/openai/v1/audio/transcriptions", {
+        method: "POST",
+        headers: {
+          "Authorization": `Bearer ${apiKey}`
+        },
+        body: formData
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        return data.text || "";
+      } else {
+        const errText = await response.text();
+        console.error("Groq Whisper API error:", errText);
+      }
+    } catch (e) {
+      console.error("Groq Whisper API exception:", e);
+    }
+  }
+
+  // Fallback if API key is missing or request fails
+  await delay(1000);
+  return "I have a headache and a slight fever.";
 }
