@@ -13,7 +13,8 @@ import { Input } from "@/components/ui/input";
 import { Progress } from "@/components/ui/progress";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
-import { BrainCircuit } from "lucide-react";
+
+import { BrainCircuit, RotateCcw } from "lucide-react";
 import { analyseSymptoms, recommendCare, transcribeAudio, type Assessment, type Recommendation, type ChatMessage } from "@/services/ai.service";
 import { cn } from "@/lib/utils";
 
@@ -43,20 +44,33 @@ const suggestions = [
 ];
 
 function AssistantPage() {
-  const [messages, setMessages] = useState<Message[]>([
-    {
-      id: "m0",
-      role: "assistant",
-      text: "Hello. Tell me what you are experiencing in your own words. You can also attach a photo of the affected area, a prescription, or a lab report.",
-    },
-  ]);
+  const [messages, setMessages] = useState<Message[]>(() => {
+    const saved = localStorage.getItem("meddoc_messages");
+    if (saved) return JSON.parse(saved);
+    return [
+      {
+        id: "m0",
+        role: "assistant",
+        text: "Hello, I am MedDoc. Tell me what you are experiencing in your own words. You can also attach a photo of the affected area, a prescription, or a lab report.",
+      },
+    ];
+  });
   const [input, setInput] = useState("");
   const [attachment, setAttachment] = useState<string | null>(null);
   const [imageBase64, setImageBase64] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
-  const [assessment, setAssessment] = useState<Assessment | null>(null);
-  const [care, setCare] = useState<Recommendation | null>(null);
-  const [dynamicSuggestions, setDynamicSuggestions] = useState<string[]>([]);
+  const [assessment, setAssessment] = useState<Assessment | null>(() => {
+    const saved = localStorage.getItem("meddoc_assessment");
+    return saved ? JSON.parse(saved) : null;
+  });
+  const [care, setCare] = useState<Recommendation | null>(() => {
+    const saved = localStorage.getItem("meddoc_care");
+    return saved ? JSON.parse(saved) : null;
+  });
+  const [dynamicSuggestions, setDynamicSuggestions] = useState<string[]>(() => {
+    const saved = localStorage.getItem("meddoc_dynamicSuggestions");
+    return saved ? JSON.parse(saved) : [];
+  });
   const [isListening, setIsListening] = useState(false);
   const [isTranscribing, setIsTranscribing] = useState(false);
   const endRef = useRef<HTMLDivElement>(null);
@@ -65,8 +79,32 @@ function AssistantPage() {
   const audioChunksRef = useRef<Blob[]>([]);
 
   useEffect(() => {
+    localStorage.setItem("meddoc_messages", JSON.stringify(messages));
+    localStorage.setItem("meddoc_assessment", JSON.stringify(assessment));
+    localStorage.setItem("meddoc_care", JSON.stringify(care));
+    localStorage.setItem("meddoc_dynamicSuggestions", JSON.stringify(dynamicSuggestions));
+  }, [messages, assessment, care, dynamicSuggestions]);
+
+  useEffect(() => {
     endRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
   }, [messages, busy]);
+
+  const clearHistory = () => {
+    setMessages([
+      {
+        id: "m0",
+        role: "assistant",
+        text: "Hello, I am MedDoc. Tell me what you are experiencing in your own words. You can also attach a photo of the affected area, a prescription, or a lab report.",
+      },
+    ]);
+    setAssessment(null);
+    setCare(null);
+    setDynamicSuggestions([]);
+    localStorage.removeItem("meddoc_messages");
+    localStorage.removeItem("meddoc_assessment");
+    localStorage.removeItem("meddoc_care");
+    localStorage.removeItem("meddoc_dynamicSuggestions");
+  };
 
   const toggleListen = async () => {
     if (isListening && mediaRecorderRef.current) {
@@ -227,11 +265,16 @@ function AssistantPage() {
 
       <div className="grid gap-6 lg:grid-cols-5">
         <Card className="flex h-[38rem] flex-col shadow-soft lg:col-span-3">
-          <CardHeader className="border-b border-border">
-            <CardTitle className="flex items-center gap-2 text-base">
-              <Bot className="size-4 text-primary" aria-hidden="true" /> Conversation
-            </CardTitle>
-            <CardDescription>Natural language · attachments supported</CardDescription>
+          <CardHeader className="border-b border-border flex-row items-center justify-between py-4">
+            <div>
+              <CardTitle className="flex items-center gap-2 text-base">
+                <Bot className="size-4 text-primary" aria-hidden="true" /> Conversation
+              </CardTitle>
+              <CardDescription>Natural language · attachments supported</CardDescription>
+            </div>
+            <Button variant="ghost" size="sm" onClick={clearHistory} className="text-muted-foreground hover:text-foreground">
+              <RotateCcw className="size-4 mr-2" /> Reset
+            </Button>
           </CardHeader>
 
           <CardContent className="flex-1 space-y-4 overflow-y-auto py-5">
