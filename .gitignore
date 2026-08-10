@@ -7,6 +7,10 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
+# Environment variables — NEVER commit secrets
+.env
+.env.local
+.env.*.local
 node_modules
 dist
 dist-ssr
@@ -30,3 +34,9 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Python virtual environments & artifacts
+venv/
+.venv/
+__pycache__/
+*.pyc
