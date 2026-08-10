@@ -94,73 +94,52 @@ function MedMindECare() {
     setIsListening(false);
   };
 
-  // Robust Native WebSpeech Engine with Chromium Bug 679292 Keep-Alive Fix & Audio Activation Chime
-  const speakText = (text: string, doctorName: DoctorName, onEnded?: () => void) => {
-    if (typeof window === "undefined" || !soundEnabled) {
-      if (onEnded) onEnded();
-      return;
-    }
-
-    const cleanText = text.replace(/[*#_~]/g, '').trim();
-    if (!cleanText) {
-      if (onEnded) onEnded();
-      return;
-    }
-
+  const fallbackBrowserTTS = (cleanText: string, doctorName: "Nuwan" | "Ishani", onEnded?: () => void) => {
     const synth = window.speechSynthesis;
     if (!synth) {
       if (onEnded) onEnded();
       return;
     }
 
-    stopAllAudio();
-
-    // 1. Play soft activation chime via Web Audio API to un-pause browser audio pipeline
-    try {
-      const AudioCtx = window.AudioContext || (window as any).webkitAudioContext;
-      if (AudioCtx) {
-        const ctx = new AudioCtx();
-        if (ctx.state === "suspended") ctx.resume();
-        const osc = ctx.createOscillator();
-        const gain = ctx.createGain();
-        osc.type = "sine";
-        osc.frequency.setValueAtTime(523.25, ctx.currentTime);
-        gain.gain.setValueAtTime(0.05, ctx.currentTime);
-        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.15);
-        osc.connect(gain);
-        gain.connect(ctx.destination);
-        osc.start();
-        osc.stop(ctx.currentTime + 0.15);
-      }
-    } catch (e) {
-      console.warn("AudioContext chime error:", e);
-    }
-
-    // 2. Prepare SpeechSynthesisUtterance
     const utterance = new SpeechSynthesisUtterance(cleanText);
-    utterance.lang = "en-US";
+    utterance.lang = "en-LK"; // Primary target: Sri Lankan English
     utterance.volume = 1.0;
-    utterance.rate = 0.92;
-    utterance.pitch = doctorName === "Nuwan" ? 0.95 : 1.05;
+    
+    // Natural Sri Lankan Doctor Voice Tuning
+    const isMale = doctorName === "Nuwan";
+    utterance.rate = isMale ? 0.91 : 0.95; 
+    utterance.pitch = isMale ? 0.86 : 1.08;
 
     const voices = synth.getVoices();
     if (voices.length > 0) {
-      const isMale = doctorName === "Nuwan";
-      const voice = voices.find((v) =>
-        v.lang.startsWith("en") &&
-        (isMale
-          ? v.name.toLowerCase().includes("male") || v.name.toLowerCase().includes("david") || v.name.toLowerCase().includes("daniel") || v.name.toLowerCase().includes("alex") || v.name.toLowerCase().includes("google us english")
-          : v.name.toLowerCase().includes("female") || v.name.toLowerCase().includes("samantha") || v.name.toLowerCase().includes("victoria") || v.name.toLowerCase().includes("karen") || v.name.toLowerCase().includes("google uk english female"))
-      ) || voices.find((v) => v.lang.startsWith("en"));
+      // 1. Try explicit Sri Lankan English voices (en-LK / Sinhala)
+      let slVoice = voices.find(v => 
+        (v.lang.includes("en-LK") || v.lang.includes("si-LK") || v.name.toLowerCase().includes("sri lanka") || v.name.toLowerCase().includes("sinhala")) &&
+        (isMale ? !v.name.toLowerCase().includes("female") : true)
+      );
 
-      if (voice) utterance.voice = voice;
+      // 2. Fallback to British English (en-GB) which forms the foundation of Sri Lankan English medical pronunciation
+      if (!slVoice) {
+        slVoice = voices.find(v => 
+          v.lang.includes("en-GB") && 
+          (isMale 
+            ? (v.name.toLowerCase().includes("male") || v.name.toLowerCase().includes("george") || v.name.toLowerCase().includes("oliver") || v.name.toLowerCase().includes("arthur") || v.name.toLowerCase().includes("daniel")) 
+            : (v.name.toLowerCase().includes("female") || v.name.toLowerCase().includes("hazel") || v.name.toLowerCase().includes("kate") || v.name.toLowerCase().includes("serena") || v.name.toLowerCase().includes("victoria")))
+        );
+      }
+
+      // 3. Fallback to any neutral English voice
+      if (!slVoice) {
+        slVoice = voices.find(v => v.lang.startsWith("en"));
+      }
+
+      if (slVoice) utterance.voice = slVoice;
     }
 
     let keepAliveInterval: any = null;
 
     utterance.onstart = () => {
       setIsSpeaking(true);
-      // Chromium Bug 679292 Fix: Keep-alive interval so Chrome never freezes speech synthesis silently
       keepAliveInterval = setInterval(() => {
         if (!synth.speaking) {
           clearInterval(keepAliveInterval);
@@ -190,6 +169,66 @@ function MedMindECare() {
       synth.resume();
       synth.speak(utterance);
     }, 50);
+  };
+
+  const speakText = (text: string, doctorName: "Nuwan" | "Ishani", onEnded?: () => void) => {
+    if (!soundEnabled) {
+      if (onEnded) onEnded();
+      return;
+    }
+
+    const cleanText = text.replace(/[*#_`]/g, "").trim();
+    if (!cleanText) {
+      if (onEnded) onEnded();
+      return;
+    }
+
+    stopAllAudio();
+
+    // 1. Play soft activation chime via Web Audio API
+    try {
+      const AudioCtx = window.AudioContext || (window as any).webkitAudioContext;
+      if (AudioCtx) {
+        const ctx = new AudioCtx();
+        if (ctx.state === "suspended") ctx.resume();
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = "sine";
+        osc.frequency.setValueAtTime(523.25, ctx.currentTime);
+        gain.gain.setValueAtTime(0.04, ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.12);
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start();
+        osc.stop(ctx.currentTime + 0.12);
+      }
+    } catch (e) {
+      console.warn("AudioContext chime error:", e);
+    }
+
+    // 2. High Quality Natural Sri Lankan English Audio Stream (en-GB/en-LK)
+    const isMale = doctorName === "Nuwan";
+    const ttsUrl = `https://translate.google.com/translate_tts?ie=UTF-8&q=${encodeURIComponent(cleanText.slice(0, 240))}&tl=en-GB&client=tw-ob`;
+    const audio = new Audio(ttsUrl);
+    audioPlayerRef.current = audio;
+    audio.playbackRate = isMale ? 0.93 : 0.98;
+
+    let fallbackTriggered = false;
+    const triggerFallback = () => {
+      if (fallbackTriggered) return;
+      fallbackTriggered = true;
+      console.log("Fallback to browser Sri Lankan SpeechSynthesis voice...");
+      fallbackBrowserTTS(cleanText, doctorName, onEnded);
+    };
+
+    audio.onplay = () => setIsSpeaking(true);
+    audio.onended = () => {
+      setIsSpeaking(false);
+      if (onEnded) onEnded();
+    };
+    audio.onerror = triggerFallback;
+
+    audio.play().catch(triggerFallback);
   };
 
   // Hands-free continuous listening loop with Voice Activity Detection (VAD) & Silence Detection
