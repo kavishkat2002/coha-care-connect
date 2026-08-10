@@ -196,7 +196,8 @@ function AssistantPage() {
       setDynamicSuggestions([]);
     }
 
-    if (result.possibleConditions.length > 0) {
+    // Show specialists if conditions were identified OR if the interview is complete (no follow-up questions)
+    if (result.possibleConditions.length > 0 || (result.followUpQuestions && result.followUpQuestions.length === 0)) {
       setCare(await recommendCare(result.suggestedSpecialty || ""));
     } else {
       setCare(null);
