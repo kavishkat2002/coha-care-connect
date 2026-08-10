@@ -1,182 +1,92 @@
 {
   "Cancer": {
+    "symptoms": ["unexplained lump or swelling", "persistent sore or ulcer that doesn't heal", "unusual bleeding or discharge", "changes in skin moles", "unexplained weight loss", "persistent fatigue", "difficulty swallowing"],
+    "riskFactors": ["family history of cancer", "smoking or tobacco use", "excessive sun exposure", "age over 50", "obesity", "excessive alcohol consumption"],
+    "whenToSeekHelp": "If you notice any persistent, unexplained changes in your body lasting more than 2-3 weeks, see a doctor promptly.",
     "doctors": [
-      {
-        "name": "Michael Johnson",
-        "count": 6
-      },
-      {
-        "name": "Mark Johnson",
-        "count": 5
-      },
-      {
-        "name": "Christopher Williams",
-        "count": 5
-      }
+      { "name": "Michael Johnson", "count": 6 },
+      { "name": "Mark Johnson", "count": 5 },
+      { "name": "Christopher Williams", "count": 5 }
     ],
     "hospitals": [
-      {
-        "name": "PLC Williams",
-        "count": 10
-      },
-      {
-        "name": "Smith Group",
-        "count": 10
-      },
-      {
-        "name": "Johnson Inc",
-        "count": 10
-      }
+      { "name": "PLC Williams", "count": 10 },
+      { "name": "Smith Group", "count": 10 },
+      { "name": "Johnson Inc", "count": 10 }
     ]
   },
   "Obesity": {
+    "symptoms": ["excess body weight", "difficulty with physical activity", "shortness of breath", "joint pain from excess weight", "fatigue", "sleep apnea", "excessive sweating"],
+    "riskFactors": ["sedentary lifestyle", "high-calorie diet", "genetic predisposition", "certain medications", "hormonal conditions", "stress and emotional eating"],
+    "whenToSeekHelp": "If your weight is affecting your daily activities, breathing, or you have a BMI over 30, consult a healthcare provider.",
     "doctors": [
-      {
-        "name": "Andrew Williams",
-        "count": 7
-      },
-      {
-        "name": "Robert Brown",
-        "count": 5
-      },
-      {
-        "name": "Robert Smith",
-        "count": 5
-      }
+      { "name": "Andrew Williams", "count": 7 },
+      { "name": "Robert Brown", "count": 5 },
+      { "name": "Robert Smith", "count": 5 }
     ],
     "hospitals": [
-      {
-        "name": "Ltd Smith",
-        "count": 11
-      },
-      {
-        "name": "Smith Group",
-        "count": 10
-      },
-      {
-        "name": "Johnson Inc",
-        "count": 8
-      }
+      { "name": "Ltd Smith", "count": 11 },
+      { "name": "Smith Group", "count": 10 },
+      { "name": "Johnson Inc", "count": 8 }
     ]
   },
   "Diabetes": {
+    "symptoms": ["increased thirst", "frequent urination", "unexplained weight loss", "extreme fatigue", "blurred vision", "slow-healing sores", "tingling in hands or feet", "frequent infections"],
+    "riskFactors": ["family history of diabetes", "overweight or obese", "age over 45", "sedentary lifestyle", "history of gestational diabetes", "polycystic ovary syndrome"],
+    "whenToSeekHelp": "If you experience persistent thirst, frequent urination, or unexplained weight changes, get your blood sugar tested as soon as possible.",
     "doctors": [
-      {
-        "name": "Christopher Brown",
-        "count": 6
-      },
-      {
-        "name": "Michael Smith",
-        "count": 6
-      },
-      {
-        "name": "David Smith",
-        "count": 5
-      }
+      { "name": "Christopher Brown", "count": 6 },
+      { "name": "Michael Smith", "count": 6 },
+      { "name": "David Smith", "count": 5 }
     ],
     "hospitals": [
-      {
-        "name": "LLC Smith",
-        "count": 11
-      },
-      {
-        "name": "Group Smith",
-        "count": 10
-      },
-      {
-        "name": "PLC Brown",
-        "count": 10
-      }
+      { "name": "LLC Smith", "count": 11 },
+      { "name": "Group Smith", "count": 10 },
+      { "name": "PLC Brown", "count": 10 }
     ]
   },
   "Asthma": {
+    "symptoms": ["shortness of breath", "wheezing", "chest tightness", "persistent cough (especially at night)", "difficulty breathing during exercise", "rapid breathing", "frequent respiratory infections"],
+    "riskFactors": ["family history of asthma or allergies", "childhood respiratory infections", "exposure to allergens or pollutants", "smoking or secondhand smoke", "obesity", "occupational exposures"],
+    "whenToSeekHelp": "Seek immediate care if you have severe difficulty breathing, cannot speak in full sentences, or your lips/fingernails turn blue.",
     "doctors": [
-      {
-        "name": "Amanda Williams",
-        "count": 5
-      },
-      {
-        "name": "David Smith",
-        "count": 5
-      },
-      {
-        "name": "Robert Smith",
-        "count": 5
-      }
+      { "name": "Amanda Williams", "count": 5 },
+      { "name": "David Smith", "count": 5 },
+      { "name": "Robert Smith", "count": 5 }
     ],
     "hospitals": [
-      {
-        "name": "Johnson PLC",
-        "count": 9
-      },
-      {
-        "name": "Johnson Inc",
-        "count": 9
-      },
-      {
-        "name": "PLC Williams",
-        "count": 8
-      }
+      { "name": "Johnson PLC", "count": 9 },
+      { "name": "Johnson Inc", "count": 9 },
+      { "name": "PLC Williams", "count": 8 }
     ]
   },
   "Hypertension": {
+    "symptoms": ["persistent headaches", "dizziness or lightheadedness", "blurred or double vision", "nosebleeds", "shortness of breath", "chest pain", "heart palpitations", "fatigue"],
+    "riskFactors": ["family history of high blood pressure", "high salt intake", "obesity", "sedentary lifestyle", "excessive alcohol", "stress", "age over 40", "smoking"],
+    "whenToSeekHelp": "If your blood pressure readings are consistently above 140/90, or you experience sudden severe headaches, chest pain, or vision changes, seek immediate medical attention.",
     "doctors": [
-      {
-        "name": "Michael Smith",
-        "count": 7
-      },
-      {
-        "name": "Stephanie Smith",
-        "count": 6
-      },
-      {
-        "name": "James Johnson",
-        "count": 6
-      }
+      { "name": "Michael Smith", "count": 7 },
+      { "name": "Stephanie Smith", "count": 6 },
+      { "name": "James Johnson", "count": 6 }
     ],
     "hospitals": [
-      {
-        "name": "LLC Smith",
-        "count": 11
-      },
-      {
-        "name": "Johnson Group",
-        "count": 9
-      },
-      {
-        "name": "Inc Williams",
-        "count": 8
-      }
+      { "name": "LLC Smith", "count": 11 },
+      { "name": "Johnson Group", "count": 9 },
+      { "name": "Inc Williams", "count": 8 }
     ]
   },
   "Arthritis": {
+    "symptoms": ["joint pain and stiffness", "swelling in joints", "reduced range of motion", "morning stiffness lasting over 30 minutes", "warmth or redness around joints", "fatigue", "joint deformity over time"],
+    "riskFactors": ["age over 50", "family history of arthritis", "previous joint injury", "obesity", "female sex (for rheumatoid arthritis)", "smoking", "occupational joint stress"],
+    "whenToSeekHelp": "If joint pain or stiffness persists for more than a few weeks, significantly limits your daily activities, or is accompanied by swelling and redness, see a doctor.",
     "doctors": [
-      {
-        "name": "John Smith",
-        "count": 8
-      },
-      {
-        "name": "Daniel Jones",
-        "count": 5
-      },
-      {
-        "name": "Jennifer Johnson",
-        "count": 5
-      }
+      { "name": "John Smith", "count": 8 },
+      { "name": "Daniel Jones", "count": 5 },
+      { "name": "Jennifer Johnson", "count": 5 }
     ],
     "hospitals": [
-      {
-        "name": "Smith PLC",
-        "count": 12
-      },
-      {
-        "name": "Smith LLC",
-        "count": 11
-      },
-      {
-        "name": "Ltd Smith",
-        "count": 9
-      }
+      { "name": "Smith PLC", "count": 12 },
+      { "name": "Smith LLC", "count": 11 },
+      { "name": "Ltd Smith", "count": 9 }
     ]
   }
 }

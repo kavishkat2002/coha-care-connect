@@ -1,13 +1,18 @@
 /**
- * Placeholder AI service layer.
- * No models are called here yet — each function returns a deterministic
- * mock payload with the same shape the real API will use, so screens can be
- * wired now and swapped to live endpoints later.
+ * AI service layer — symptom analysis, image analysis, report analysis, and care recommendation.
+ * Uses Groq LLM API with conversation-aware context for accurate assessments.
+ * Falls back to local keyword-based logic when the API is unavailable.
  */
 import { AI_DISCLAIMER, doctors, type Doctor } from "@/data/mock";
 import aiKnowledge from "@/data/ai_knowledge.json";
 
 export type RiskLevel = "low" | "moderate" | "elevated";
+
+export type ChatMessage = {
+  role: "user" | "assistant" | "system";
+  content: string;
+  imageBase64?: string;
+};
 
 export type Assessment = {
   intent: string;
@@ -15,6 +20,8 @@ export type Assessment = {
   risk: RiskLevel;
   confidence: number;
   summary: string;
+  plainLanguageSummary: string;
+  followUpQuestions: string[];
   recommendation: string[];
   suggestedSpecialty: string;
   disclaimer: string;
@@ -22,15 +29,33 @@ export type Assessment = {
 
 const delay = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
+// ──────────────────── Symptom keywords with correct specialty mapping ────────────────────
+
 const KEYWORDS = [
-  { match: ["ulcer", "mouth", "oral", "tongue", "gum"], condition: "Cancer" },
-  { match: ["rash", "skin", "mole", "itch", "patch", "acne"], condition: "Cancer" },
-  { match: ["breast", "lump", "nipple"], condition: "Cancer" },
-  { match: ["fatigue", "thirst", "pee", "urinate"], condition: "Diabetes" },
-  { match: ["breath", "wheeze", "chest", "cough"], condition: "Asthma" },
-  { match: ["blood pressure", "headache", "dizzy", "vision"], condition: "Hypertension" },
-  { match: ["joint", "pain", "stiff", "knee", "ache"], condition: "Arthritis" },
-  { match: ["weight", "fat", "heavy", "diet"], condition: "Obesity" },
+  // Oral / Cancer
+  { match: ["ulcer", "mouth", "oral", "tongue", "gum", "sore throat", "swallowing", "jaw"], condition: "Cancer", specialty: "Dentistry & Oral Medicine" },
+  // Skin
+  { match: ["rash", "skin", "mole", "itch", "patch", "acne", "lesion", "pigment", "spot", "blister", "burn", "eczema", "psoriasis"], condition: "Cancer", specialty: "Dermatology" },
+  // Breast
+  { match: ["breast", "lump", "nipple", "mammogram"], condition: "Cancer", specialty: "Oncology" },
+  // Diabetes
+  { match: ["fatigue", "thirst", "pee", "urinate", "blood sugar", "glucose", "insulin", "tired all the time", "blurred vision", "slow healing"], condition: "Diabetes", specialty: "General Medicine" },
+  // Asthma / Respiratory
+  { match: ["breath", "wheeze", "chest", "cough", "inhaler", "shortness of breath", "chest tightness", "asthma", "bronchitis", "phlegm", "mucus"], condition: "Asthma", specialty: "General Medicine" },
+  // Hypertension / Cardiovascular
+  { match: ["blood pressure", "headache", "dizzy", "dizziness", "palpitation", "heart racing", "high bp", "hypertension", "migraine", "fainting", "nosebleed"], condition: "Hypertension", specialty: "Cardiology" },
+  // Arthritis / Musculoskeletal
+  { match: ["joint", "stiff", "knee", "ache", "swelling", "inflammation", "arthritis", "back pain", "hip pain", "shoulder pain", "muscle pain", "cramp"], condition: "Arthritis", specialty: "General Medicine" },
+  // Obesity / Metabolic
+  { match: ["weight", "fat", "heavy", "diet", "bmi", "overweight", "obese", "belly fat", "appetite"], condition: "Obesity", specialty: "General Medicine" },
+  // Eye
+  { match: ["eye", "blurry", "red eye", "dry eye", "watery eye", "double vision", "floaters", "eye pain", "eye strain"], condition: "Eye Condition", specialty: "Ophthalmology" },
+  // Women's health
+  { match: ["period", "menstrual", "pregnancy", "pregnant", "ovary", "pcos", "menopause", "cramps", "irregular period"], condition: "Gynaecological Condition", specialty: "Gynaecology" },
+  // General pain / fever
+  { match: ["fever", "temperature", "chills", "nausea", "vomiting", "diarrhoea", "diarrhea", "stomach", "abdominal pain", "bloating", "constipation"], condition: "General Illness", specialty: "General Medicine" },
+  // Numbness / Neurological
+  { match: ["numb", "tingling", "numbness", "pins and needles", "weakness", "tremor", "seizure", "memory loss", "confusion"], condition: "Neurological Condition", specialty: "General Medicine" },
 ];
 
 const SPECIALTY_KEYWORDS = [
@@ -44,6 +69,20 @@ const SPECIALTY_KEYWORDS = [
   { match: ["gynaecolog", "gynecolog", "women doctor"], specialty: "Gynaecology" },
 ];
 
+// Map conditions to valid specialties in the doctor pool
+const CONDITION_SPECIALTY_MAP: Record<string, string> = {
+  Cancer: "Oncology",
+  Diabetes: "General Medicine",
+  Asthma: "General Medicine",
+  Hypertension: "Cardiology",
+  Arthritis: "General Medicine",
+  Obesity: "General Medicine",
+  "Eye Condition": "Ophthalmology",
+  "Gynaecological Condition": "Gynaecology",
+  "General Illness": "General Medicine",
+  "Neurological Condition": "General Medicine",
+};
+
 export function detectIntent(message: string) {
   const text = message.toLowerCase();
   
@@ -53,29 +92,64 @@ export function detectIntent(message: string) {
     return {
       type: "specialty_request",
       specialty: specialtyHit.specialty,
-      condition: specialtyHit.specialty, // Pass it as condition so recommendCare gets it
+      condition: specialtyHit.specialty,
     };
   }
 
-  // 2. Fallback to symptom matching
+  // 2. Fallback to symptom matching — check all keywords and pick the best match
   const hit = KEYWORDS.find((k) => k.match.some((m) => text.includes(m)));
   
   const condition = hit ? hit.condition : "Unknown";
+  const specialty = hit ? hit.specialty : "General Medicine";
   const knowledge = condition !== "Unknown" ? aiKnowledge[condition as keyof typeof aiKnowledge] : null;
 
   return {
     type: "symptom_assessment",
     condition,
+    specialty,
     knowledge
   };
 }
 
-export async function analyseSymptoms(message: string): Promise<Assessment> {
+// ──────────────────── Groq system prompt ────────────────────
+
+const SYMPTOM_SYSTEM_PROMPT = `You are an advanced AI health assistant built into a medical platform called MedDoc / Coha Care Connect. You provide accurate, empathetic, evidence-based health assessments.
+
+CLINICAL REASONING PROTOCOL:
+1. Analyze the full conversation history — each follow-up answer from the user should refine your diagnosis.
+2. Consider symptom combinations, duration, severity, and risk factors.
+3. If the user's description is vague or incomplete, include follow-up questions to gather critical missing information (duration, severity, location, triggers, family history, medications, etc.).
+4. Provide multiple possible conditions ranked by likelihood, not just one.
+5. Assess risk level based on symptom urgency: "low" (routine), "moderate" (see a doctor soon), "elevated" (seek immediate care).
+6. Give confidence as a percentage — be honest; lower confidence when information is insufficient.
+
+RESPONSE FORMAT:
+Return ONLY a valid JSON object matching this exact structure (no other text, no markdown):
+{
+  "intent": string (e.g. "Assessment for Skin Lesion", "Find a Dermatologist"),
+  "possibleConditions": [{ "name": string, "likelihood": number (0-100) }] (up to 3 conditions, ranked by likelihood),
+  "risk": "low" | "moderate" | "elevated",
+  "confidence": number (0-100, be honest — lower when info is incomplete),
+  "summary": string (a detailed, clinical explanation of your assessment),
+  "plainLanguageSummary": string (the SAME assessment rewritten in simple everyday language that a non-medical person can easily understand — no jargon, no abbreviations, explain as if talking to a friend),
+  "followUpQuestions": string[] (0-3 questions to ask the user if more information would improve accuracy; empty array if you have enough info),
+  "recommendation": string[] (2-4 specific, actionable next steps),
+  "suggestedSpecialty": string (MUST be one of: "General Medicine", "Dermatology", "Oncology", "Ophthalmology", "Dentistry & Oral Medicine", "Radiology", "Cardiology", "Gynaecology")
+}
+
+SPECIAL CASES:
+- If the user greets you ("hi", "hello", etc.) without symptoms, return intent "General Inquiry", empty possibleConditions, confidence 0, and ask them to describe their symptoms.
+- If the user asks for a specific type of doctor, return intent "Find [Specialty]" and set suggestedSpecialty accordingly.
+- Always be empathetic and reassuring while being accurate.`;
+
+export async function analyseSymptoms(conversationHistory: ChatMessage[]): Promise<Assessment> {
   // @ts-ignore
   const apiKey = import.meta.env.VITE_GROQ_API_KEY;
   
-  if (apiKey) {
+  if (apiKey && conversationHistory.length > 0) {
     try {
+      const hasImages = conversationHistory.some(m => !!m.imageBase64);
+      
       const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
         method: "POST",
         headers: {
@@ -83,49 +157,48 @@ export async function analyseSymptoms(message: string): Promise<Assessment> {
           "Authorization": `Bearer ${apiKey}`
         },
         body: JSON.stringify({
-          model: "llama3-8b-8192",
+          model: hasImages ? "qwen/qwen3.6-27b" : "llama3-8b-8192",
           messages: [
-            {
-              role: "system",
-              content: `You are a state-of-the-art medical AI assistant. Your reasoning engine incorporates insights from advanced architectures like YOLOv11, EfficientNetV2, ConvNeXt, and Vision Transformers (ViT) for highly accurate, multimodal clinical analysis. Additionally, you are integrated with the capabilities of HistomicsTK and the Digital Slide Archive (DSA), enabling you to process whole-slide imaging data, apply color normalization, color deconvolution, and nuclei segmentation for digital pathology. You also leverage MONAI (Medical Open Network for AI), a PyTorch-based framework, to apply state-of-the-art domain-specific network implementations, flexible pre-processing for multi-dimensional healthcare imaging data, and robust medical evaluation metrics. Analyze the user's message with extreme precision.
-Return ONLY a valid JSON object matching this structure (and absolutely no other text):
-{
-  "intent": string (e.g. "Assessment for X", "Find a Y Specialist"),
-  "possibleConditions": [{ "name": string, "likelihood": number (0-100) }],
-  "risk": "low" | "moderate" | "elevated",
-  "confidence": number (0-100),
-  "summary": string (a short, empathetic explanation of what you found),
-  "recommendation": string[] (list of 2-3 action items),
-  "suggestedSpecialty": string (MUST be one of: "General Medicine", "Dermatology", "Oncology", "Ophthalmology", "Dentistry & Oral Medicine", "Radiology", "Cardiology", "Gynaecology")
-}
-
-If the user is just saying "hi" or making a general inquiry without symptoms, return:
-{
-  "intent": "General Inquiry",
-  "possibleConditions": [],
-  "risk": "low",
-  "confidence": 0,
-  "summary": "Hello! I am your AI health assistant. Please describe your symptoms in more detail so I can help analyze your medical condition and recommend the best specialists.",
-  "recommendation": ["Describe what you are feeling", "Mention how long you've had these symptoms"],
-  "suggestedSpecialty": "General Medicine"
-}`
-            },
-            {
-              role: "user",
-              content: message
-            }
+            { role: "system", content: SYMPTOM_SYSTEM_PROMPT },
+            ...conversationHistory.map((m) => {
+              if (m.imageBase64) {
+                return {
+                  role: m.role,
+                  content: [
+                    { type: "text", text: m.content || "Attached image:" },
+                    { type: "image_url", image_url: { url: m.imageBase64 } }
+                  ]
+                };
+              }
+              return { role: m.role, content: m.content };
+            })
           ],
-          response_format: { type: "json_object" }
+          ...(hasImages ? {} : { response_format: { type: "json_object" } })
         })
       });
 
       if (response.ok) {
         const data = await response.json();
-        const content = data.choices[0].message.content;
+        let content = data.choices[0].message.content.trim();
+        
+        // Handle reasoning model think tags
+        content = content.replace(/<think>[\s\S]*?<\/think>/g, '').trim();
+        if (content.includes('<think>')) {
+          content = content.replace(/<think>[\s\S]*/g, '').trim();
+        }
+        
         const parsed = JSON.parse(content);
         return {
-          ...parsed,
-          disclaimer: AI_DISCLAIMER
+          intent: parsed.intent || "General Inquiry",
+          possibleConditions: parsed.possibleConditions || [],
+          risk: parsed.risk || "low",
+          confidence: parsed.confidence || 0,
+          summary: parsed.summary || "",
+          plainLanguageSummary: parsed.plainLanguageSummary || "",
+          followUpQuestions: parsed.followUpQuestions || [],
+          recommendation: parsed.recommendation || [],
+          suggestedSpecialty: parsed.suggestedSpecialty || "General Medicine",
+          disclaimer: AI_DISCLAIMER,
         };
       }
     } catch (e) {
@@ -135,7 +208,10 @@ If the user is just saying "hi" or making a general inquiry without symptoms, re
 
   // Fallback to local logic if Groq fails or API key is missing
   await delay(900);
-  const hit = detectIntent(message);
+  const latestMessage = conversationHistory.length > 0
+    ? conversationHistory[conversationHistory.length - 1]!.content
+    : "";
+  const hit = detectIntent(latestMessage);
   
   if (hit.type === "specialty_request") {
     return {
@@ -144,6 +220,8 @@ If the user is just saying "hi" or making a general inquiry without symptoms, re
       risk: "low",
       confidence: 100,
       summary: `I can help you find a ${hit.specialty}. Here are some of the top-rated specialists available for booking.`,
+      plainLanguageSummary: `You're looking for a ${hit.specialty} — I've found some great doctors nearby that you can book an appointment with right away.`,
+      followUpQuestions: [],
       recommendation: [
         `Review the available ${hit.specialty} specialists below`,
         "Select a suitable time slot and book an appointment"
@@ -152,15 +230,22 @@ If the user is just saying "hi" or making a general inquiry without symptoms, re
       disclaimer: AI_DISCLAIMER,
     };
   }
+
   if (hit.condition === "Unknown") {
     return {
       intent: "General Inquiry",
       possibleConditions: [],
       risk: "low",
       confidence: 0,
-      summary: "Hello! I am your AI health assistant. Please describe your symptoms in more detail so I can help analyze your medical condition and recommend the best specialists.",
+      summary: "I need more information to provide an accurate assessment. Could you describe your symptoms in more detail?",
+      plainLanguageSummary: "I'd love to help, but I need a bit more detail about what you're experiencing. The more you tell me, the better I can help!",
+      followUpQuestions: [
+        "What symptoms are you experiencing?",
+        "How long have you had these symptoms?",
+        "Do you have any existing medical conditions?"
+      ],
       recommendation: [
-        "Describe what you are feeling",
+        "Describe what you are feeling in detail",
         "Mention how long you've had these symptoms",
         "Include any other relevant health history"
       ],
@@ -169,18 +254,32 @@ If the user is just saying "hi" or making a general inquiry without symptoms, re
     };
   }
 
+  // Get knowledge base info for the condition
+  const knowledgeEntry = aiKnowledge[hit.condition as keyof typeof aiKnowledge];
+  const specialty = hit.specialty || CONDITION_SPECIALTY_MAP[hit.condition] || "General Medicine";
+  const hasWeeks = latestMessage.toLowerCase().includes("weeks");
+  const hasSevere = /\b(severe|intense|unbearable|extreme|worst|very bad)\b/i.test(latestMessage);
+
   return {
     intent: `Assessment for ${hit.condition}`,
     possibleConditions: [{ name: hit.condition, likelihood: 85 }],
-    risk: message.toLowerCase().includes("weeks") ? "moderate" : "low",
-    confidence: 88,
+    risk: hasSevere ? "elevated" : hasWeeks ? "moderate" : "low",
+    confidence: 78,
     summary:
-      `Based on the details you shared and our analysis of over 55,000 patient records, your symptoms align closely with cases of ${hit.condition}.`,
-    recommendation: [
-      `Consult one of the top specialists for ${hit.condition} immediately`,
-      "Monitor symptoms and log any changes",
+      `Based on the symptoms you've described, there are indicators that align with ${hit.condition}. ${hasWeeks ? "The duration you mentioned increases the clinical significance." : ""} I recommend consulting a ${specialty} specialist for a thorough evaluation.`,
+    plainLanguageSummary:
+      `From what you've told me, your symptoms could be related to ${hit.condition}. ${hasWeeks ? "Since you've had this for a while, it's important to get it checked." : "It's a good idea to see a doctor to be sure."} I've suggested a ${specialty.toLowerCase()} doctor below who can help.`,
+    followUpQuestions: [
+      "Have you noticed any changes in the severity of your symptoms recently?",
+      "Are you currently taking any medication?",
+      "Does anyone in your family have a similar condition?"
     ],
-    suggestedSpecialty: hit.condition + " Specialist",
+    recommendation: [
+      `Book an appointment with a ${specialty} specialist`,
+      "Keep a log of your symptoms including severity and timing",
+      hasWeeks ? "Seek medical attention within the next few days" : "Monitor symptoms and seek care if they worsen",
+    ],
+    suggestedSpecialty: specialty,
     disclaimer: AI_DISCLAIMER,
   };
 }
@@ -409,7 +508,95 @@ export type ReportAnalysis = {
   disclaimer: string;
 };
 
-export async function analyseMedicalReport(fileName: string): Promise<ReportAnalysis> {
+export async function analyseMedicalReport(fileName: string, base64Data?: string): Promise<ReportAnalysis> {
+  // @ts-ignore
+  const apiKey = import.meta.env.VITE_GROQ_API_KEY;
+
+  if (apiKey && base64Data) {
+    try {
+      const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${apiKey}`
+        },
+        body: JSON.stringify({
+          model: "qwen/qwen3.6-27b",
+          max_tokens: 16384,
+          messages: [
+            {
+              role: "user",
+              content: [
+                {
+                  type: "text",
+                  text: `You are an expert medical AI assistant. Analyze this image of a medical laboratory or clinical report.
+Extract any abnormal values that fall outside the standard reference range.
+Provide a plain language summary of what these abnormal values might indicate.
+Suggest the best medical specialty to consult for these specific results.
+
+Return ONLY a valid JSON object matching this strict structure (and absolutely no other text or markdown tags):
+{
+  "abnormal": [
+    {
+      "label": "Test Name (e.g. Haemoglobin)",
+      "value": "The recorded value (e.g. 10.8 g/dL)",
+      "range": "The reference range (e.g. 12.0 - 15.5)"
+    }
+  ],
+  "plainLanguage": "A simple, easy-to-understand explanation written for someone with no medical background explaining what the abnormal results might mean. Avoid jargon.",
+  "suggestedSpecialty": "The best medical specialty (e.g. Hematology, Endocrinology, General Medicine)"
+}`
+                },
+                {
+                  type: "image_url",
+                  image_url: {
+                    url: base64Data
+                  }
+                }
+              ]
+            }
+          ]
+        })
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        let content = data.choices[0].message.content.trim();
+        
+        // Handle reasoning model think tags
+        content = content.replace(/<think>[\s\S]*?<\/think>/g, '').trim();
+        if (content.includes('<think>')) {
+          content = content.replace(/<think>[\s\S]*/g, '').trim();
+        }
+        
+        // Strip markdown backticks if they exist
+        if (content.startsWith("```json")) {
+          content = content.replace(/^```json/, "").replace(/```$/, "").trim();
+        } else if (content.startsWith("```")) {
+          content = content.replace(/^```/, "").replace(/```$/, "").trim();
+        }
+
+        // Extract the JSON object from any surrounding text
+        const jsonMatch = content.match(/\{[\s\S]*\}/);
+        if (jsonMatch) {
+          content = jsonMatch[0];
+        }
+        
+        const parsed = JSON.parse(content);
+        return {
+          fileName,
+          abnormal: parsed.abnormal || [],
+          plainLanguage: parsed.plainLanguage || "No clear plain language summary could be generated.",
+          suggestedSpecialty: parsed.suggestedSpecialty || "General Medicine",
+          disclaimer: AI_DISCLAIMER
+        };
+      }
+    } catch (e: any) {
+      console.error("Groq API error:", e);
+    }
+  }
+
+  // Fallback to local logic
   await delay(1200);
   return {
     fileName,
