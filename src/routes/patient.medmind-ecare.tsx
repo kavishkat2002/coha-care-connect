@@ -1,11 +1,13 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState, useRef, useEffect } from "react";
-import { Mic, MicOff, Send, ArrowLeft, Volume2, VolumeX, PhoneCall, PhoneOff, Sparkles, MessageSquare } from "lucide-react";
+import { Mic, MicOff, Send, ArrowLeft, Volume2, VolumeX, PhoneCall, PhoneOff, Sparkles, MessageSquare, Stethoscope, Star, Calendar, UserCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { consultPsychologist, transcribeAudio, type ChatMessage } from "@/services/ai.service";
+import { doctorService } from "@/services/doctor.service";
+import { type Doctor } from "@/data/mock";
 
 export const Route = createFileRoute("/patient/medmind-ecare")({
   head: () => ({
@@ -32,6 +34,7 @@ function MedMindECare() {
   const [isTranscribing, setIsTranscribing] = useState(false);
   const [soundEnabled, setSoundEnabled] = useState(true);
   const [speechError, setSpeechError] = useState<string | null>(null);
+  const [recommendedPsychiatrists, setRecommendedPsychiatrists] = useState<Doctor[]>([]);
 
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioChunksRef = useRef<Blob[]>([]);
@@ -52,6 +55,12 @@ function MedMindECare() {
         synthRef.current.onvoiceschanged = () => {};
       }
     }
+
+    // Fetch Recommended Psychiatrists from system database
+    void doctorService.getDoctorsBySpecialty("Psychiatry").then((docs) => {
+      setRecommendedPsychiatrists(docs);
+    });
+
     return () => {
       isLiveActiveRef.current = false;
       stopAllAudio();
@@ -714,35 +723,77 @@ function MedMindECare() {
       ) : (
         /* ── Standard Text & Voice Chat Mode ── */
         <div className="flex flex-col lg:flex-row gap-6 h-full min-h-0">
-          <div className="lg:w-1/3 flex flex-col items-center justify-center p-6 bg-slate-50 dark:bg-slate-900/50 rounded-3xl border border-border">
-            <div className={`relative w-56 h-56 rounded-full overflow-hidden border-4 border-white shadow-xl transition-all duration-500 ${isSpeaking ? "scale-105 ring-4 ring-primary/40 shadow-primary/20" : ""}`}>
-              <img 
-                src={avatarSrc} 
-                alt={selectedDoctor} 
-                onError={(e) => {
-                  const fallback = selectedDoctor === "Nuwan"
-                    ? "https://images.unsplash.com/photo-1622253692010-333f2da6031d?w=600&auto=format&fit=crop&q=80"
-                    : "https://images.unsplash.com/photo-1594824813566-78a050f7514a?w=600&auto=format&fit=crop&q=80";
-                  (e.target as HTMLImageElement).src = fallback;
-                }}
-                className="w-full h-full object-cover" 
-              />
-            </div>
-            <h2 className="mt-4 text-xl font-bold">{selectedDoctor === "Kavi" ? "Kavi" : `Dr. ${selectedDoctor}`}</h2>
-            <p className="text-xs text-muted-foreground mb-6">
-              {selectedDoctor === "Kavi" ? "Your Best Friend & Mood Booster" : "Senior Psychological Doctor"}
-            </p>
+          <div className="lg:w-1/3 flex flex-col items-center justify-between p-6 bg-slate-50 dark:bg-slate-900/50 rounded-3xl border border-border overflow-y-auto">
+            <div className="flex flex-col items-center text-center w-full">
+              <div className={`relative w-44 h-44 rounded-full overflow-hidden border-4 border-white shadow-xl transition-all duration-500 ${isSpeaking ? "scale-105 ring-4 ring-primary/40 shadow-primary/20" : ""}`}>
+                <img 
+                  src={avatarSrc} 
+                  alt={selectedDoctor} 
+                  onError={(e) => {
+                    const fallback = selectedDoctor === "Nuwan"
+                      ? "https://images.unsplash.com/photo-1622253692010-333f2da6031d?w=600&auto=format&fit=crop&q=80"
+                      : "https://images.unsplash.com/photo-1594824813566-78a050f7514a?w=600&auto=format&fit=crop&q=80";
+                    (e.target as HTMLImageElement).src = fallback;
+                  }}
+                  className="w-full h-full object-cover" 
+                />
+              </div>
+              <h2 className="mt-3 text-lg font-bold">{selectedDoctor === "Kavi" ? "Kavi" : `Dr. ${selectedDoctor}`}</h2>
+              <p className="text-xs text-muted-foreground mb-4">
+                {selectedDoctor === "Kavi" ? "Your Best Friend & Mood Booster" : "Senior Psychological Doctor"}
+              </p>
 
-            <Button 
-              size="lg"
-              className="w-full rounded-full gap-2 bg-emerald-600 hover:bg-emerald-700 text-white"
-              onClick={() => {
-                setMode("live-call");
-                toggleLiveCallMode();
-              }}
-            >
-              <PhoneCall className="size-4" /> Switch to Gemini Live Mode
-            </Button>
+              <Button 
+                size="sm"
+                className="w-full rounded-full gap-2 bg-emerald-600 hover:bg-emerald-700 text-white mb-6"
+                onClick={() => {
+                  setMode("live-call");
+                  toggleLiveCallMode();
+                }}
+              >
+                <PhoneCall className="size-4" /> Switch to Gemini Live Mode
+              </Button>
+            </div>
+
+            {/* Recommended System Psychiatrists Section */}
+            <div className="w-full pt-4 border-t border-border space-y-3">
+              <div className="flex items-center justify-between">
+                <span className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
+                  <Stethoscope className="size-3.5 text-primary" /> Top Psychiatrists in System
+                </span>
+                <Badge variant="outline" className="text-[10px] bg-primary/10 text-primary border-primary/20 py-0">
+                  Verified
+                </Badge>
+              </div>
+
+              {recommendedPsychiatrists.slice(0, 2).map((psych) => (
+                <div key={psych.id} className="p-3 bg-background rounded-2xl border border-border shadow-xs hover:border-primary/40 transition-all flex flex-col gap-1.5 text-left">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h4 className="font-semibold text-xs leading-tight text-foreground">{psych.name}</h4>
+                      <p className="text-[10px] text-muted-foreground">{psych.hospital}</p>
+                    </div>
+                    <div className="flex items-center gap-1 text-[10px] font-semibold text-amber-500 bg-amber-500/10 px-1.5 py-0.5 rounded-full">
+                      <Star className="size-3 fill-amber-500" /> {psych.rating}
+                    </div>
+                  </div>
+                  <div className="flex items-center justify-between text-[10px] text-slate-500 dark:text-slate-400">
+                    <span className="flex items-center gap-1"><Calendar className="size-3" /> {psych.nextSlot}</span>
+                    <span className="font-medium text-emerald-600 dark:text-emerald-400">Rs. {psych.fee.toLocaleString()}</span>
+                  </div>
+                  <Button 
+                    size="sm" 
+                    variant="outline" 
+                    className="w-full rounded-xl text-[11px] gap-1 h-7 border-primary/30 hover:bg-primary hover:text-white"
+                    onClick={() => {
+                      window.location.href = `/patient/appointments?doctor=${encodeURIComponent(psych.name)}`;
+                    }}
+                  >
+                    <UserCheck className="size-3" /> Book Channel
+                  </Button>
+                </div>
+              ))}
+            </div>
           </div>
 
           <Card className="flex-1 flex flex-col shadow-soft border-border overflow-hidden">
