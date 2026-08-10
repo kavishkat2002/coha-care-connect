@@ -150,7 +150,7 @@ SPECIAL CASES:
 
 export async function analyseSymptoms(conversationHistory: ChatMessage[]): Promise<Assessment> {
   // @ts-ignore
-  const apiKey = import.meta.env.VITE_GROQ_API_KEY;
+  const apiKey = import.meta.env["VITE_GROQ_API_KEY"];
   
   if (apiKey && conversationHistory.length > 0) {
     try {
@@ -379,7 +379,7 @@ function repairTruncatedJson(json: string): string {
 
 export async function analyseMedicalImage(region: string, imageBase64?: string): Promise<ImageAnalysis> {
   // @ts-ignore
-  const apiKey = import.meta.env.VITE_GROQ_API_KEY;
+  const apiKey = import.meta.env["VITE_GROQ_API_KEY"];
 
   if (apiKey && imageBase64) {
     try {
@@ -526,7 +526,7 @@ export type ReportAnalysis = {
 
 export async function analyseMedicalReport(fileName: string, base64Data?: string): Promise<ReportAnalysis> {
   // @ts-ignore
-  const apiKey = import.meta.env.VITE_GROQ_API_KEY;
+  const apiKey = import.meta.env["VITE_GROQ_API_KEY"];
 
   if (apiKey && base64Data) {
     try {
@@ -659,7 +659,7 @@ export async function recommendCare(condition: string): Promise<Recommendation> 
 
 export async function transcribeAudio(audioBlob: Blob): Promise<string> {
   // @ts-ignore
-  const apiKey = import.meta.env.VITE_GROQ_API_KEY;
+  const apiKey = import.meta.env["VITE_GROQ_API_KEY"];
 
   if (apiKey) {
     try {
@@ -710,4 +710,47 @@ export async function searchMedicalInformation(query: string): Promise<string> {
     console.error("Wikipedia Search API error:", e);
     return "Internet search failed.";
   }
+}
+
+export async function consultPsychologist(
+  messages: ChatMessage[],
+  doctorName: "Nuwan" | "Ishani"
+): Promise<string> {
+  const apiKey = import.meta.env["VITE_GROQ_API_KEY"] as string | undefined;
+  if (!apiKey) {
+    await delay(1000);
+    return `Hello, I am ${doctorName}. I'm here to listen. Tell me more about what you're feeling.`;
+  }
+
+  const systemPrompt = `You are ${doctorName}, a senior psychological doctor with 10+ years of experience. The user is experiencing mental negativity or psychological distress. Respond with deep empathy, psychological insight, and therapeutic conversation techniques. Speak naturally, warmly, and professionally, as if in a live voice call. Keep responses concise (2-4 sentences max) to ensure natural conversational flow. Do not use markdown like * or **.`;
+
+  try {
+    const formattedMessages = messages.map(msg => ({
+      role: msg.role,
+      content: msg.content
+    }));
+
+    const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${apiKey}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        model: "llama-3.1-8b-instant",
+        messages: [{ role: "system", content: systemPrompt }, ...formattedMessages],
+        temperature: 0.7,
+        max_tokens: 200,
+      }),
+    });
+
+    if (response.ok) {
+      const data = await response.json();
+      return data.choices[0].message.content;
+    }
+  } catch (e) {
+    console.error("MedMind AI error:", e);
+  }
+
+  return `I'm sorry, I'm having trouble connecting right now, but I want you to know I'm here for you. Could you share a bit more?`;
 }

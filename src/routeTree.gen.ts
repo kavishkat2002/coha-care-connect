@@ -27,6 +27,7 @@ import { Route as PatientAppointmentsRouteImport } from './routes/patient.appoin
 import { Route as PatientAssistantRouteImport } from './routes/patient.assistant'
 import { Route as PatientBookRouteImport } from './routes/patient.book'
 import { Route as PatientImagesRouteImport } from './routes/patient.images'
+import { Route as PatientMedmindEcareRouteImport } from './routes/patient.medmind-ecare'
 import { Route as PatientProfileRouteImport } from './routes/patient.profile'
 import { Route as PatientReportsRouteImport } from './routes/patient.reports'
 import { Route as PatientTelemedicineRouteImport } from './routes/patient.telemedicine'
@@ -122,6 +123,11 @@ const PatientImagesRoute = PatientImagesRouteImport.update({
   path: '/images',
   getParentRoute: () => PatientRoute,
 } as any)
+const PatientMedmindEcareRoute = PatientMedmindEcareRouteImport.update({
+  id: '/medmind-ecare',
+  path: '/medmind-ecare',
+  getParentRoute: () => PatientRoute,
+} as any)
 const PatientProfileRoute = PatientProfileRouteImport.update({
   id: '/profile',
   path: '/profile',
@@ -158,6 +164,7 @@ export interface FileRoutesByFullPath {
   '/patient/assistant': typeof PatientAssistantRoute
   '/patient/book': typeof PatientBookRoute
   '/patient/images': typeof PatientImagesRoute
+  '/patient/medmind-ecare': typeof PatientMedmindEcareRoute
   '/patient/profile': typeof PatientProfileRoute
   '/patient/reports': typeof PatientReportsRoute
   '/patient/telemedicine': typeof PatientTelemedicineRoute
@@ -178,6 +185,7 @@ export interface FileRoutesByTo {
   '/patient/assistant': typeof PatientAssistantRoute
   '/patient/book': typeof PatientBookRoute
   '/patient/images': typeof PatientImagesRoute
+  '/patient/medmind-ecare': typeof PatientMedmindEcareRoute
   '/patient/profile': typeof PatientProfileRoute
   '/patient/reports': typeof PatientReportsRoute
   '/patient/telemedicine': typeof PatientTelemedicineRoute
@@ -203,6 +211,7 @@ export interface FileRoutesById {
   '/patient/assistant': typeof PatientAssistantRoute
   '/patient/book': typeof PatientBookRoute
   '/patient/images': typeof PatientImagesRoute
+  '/patient/medmind-ecare': typeof PatientMedmindEcareRoute
   '/patient/profile': typeof PatientProfileRoute
   '/patient/reports': typeof PatientReportsRoute
   '/patient/telemedicine': typeof PatientTelemedicineRoute
@@ -229,6 +238,7 @@ export interface FileRouteTypes {
     | '/patient/assistant'
     | '/patient/book'
     | '/patient/images'
+    | '/patient/medmind-ecare'
     | '/patient/profile'
     | '/patient/reports'
     | '/patient/telemedicine'
@@ -249,6 +259,7 @@ export interface FileRouteTypes {
     | '/patient/assistant'
     | '/patient/book'
     | '/patient/images'
+    | '/patient/medmind-ecare'
     | '/patient/profile'
     | '/patient/reports'
     | '/patient/telemedicine'
@@ -273,6 +284,7 @@ export interface FileRouteTypes {
     | '/patient/assistant'
     | '/patient/book'
     | '/patient/images'
+    | '/patient/medmind-ecare'
     | '/patient/profile'
     | '/patient/reports'
     | '/patient/telemedicine'
@@ -420,6 +432,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PatientImagesRouteImport
       parentRoute: typeof PatientRoute
     }
+    '/patient/medmind-ecare': {
+      id: '/patient/medmind-ecare'
+      path: '/medmind-ecare'
+      fullPath: '/patient/medmind-ecare'
+      preLoaderRoute: typeof PatientMedmindEcareRouteImport
+      parentRoute: typeof PatientRoute
+    }
     '/patient/profile': {
       id: '/patient/profile'
       path: '/profile'
@@ -497,6 +516,7 @@ interface PatientRouteChildren {
   PatientAssistantRoute: typeof PatientAssistantRoute
   PatientBookRoute: typeof PatientBookRoute
   PatientImagesRoute: typeof PatientImagesRoute
+  PatientMedmindEcareRoute: typeof PatientMedmindEcareRoute
   PatientProfileRoute: typeof PatientProfileRoute
   PatientReportsRoute: typeof PatientReportsRoute
   PatientTelemedicineRoute: typeof PatientTelemedicineRoute
@@ -509,6 +529,7 @@ const PatientRouteChildren: PatientRouteChildren = {
   PatientAssistantRoute: PatientAssistantRoute,
   PatientBookRoute: PatientBookRoute,
   PatientImagesRoute: PatientImagesRoute,
+  PatientMedmindEcareRoute: PatientMedmindEcareRoute,
   PatientProfileRoute: PatientProfileRoute,
   PatientReportsRoute: PatientReportsRoute,
   PatientTelemedicineRoute: PatientTelemedicineRoute,

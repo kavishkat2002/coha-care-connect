@@ -318,6 +318,8 @@ function BookPage() {
               onClick={() => {
                 if (item.id === "hosp") {
                   navigate({ to: "/patient/telemedicine" });
+                } else if (item.id === "dl") {
+                  navigate({ to: "/patient/medmind-ecare" });
                 }
               }}
               className="relative p-5 bg-card border border-border shadow-soft rounded-2xl flex flex-col items-center justify-center gap-4 hover:shadow-md transition-shadow cursor-pointer"
