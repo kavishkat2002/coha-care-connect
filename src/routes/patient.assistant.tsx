@@ -10,6 +10,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { Progress } from "@/components/ui/progress";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
@@ -77,6 +78,7 @@ function AssistantPage() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioChunksRef = useRef<Blob[]>([]);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   useEffect(() => {
     localStorage.setItem("meddoc_messages", JSON.stringify(messages));
@@ -219,6 +221,7 @@ function AssistantPage() {
     setInput("");
     setAttachment(null);
     setImageBase64(null);
+    if (textareaRef.current) textareaRef.current.style.height = "auto";
     if (fileInputRef.current) fileInputRef.current.value = "";
     setBusy(true);
 
@@ -312,7 +315,7 @@ function AssistantPage() {
                       </AccordionItem>
                     </Accordion>
                   )}
-                  {m.text && <span className="leading-relaxed">{m.text}</span>}
+                  {m.text && <span className="leading-relaxed whitespace-pre-wrap">{m.text}</span>}
                   {(m.attachment && !m.imageBase64) ? (
                     <span className="mt-1 block text-xs opacity-80">Attached: {m.attachment}</span>
                   ) : null}
@@ -410,11 +413,24 @@ function AssistantPage() {
               >
                 <Mic className="size-4" />
               </Button>
-              <Input
+              <Textarea
+                ref={textareaRef}
                 value={input}
-                onChange={(e) => setInput(e.target.value)}
+                onChange={(e) => {
+                  setInput(e.target.value);
+                  e.target.style.height = "auto";
+                  e.target.style.height = `${e.target.scrollHeight}px`;
+                }}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" && !e.shiftKey) {
+                    e.preventDefault();
+                    if (!busy && input.trim()) void send(input);
+                  }
+                }}
                 placeholder="Describe your symptoms…"
                 aria-label="Message"
+                className="min-h-[44px] max-h-[200px] resize-none py-3 overflow-y-auto"
+                rows={1}
               />
               <Button type="submit" size="icon" aria-label="Send message" disabled={busy}>
                 <Send className="size-4" />
