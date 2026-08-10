@@ -243,7 +243,7 @@ export function PortalShell({
                 <Button variant="ghost" size="icon" aria-label="Notifications" className="relative size-10 rounded-full hover:bg-muted">
                   <Bell className="size-5 text-slate-700 dark:text-slate-200" />
                   {unreadCount > 0 && (
-                    <span className="absolute -top-0.5 -right-0.5 size-5 bg-blue-600 text-white font-extrabold text-[10px] rounded-full flex items-center justify-center border-2 border-card shadow-xs animate-pulse">
+                    <span className="absolute -top-0.5 -right-0.5 size-5 bg-blue-600 text-white font-extrabold text-[10px] rounded-full flex items-center justify-center border-2 border-card shadow-xs">
                       {unreadCount}
                     </span>
                   )}
