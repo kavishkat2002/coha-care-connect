@@ -56,6 +56,11 @@ function PatientOverview() {
   const [reports, setReports] = useState<ReportItem[]>([]);
   const [timeline, setTimeline] = useState<TimelineItem[]>([]);
 
+  const [chatMessagesCount, setChatMessagesCount] = useState(0);
+  const [reportsAnalysedCount, setReportsAnalysedCount] = useState(0);
+  const [healthScore, setHealthScore] = useState(82);
+  const [healthHint, setHealthHint] = useState("Stable this month");
+
   useEffect(() => {
     async function loadData() {
       const [appts, profile, rpts, tl] = await Promise.all([
@@ -68,6 +73,39 @@ function PatientOverview() {
       setPatientProfile(profile);
       setReports(rpts);
       setTimeline(tl);
+
+      // --- Real Data Analytics from AI Collaboration ---
+      setReportsAnalysedCount(rpts.length);
+      const savedMessages = localStorage.getItem("meddoc_messages");
+      if (savedMessages) {
+        try {
+          const messages = JSON.parse(savedMessages);
+          setChatMessagesCount(Math.max(0, messages.length - 1)); // exclude initial greeting
+          const attachmentsCount = messages.filter((m: any) => m.attachment || m.imageBase64).length;
+          setReportsAnalysedCount(rpts.length + attachmentsCount);
+        } catch (e) {
+          console.error(e);
+        }
+      }
+
+      const savedAssessment = localStorage.getItem("meddoc_assessment");
+      if (savedAssessment) {
+        try {
+          const assessment = JSON.parse(savedAssessment);
+          if (assessment.risk === "low") {
+            setHealthScore(94);
+            setHealthHint("Looking great based on assessment");
+          } else if (assessment.risk === "moderate") {
+            setHealthScore(72);
+            setHealthHint("Needs attention soon");
+          } else if (assessment.risk === "elevated") {
+            setHealthScore(45);
+            setHealthHint("Action required immediately");
+          }
+        } catch (e) {
+          console.error(e);
+        }
+      }
     }
     loadData();
   }, []);
@@ -86,10 +124,10 @@ function PatientOverview() {
       />
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <StatCard icon={HeartPulse} label="Health score" value="82 / 100" hint="Stable this month" />
+        <StatCard icon={HeartPulse} label="Health score" value={`${healthScore} / 100`} hint={healthHint} />
         <StatCard icon={CalendarCheck} label="Upcoming visits" value={String(upcoming.length)} hint="Next: 12 Aug" />
-        <StatCard icon={FileText} label="Reports analysed" value={String(reports.length)} hint="3 flagged values" />
-        <StatCard icon={Activity} label="Timeline events" value={String(timeline.length)} hint="Last 60 days" />
+        <StatCard icon={FileText} label="Reports analysed" value={String(reportsAnalysedCount)} hint={reportsAnalysedCount > reports.length ? `${reportsAnalysedCount - reports.length} new from chat` : "3 flagged values"} />
+        <StatCard icon={Activity} label="AI Interactions" value={String(chatMessagesCount)} hint="Recent collaborations" />
       </div>
 
       <div className="grid gap-6 lg:grid-cols-3">
