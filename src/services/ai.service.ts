@@ -712,13 +712,25 @@ export async function searchMedicalInformation(query: string): Promise<string> {
   }
 }
 
+export type DoctorName = "Nuwan" | "Ishani" | "Kavi";
+
 export async function consultPsychologist(
   messages: ChatMessage[],
-  doctorName: "Nuwan" | "Ishani"
+  doctorName: DoctorName
 ): Promise<string> {
   const apiKey = import.meta.env["VITE_GROQ_API_KEY"] as string | undefined;
 
-  const systemPrompt = `You are Dr. ${doctorName}, a senior psychological doctor and psychotherapist with over 10 years of clinical experience.
+  const isBestFriend = doctorName === "Kavi";
+
+  const systemPrompt = isBestFriend
+    ? `You are Kavi, the user's caring, loyal best friend and instant Mood Fixer.
+You are currently on a live voice call with your best friend.
+Your goals:
+1. Warm Best-Friend Energy: Talk casually, enthusiastically, affectionately, and supportively like a true best friend.
+2. Instant Mood Lifting: Cheer them up, validate their emotions, offer comforting encouragement, and bring positive energy.
+3. Voice Style: Keep responses concise (2 to 3 sentences max), natural, warm, and friendly as if speaking to your closest friend.
+4. Plain Text Only: Never use any markdown formatting (*, #) because your response will be spoken aloud.`
+    : `You are Dr. ${doctorName}, a senior psychological doctor and psychotherapist with over 10 years of clinical experience.
 You are currently engaged in a live voice consultation with a patient.
 Your goals:
 1. Active Listening & Intent Identification: Listen carefully to what the patient says. Identify their underlying psychological intent and emotional distress (e.g. intrusive thoughts, racing mind, anxiety, feelings of inadequacy, grief, or burnout).
@@ -763,6 +775,10 @@ Your goals:
   // Smart Psychological Intent NLP Engine Fallback
   await delay(600);
   const lastUserMsg = [...messages].reverse().find(m => m.role === "user")?.content.toLowerCase() || "";
+
+  if (isBestFriend) {
+    return `Hey bestie! I am right here with you, and no matter what kind of day you are having, we are going to fix your mood together. Tell me what is on your mind or what happened today!`;
+  }
 
   if (lastUserMsg.includes("terrible") || lastUserMsg.includes("question") || lastUserMsg.includes("racing") || lastUserMsg.includes("thought")) {
     return `I hear how heavy and exhausting it feels when terrible thoughts or questions flood your mind. Often when our minds feel overwhelmed, it helps to slow down and look at what is underneath them. Are these thoughts about your future, or something specific causing you distress right now?`;

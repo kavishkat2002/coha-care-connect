@@ -17,7 +17,7 @@ export const Route = createFileRoute("/patient/medmind-ecare")({
   component: MedMindECare,
 });
 
-type DoctorName = "Nuwan" | "Ishani";
+type DoctorName = "Nuwan" | "Ishani" | "Kavi";
 type SessionMode = "live-call" | "chat";
 
 function MedMindECare() {
@@ -94,7 +94,7 @@ function MedMindECare() {
     setIsListening(false);
   };
 
-  const fallbackBrowserTTS = (cleanText: string, doctorName: "Nuwan" | "Ishani", onEnded?: () => void) => {
+  const fallbackBrowserTTS = (cleanText: string, doctorName: DoctorName, onEnded?: () => void) => {
     const synth = window.speechSynthesis;
     if (!synth) {
       if (onEnded) onEnded();
@@ -102,35 +102,46 @@ function MedMindECare() {
     }
 
     const utterance = new SpeechSynthesisUtterance(cleanText);
-    utterance.lang = "en-LK"; // Primary target: Sri Lankan English
+    utterance.lang = "en-LK";
     utterance.volume = 1.0;
     
-    // Natural Sri Lankan Doctor Voice Tuning
+    // Natural Doctor / Best Friend Vocal Tuning
     const isMale = doctorName === "Nuwan";
-    utterance.rate = isMale ? 0.91 : 0.95; 
-    utterance.pitch = isMale ? 0.86 : 1.08;
+    const isBestFriend = doctorName === "Kavi";
+    utterance.rate = isMale ? 0.90 : isBestFriend ? 0.96 : 0.94; 
+    utterance.pitch = isMale ? 0.88 : isBestFriend ? 1.04 : 1.05;
 
     const voices = synth.getVoices();
     if (voices.length > 0) {
-      // 1. Try explicit Sri Lankan English voices (en-LK / Sinhala)
-      let slVoice = voices.find(v => 
+      // Prioritize High-Quality Neural / Natural voices
+      const sortedVoices = [...voices].sort((a, b) => {
+        const aScore = (a.name.includes("Natural") || a.name.includes("Neural") || a.name.includes("Online")) ? 2 : 1;
+        const bScore = (b.name.includes("Natural") || b.name.includes("Neural") || b.name.includes("Online")) ? 2 : 1;
+        return bScore - aScore;
+      });
+
+      // 1. Try explicit Sri Lankan English voices
+      let slVoice = sortedVoices.find(v => 
         (v.lang.includes("en-LK") || v.lang.includes("si-LK") || v.name.toLowerCase().includes("sri lanka") || v.name.toLowerCase().includes("sinhala")) &&
         (isMale ? !v.name.toLowerCase().includes("female") : true)
       );
 
-      // 2. Fallback to British English (en-GB) which forms the foundation of Sri Lankan English medical pronunciation
+      // 2. Fallback to British English (en-GB) Neural voices
       if (!slVoice) {
-        slVoice = voices.find(v => 
+        slVoice = sortedVoices.find(v => 
           v.lang.includes("en-GB") && 
           (isMale 
-            ? (v.name.toLowerCase().includes("male") || v.name.toLowerCase().includes("george") || v.name.toLowerCase().includes("oliver") || v.name.toLowerCase().includes("arthur") || v.name.toLowerCase().includes("daniel")) 
-            : (v.name.toLowerCase().includes("female") || v.name.toLowerCase().includes("hazel") || v.name.toLowerCase().includes("kate") || v.name.toLowerCase().includes("serena") || v.name.toLowerCase().includes("victoria")))
+            ? (v.name.toLowerCase().includes("male") || v.name.toLowerCase().includes("george") || v.name.toLowerCase().includes("oliver") || v.name.toLowerCase().includes("daniel") || v.name.toLowerCase().includes("uk english male")) 
+            : (v.name.toLowerCase().includes("female") || v.name.toLowerCase().includes("serena") || v.name.toLowerCase().includes("kate") || v.name.toLowerCase().includes("victoria") || v.name.toLowerCase().includes("uk english female")))
         );
       }
 
-      // 3. Fallback to any neutral English voice
+      // 3. Fallback to any natural English voice matching gender
       if (!slVoice) {
-        slVoice = voices.find(v => v.lang.startsWith("en"));
+        slVoice = sortedVoices.find(v => 
+          v.lang.startsWith("en") && 
+          (isMale ? !v.name.toLowerCase().includes("female") : true)
+        );
       }
 
       if (slVoice) utterance.voice = slVoice;
@@ -171,13 +182,20 @@ function MedMindECare() {
     }, 50);
   };
 
-  const speakText = (text: string, doctorName: "Nuwan" | "Ishani", onEnded?: () => void) => {
+  const speakText = (text: string, doctorName: DoctorName, onEnded?: () => void) => {
     if (!soundEnabled) {
       if (onEnded) onEnded();
       return;
     }
 
-    const cleanText = text.replace(/[*#_`]/g, "").trim();
+    // Format text with natural human breath pauses & clear pronunciation
+    let cleanText = text
+      .replace(/[*#_`]/g, "")
+      .replace(/\bDr\./gi, "Doctor")
+      .replace(/\bvs\./gi, "versus")
+      .replace(/\s+/g, " ")
+      .trim();
+
     if (!cleanText) {
       if (onEnded) onEnded();
       return;
@@ -206,12 +224,12 @@ function MedMindECare() {
       console.warn("AudioContext chime error:", e);
     }
 
-    // 2. High Quality Natural Sri Lankan English Audio Stream (en-GB/en-LK)
+    // 2. High Quality Natural Voice Stream
     const isMale = doctorName === "Nuwan";
     const ttsUrl = `https://translate.google.com/translate_tts?ie=UTF-8&q=${encodeURIComponent(cleanText.slice(0, 240))}&tl=en-GB&client=tw-ob`;
     const audio = new Audio(ttsUrl);
     audioPlayerRef.current = audio;
-    audio.playbackRate = isMale ? 0.93 : 0.98;
+    audio.playbackRate = isMale ? 0.90 : 0.94;
 
     let fallbackTriggered = false;
     const triggerFallback = () => {
@@ -390,7 +408,9 @@ function MedMindECare() {
 
     const greeting = docName === "Nuwan" 
       ? "Hello, I am Dr. Nuwan. I'm here as your psychological doctor. Tell me what's on your mind today."
-      : "Hello, I am Dr. Ishani. I'm listening closely. How are you feeling today?";
+      : docName === "Ishani"
+      ? "Hello, I am Dr. Ishani. I'm listening closely. How are you feeling today?"
+      : "Hey bestie! I'm Kavi, your best friend and mood fixer. I'm right here with you—tell me what's going on or how you're feeling today!";
     
     setMessages([{ role: "assistant", content: greeting }]);
 
@@ -419,20 +439,17 @@ function MedMindECare() {
     return (
       <div className="space-y-6 max-w-4xl mx-auto py-8">
         <div className="text-center space-y-2 mb-10">
-          <Badge className="bg-primary/10 text-primary border-primary/20 hover:bg-primary/20 px-3 py-1 mb-2">
-            <Sparkles className="size-3.5 mr-1.5 animate-pulse" /> Live Voice Conversation Mode
-          </Badge>
           <h1 className="text-3xl font-bold text-[#0E3860] dark:text-blue-100">MedMind eCare</h1>
           <p className="text-muted-foreground">Choose a psychological doctor to start your live voice session.</p>
         </div>
         
-        <div className="grid md:grid-cols-2 gap-8">
+        <div className="grid md:grid-cols-3 gap-6">
           {/* Dr. Nuwan Card */}
           <Card 
             className="cursor-pointer hover:border-primary/50 hover:shadow-2xl transition-all duration-300 group overflow-hidden border-2"
             onClick={() => startDoctorSession("Nuwan")}
           >
-            <div className="h-72 bg-slate-100 dark:bg-slate-800 relative overflow-hidden flex items-center justify-center">
+            <div className="h-64 bg-slate-100 dark:bg-slate-800 relative overflow-hidden flex items-center justify-center">
               <img 
                 src="/@fs/Users/kavishkathilakarathna/.gemini/antigravity-ide/brain/13521ad2-0754-4111-8661-64f2911f3a1b/nuwan_avatar_1786363440934.png" 
                 alt="Dr. Nuwan" 
@@ -441,15 +458,15 @@ function MedMindECare() {
                 }}
                 className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-6">
-                <Button className="w-full rounded-full gap-2">
-                  <PhoneCall className="size-4" /> Start Live Call with Dr. Nuwan
+              <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-4">
+                <Button size="sm" className="w-full rounded-full gap-2 text-xs">
+                  <PhoneCall className="size-3.5" /> Call Dr. Nuwan
                 </Button>
               </div>
             </div>
-            <CardHeader className="text-center">
-              <CardTitle className="text-xl">Dr. Nuwan</CardTitle>
-              <p className="text-sm text-muted-foreground">Senior Psychological Doctor (10+ Years)</p>
+            <CardHeader className="text-center p-4">
+              <CardTitle className="text-lg">Dr. Nuwan</CardTitle>
+              <p className="text-xs text-muted-foreground">Senior Psychological Doctor</p>
             </CardHeader>
           </Card>
 
@@ -458,7 +475,7 @@ function MedMindECare() {
             className="cursor-pointer hover:border-primary/50 hover:shadow-2xl transition-all duration-300 group overflow-hidden border-2"
             onClick={() => startDoctorSession("Ishani")}
           >
-            <div className="h-72 bg-slate-100 dark:bg-slate-800 relative overflow-hidden flex items-center justify-center">
+            <div className="h-64 bg-slate-100 dark:bg-slate-800 relative overflow-hidden flex items-center justify-center">
               <img 
                 src="/@fs/Users/kavishkathilakarathna/.gemini/antigravity-ide/brain/13521ad2-0754-4111-8661-64f2911f3a1b/ishani_avatar_1786363461362.png" 
                 alt="Dr. Ishani" 
@@ -467,15 +484,44 @@ function MedMindECare() {
                 }}
                 className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-6">
-                <Button className="w-full rounded-full gap-2 bg-emerald-600 hover:bg-emerald-700">
-                  <PhoneCall className="size-4" /> Start Live Call with Dr. Ishani
+              <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-4">
+                <Button size="sm" className="w-full rounded-full gap-2 bg-emerald-600 hover:bg-emerald-700 text-xs">
+                  <PhoneCall className="size-3.5" /> Call Dr. Ishani
                 </Button>
               </div>
             </div>
-            <CardHeader className="text-center">
-              <CardTitle className="text-xl">Dr. Ishani</CardTitle>
-              <p className="text-sm text-muted-foreground">Senior Psychological Doctor (10+ Years)</p>
+            <CardHeader className="text-center p-4">
+              <CardTitle className="text-lg">Dr. Ishani</CardTitle>
+              <p className="text-xs text-muted-foreground">Senior Psychological Doctor</p>
+            </CardHeader>
+          </Card>
+
+          {/* Kavi (Mood Fixer & Best Friend) Card */}
+          <Card 
+            className="cursor-pointer hover:border-amber-500/50 hover:shadow-2xl transition-all duration-300 group overflow-hidden border-2 border-amber-500/30"
+            onClick={() => startDoctorSession("Kavi")}
+          >
+            <div className="h-64 bg-amber-50 dark:bg-amber-950/40 relative overflow-hidden flex items-center justify-center">
+              <img 
+                src="/@fs/Users/kavishkathilakarathna/.gemini/antigravity-ide/brain/13521ad2-0754-4111-8661-64f2911f3a1b/kavi_bestfriend_avatar_1786373760801.png" 
+                alt="Kavi (Mood Fixer)" 
+                onError={(e) => {
+                  (e.target as HTMLImageElement).src = "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=600&auto=format&fit=crop&q=80";
+                }}
+                className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-4">
+                <Button size="sm" className="w-full rounded-full gap-2 bg-amber-500 hover:bg-amber-600 text-slate-950 font-semibold text-xs">
+                  <Sparkles className="size-3.5" /> Talk to Bestie Kavi
+                </Button>
+              </div>
+            </div>
+            <CardHeader className="text-center p-4">
+              <div className="flex items-center justify-center gap-1.5 mb-1">
+                <CardTitle className="text-lg">Kavi</CardTitle>
+                <Badge className="bg-amber-500/20 text-amber-600 dark:text-amber-400 border-amber-500/30 text-[10px] py-0">Mood Fixer</Badge>
+              </div>
+              <p className="text-xs text-muted-foreground">Your Best Friend & Mood Booster</p>
             </CardHeader>
           </Card>
         </div>
@@ -485,7 +531,9 @@ function MedMindECare() {
 
   const avatarSrc = selectedDoctor === "Nuwan" 
     ? "/@fs/Users/kavishkathilakarathna/.gemini/antigravity-ide/brain/13521ad2-0754-4111-8661-64f2911f3a1b/nuwan_avatar_1786363440934.png"
-    : "/@fs/Users/kavishkathilakarathna/.gemini/antigravity-ide/brain/13521ad2-0754-4111-8661-64f2911f3a1b/ishani_avatar_1786363461362.png";
+    : selectedDoctor === "Ishani"
+    ? "/@fs/Users/kavishkathilakarathna/.gemini/antigravity-ide/brain/13521ad2-0754-4111-8661-64f2911f3a1b/ishani_avatar_1786363461362.png"
+    : "/@fs/Users/kavishkathilakarathna/.gemini/antigravity-ide/brain/13521ad2-0754-4111-8661-64f2911f3a1b/kavi_bestfriend_avatar_1786373760801.png";
 
   return (
     <div className="flex flex-col h-[calc(100vh-120px)] max-w-5xl mx-auto gap-4">
@@ -540,8 +588,12 @@ function MedMindECare() {
               <span className={`size-2 rounded-full ${isLiveActiveRef.current ? "bg-emerald-500 animate-pulse" : "bg-slate-500"}`} />
               {isLiveActiveRef.current ? "Live Voice Session Active" : "Call Paused"}
             </Badge>
-            <h2 className="text-2xl md:text-3xl font-bold tracking-tight">Dr. {selectedDoctor}</h2>
-            <p className="text-slate-400 text-xs md:text-sm">Senior Psychological Doctor</p>
+            <h2 className="text-2xl md:text-3xl font-bold tracking-tight">
+              {selectedDoctor === "Kavi" ? "Kavi" : `Dr. ${selectedDoctor}`}
+            </h2>
+            <p className="text-slate-400 text-xs md:text-sm">
+              {selectedDoctor === "Kavi" ? "Your Best Friend & Mood Fixer" : "Senior Psychological Doctor"}
+            </p>
           </div>
 
           {/* 3D Doctor Avatar with Glowing Soundwave Rings */}
