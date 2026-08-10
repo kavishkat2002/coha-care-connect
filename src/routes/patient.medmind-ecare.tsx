@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState, useRef, useEffect } from "react";
-import { Mic, MicOff, Send, ArrowLeft, Volume2, VolumeX, PhoneCall, PhoneOff, Sparkles, MessageSquare, Stethoscope, Star, Calendar, UserCheck } from "lucide-react";
+import { Mic, MicOff, Send, ArrowLeft, Volume2, VolumeX, PhoneCall, PhoneOff, Sparkles, MessageSquare, Stethoscope, Star, Calendar, UserCheck, Lock, ShieldCheck, UserPlus, LogIn } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
@@ -8,6 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { consultPsychologist, transcribeAudio, type ChatMessage } from "@/services/ai.service";
 import { doctorService } from "@/services/doctor.service";
 import { type Doctor } from "@/data/mock";
+import { supabase } from "@/lib/supabase";
 
 export const Route = createFileRoute("/patient/medmind-ecare")({
   head: () => ({
@@ -35,6 +36,7 @@ function MedMindECare() {
   const [soundEnabled, setSoundEnabled] = useState(true);
   const [speechError, setSpeechError] = useState<string | null>(null);
   const [recommendedPsychiatrists, setRecommendedPsychiatrists] = useState<Doctor[]>([]);
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
 
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioChunksRef = useRef<Blob[]>([]);
@@ -49,6 +51,32 @@ function MedMindECare() {
   const animFrameRef = useRef<number | null>(null);
 
   useEffect(() => {
+    async function checkMemberAuth() {
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session && session.user) {
+          setIsAuthenticated(true);
+          return;
+        }
+      } catch (e) {
+        console.warn("Supabase auth check error:", e);
+      }
+
+      // Check local storage member session fallback
+      const localUser = localStorage.getItem("sb-access-token") || 
+                        localStorage.getItem("coha_user") || 
+                        localStorage.getItem("user") || 
+                        localStorage.getItem("lifora_patient");
+      if (localUser) {
+        setIsAuthenticated(true);
+      } else {
+        setIsAuthenticated(false);
+        // Automatically redirect unauthenticated / non-registered users directly to Sign in / Register!
+        window.location.href = "/auth";
+      }
+    }
+    void checkMemberAuth();
+
     if (typeof window !== "undefined") {
       synthRef.current = window.speechSynthesis;
       if (synthRef.current) {
@@ -443,6 +471,15 @@ function MedMindECare() {
       void startListeningLoop();
     }
   };
+
+  if (isAuthenticated === false) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[60vh] gap-3 text-center">
+        <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin" />
+        <p className="text-sm font-medium text-slate-500">Redirecting to Sign in / Register...</p>
+      </div>
+    );
+  }
 
   if (!selectedDoctor) {
     return (
