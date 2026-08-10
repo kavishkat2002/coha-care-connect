@@ -1,0 +1,36 @@
+[tool.pyrefly]
+# Use the project's virtual environment for package resolution
+python_environment = "venv"
+python_version = "3.9"
+
+# Ignore missing third-party ML/data-science imports that aren't installed
+# in the main venv (tensorflow, sklearn, seaborn, etc.)
+ignore-missing-imports = [
+    "tensorflow",
+    "tensorflow.*",
+    "tensorflow_hub",
+    "tensorflow_hub.*",
+    "matplotlib",
+    "matplotlib.*",
+    "seaborn",
+    "seaborn.*",
+    "sklearn",
+    "sklearn.*",
+    "imblearn",
+    "imblearn.*",
+    "numpy",
+    "numpy.*",
+    "PIL",
+    "PIL.*",
+]
+
+# Exclude standalone Python scripts and all notebooks from type checking.
+# These are auxiliary ML/data tooling — not part of the core TypeScript app.
+project-excludes = [
+    "**/*.ipynb",
+    "public/**",
+    "fetch_breast_cancer.py",
+    "test_dataset.py",
+    "get_groq_models.py",
+]
+

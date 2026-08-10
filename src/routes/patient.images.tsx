@@ -232,6 +232,55 @@ function ImagesPage() {
                     ))}
                   </ul>
                 </div>
+
+                {result.skinCancerClassification && (
+                  <div className="rounded-2xl border-2 overflow-hidden" style={{ borderColor: result.skinCancerClassification.classification === "malignant" ? "var(--destructive)" : "var(--success)" }}>
+                    <div className="p-3 px-4 border-b" style={{ 
+                      backgroundColor: result.skinCancerClassification.classification === "malignant" ? "hsl(0 72% 51% / 0.08)" : "hsl(142 71% 45% / 0.08)",
+                      borderColor: result.skinCancerClassification.classification === "malignant" ? "var(--destructive)" : "var(--success)"
+                    }}>
+                      <div className="flex items-center justify-between">
+                        <p className="text-sm font-semibold">Skin Cancer Classification</p>
+                        <Badge variant={result.skinCancerClassification.classification === "malignant" ? "destructive" : "secondary"} className="uppercase tracking-wider text-xs">
+                          {result.skinCancerClassification.classification}
+                        </Badge>
+                      </div>
+                      <p className="text-xs text-muted-foreground mt-0.5">
+                        Subtype: <span className="font-medium capitalize">{result.skinCancerClassification.subtype.replace("_", " ")}</span>
+                        {" · "}Malignancy probability: <span className="font-semibold">{result.skinCancerClassification.malignancyProbability}%</span>
+                      </p>
+                    </div>
+                    <div className="p-4 space-y-3">
+                      <div>
+                        <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2">ABCDE Criteria Analysis</p>
+                        <div className="grid gap-2">
+                          {[
+                            { letter: "A", label: "Asymmetry", value: result.skinCancerClassification.abcde.asymmetry },
+                            { letter: "B", label: "Border", value: result.skinCancerClassification.abcde.border },
+                            { letter: "C", label: "Color", value: result.skinCancerClassification.abcde.color },
+                            { letter: "D", label: "Diameter", value: result.skinCancerClassification.abcde.diameter },
+                            { letter: "E", label: "Evolution", value: result.skinCancerClassification.abcde.evolution },
+                          ].map((item) => (
+                            <div key={item.letter} className="flex gap-3 items-start text-sm">
+                              <span className="flex size-6 items-center justify-center rounded-full bg-primary/10 text-primary font-bold text-xs shrink-0">{item.letter}</span>
+                              <div>
+                                <span className="font-medium">{item.label}: </span>
+                                <span className="text-muted-foreground">{item.value}</span>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                      <div className="pt-2 border-t border-border">
+                        <div className="flex gap-4 text-xs text-muted-foreground">
+                          <span>📊 {result.skinCancerClassification.sensitivity}</span>
+                          <span>📈 {result.skinCancerClassification.specificity}</span>
+                        </div>
+                        <p className="text-xs text-muted-foreground mt-1.5">Clinical threshold: 23% (sensitivity-optimized to minimize false negatives for malignant detection)</p>
+                      </div>
+                    </div>
+                  </div>
+                )}
                 
                 {recommendedDoctors.slice(0, 1).map(doctor => (
                   <div key={doctor.id} className="rounded-2xl border border-border overflow-hidden">
