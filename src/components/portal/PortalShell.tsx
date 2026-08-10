@@ -1,10 +1,27 @@
 import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
-import { Bell, LogOut, Menu, type LucideIcon } from "lucide-react";
+import {
+  Bell,
+  LogOut,
+  Menu,
+  MessageSquare,
+  Calendar,
+  Award,
+  Pill,
+  CheckCircle2,
+  Info,
+  Clock,
+  ExternalLink,
+  Check,
+  Trash2,
+  type LucideIcon,
+} from "lucide-react";
 import { useEffect, useState, type ReactNode } from "react";
+import { toast } from "sonner";
 
 import { Logo } from "@/components/shared/Logo";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -19,6 +36,64 @@ import { cn } from "@/lib/utils";
 
 export type NavItem = { label: string; to: string; icon: LucideIcon };
 
+export type NotificationItem = {
+  id: string;
+  type: "message" | "appointment" | "epass" | "medication" | "system";
+  title: string;
+  description: string;
+  time: string;
+  read: boolean;
+  link?: string;
+};
+
+const INITIAL_NOTIFICATIONS: NotificationItem[] = [
+  {
+    id: "n1",
+    type: "message",
+    title: "New Doctor Message & Prescription",
+    description: "Dr. Menaka De Alwis sent a follow-up chat message with a PDF medical document.",
+    time: "5 mins ago",
+    read: false,
+    link: "/patient/telemedicine",
+  },
+  {
+    id: "n2",
+    type: "appointment",
+    title: "Scheduled Video Consultation Today",
+    description: "Your Telemedicine video meeting with Dr. Menaka De Alwis is ready for launch.",
+    time: "30 mins ago",
+    read: false,
+    link: "/patient/telemedicine",
+  },
+  {
+    id: "n3",
+    type: "medication",
+    title: "MedMind Daily Pill Reminder",
+    description: "Scheduled dose: Amoxicillin 500mg (Post-lunch). Tap to view dosage schedule.",
+    time: "Today, 01:30 PM",
+    read: false,
+    link: "/patient/medmind-ecare",
+  },
+  {
+    id: "n4",
+    type: "epass",
+    title: "Digital Health ePass Active",
+    description: "Your Gold Care Digital Membership is active and valid for 30 days.",
+    time: "Yesterday",
+    read: true,
+    link: "/patient/epass",
+  },
+  {
+    id: "n5",
+    type: "system",
+    title: "HD Video Call Feature Enabled",
+    description: "Direct 2-way HD video meetings are unlocked for your scheduled consultations.",
+    time: "2 days ago",
+    read: true,
+    link: "/patient/telemedicine",
+  },
+];
+
 export function PortalShell({
   nav,
   portalLabel,
@@ -31,6 +106,16 @@ export function PortalShell({
   const [session, setSession] = useState<Session | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [open, setOpen] = useState(false);
+  const [notifications, setNotifications] = useState<NotificationItem[]>(() => {
+    const saved = localStorage.getItem("meddoc_notifications");
+    if (saved) {
+      try {
+        return JSON.parse(saved);
+      } catch (e) {}
+    }
+    return INITIAL_NOTIFICATIONS;
+  });
+
   const navigate = useNavigate();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
 
@@ -48,38 +133,73 @@ export function PortalShell({
     };
   }, []);
 
+  // Sync notifications to localStorage
+  useEffect(() => {
+    localStorage.setItem("meddoc_notifications", JSON.stringify(notifications));
+  }, [notifications]);
+
   useEffect(() => setOpen(false), [pathname]);
 
-  const initials = (session?.name ?? "Guest")
-    .split(" ")
-    .map((p) => p[0])
-    .slice(0, 2)
-    .join("")
-    .toUpperCase();
+  const unreadCount = notifications.filter((n) => !n.read).length;
 
-  const filteredNav = isLoading 
-    ? nav 
-    : session 
-      ? nav 
-      : nav.filter(item => item.label !== "Overview" && item.label !== "Profile" && item.label !== "Appointments" && item.label !== "Health Timeline");
+  const markAllAsRead = () => {
+    setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
+    toast.success("All notifications marked as read");
+  };
+
+  const markAsRead = (id: string) => {
+    setNotifications((prev) => prev.map((n) => (n.id === id ? { ...n, read: true } : n)));
+  };
+
+  const clearAllNotifications = () => {
+    setNotifications([]);
+    toast.info("Notifications panel cleared");
+  };
+
+  const getNotificationIcon = (type: NotificationItem["type"]) => {
+    switch (type) {
+      case "message":
+        return <MessageSquare className="size-4 text-blue-600 dark:text-blue-400" />;
+      case "appointment":
+        return <Calendar className="size-4 text-emerald-600 dark:text-emerald-400" />;
+      case "medication":
+        return <Pill className="size-4 text-purple-600 dark:text-purple-400" />;
+      case "epass":
+        return <Award className="size-4 text-amber-600 dark:text-amber-400" />;
+      case "system":
+      default:
+        return <Info className="size-4 text-indigo-600 dark:text-indigo-400" />;
+    }
+  };
+
+  const initials = session?.name
+    ? session.name
+        .split(" ")
+        .map((n) => n[0])
+        .slice(0, 2)
+        .join("")
+        .toUpperCase()
+    : "MD";
 
   const links = (
-    <nav className="flex flex-col gap-1" aria-label={`${portalLabel} navigation`}>
-      {filteredNav.map((item) => {
-        const active = pathname === item.to;
+    <nav className="space-y-1">
+      {nav.map((item) => {
+        const Icon = item.icon;
+        const isActive = pathname === item.to;
         return (
           <Link
             key={item.to}
             to={item.to}
+            onClick={() => setOpen(false)}
             className={cn(
-              "flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors",
-              active
-                ? "bg-accent text-accent-foreground"
-                : "text-muted-foreground hover:bg-muted hover:text-foreground",
+              "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
+              isActive
+                ? "bg-primary text-primary-foreground"
+                : "text-muted-foreground hover:bg-muted hover:text-foreground"
             )}
           >
-            <item.icon className="size-4" aria-hidden="true" />
-            {item.label}
+            <Icon className="size-4 shrink-0" />
+            <span>{item.label}</span>
           </Link>
         );
       })}
@@ -87,15 +207,15 @@ export function PortalShell({
   );
 
   return (
-    <div className="min-h-dvh bg-background">
-      <aside className="fixed inset-y-0 left-0 hidden w-64 flex-col border-r border-border bg-card px-4 py-5 lg:flex">
-        <Link to="/" className="px-2">
+    <div className="min-h-screen bg-background">
+      <aside className="fixed inset-y-0 left-0 z-40 hidden w-64 border-r border-border bg-card p-4 lg:block">
+        <div className="mb-6 flex items-center justify-between px-2">
           <Logo />
-        </Link>
-        <p className="mt-6 px-3 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+        </div>
+        <div className="mb-2 px-2 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
           {portalLabel}
-        </p>
-        <div className="mt-2">{links}</div>
+        </div>
+        {links}
       </aside>
 
       <div className="lg:pl-64">
@@ -116,11 +236,100 @@ export function PortalShell({
             <span className="text-sm font-medium lg:hidden">MedDoc</span>
           </div>
 
-          <div className="flex items-center gap-1.5">
-            <Button variant="ghost" size="icon" aria-label="Notifications" className="relative">
-              <Bell className="size-5" />
-              <span className="absolute right-2 top-2 size-2 rounded-full bg-primary" />
-            </Button>
+          <div className="flex items-center gap-2">
+            {/* Interactive Notifications & Reminders Dropdown Panel */}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="icon" aria-label="Notifications" className="relative size-10 rounded-full hover:bg-muted">
+                  <Bell className="size-5 text-slate-700 dark:text-slate-200" />
+                  {unreadCount > 0 && (
+                    <span className="absolute -top-0.5 -right-0.5 size-5 bg-blue-600 text-white font-extrabold text-[10px] rounded-full flex items-center justify-center border-2 border-card shadow-xs animate-pulse">
+                      {unreadCount}
+                    </span>
+                  )}
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-80 sm:w-96 p-0 rounded-2xl border border-border shadow-2xl overflow-hidden">
+                <div className="p-3.5 bg-gradient-to-r from-blue-50/80 via-white to-indigo-50/60 dark:from-slate-900 dark:via-slate-900 dark:to-slate-950 border-b border-border flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <Bell className="size-4 text-blue-600 dark:text-blue-400" />
+                    <span className="font-bold text-sm text-slate-900 dark:text-white">Notifications & Reminders</span>
+                    {unreadCount > 0 && (
+                      <Badge className="bg-blue-600 text-white text-[10px] font-bold px-1.5 py-0.2 rounded-full">
+                        {unreadCount} new
+                      </Badge>
+                    )}
+                  </div>
+                  {notifications.length > 0 && (
+                    <button
+                      type="button"
+                      onClick={markAllAsRead}
+                      className="text-[11px] font-bold text-blue-600 hover:text-blue-700 dark:text-blue-400 flex items-center gap-1"
+                    >
+                      <Check className="size-3" /> Mark read
+                    </button>
+                  )}
+                </div>
+
+                <div className="max-h-88 overflow-y-auto divide-y divide-border">
+                  {notifications.length === 0 ? (
+                    <div className="p-8 text-center space-y-2">
+                      <CheckCircle2 className="size-8 text-emerald-500 mx-auto opacity-80" />
+                      <p className="text-xs font-semibold text-foreground">You are all caught up!</p>
+                      <p className="text-[11px] text-muted-foreground">No pending messages or reminders.</p>
+                    </div>
+                  ) : (
+                    notifications.map((n) => (
+                      <div
+                        key={n.id}
+                        onClick={() => {
+                          markAsRead(n.id);
+                          if (n.link) navigate({ to: n.link });
+                        }}
+                        className={cn(
+                          "p-3.5 transition-colors cursor-pointer flex items-start gap-3 hover:bg-muted/50",
+                          !n.read ? "bg-blue-50/40 dark:bg-blue-950/20" : ""
+                        )}
+                      >
+                        <div className="p-2 rounded-xl bg-slate-100 dark:bg-slate-800 shrink-0 mt-0.5">
+                          {getNotificationIcon(n.type)}
+                        </div>
+                        <div className="flex-1 min-w-0 space-y-1">
+                          <div className="flex items-center justify-between gap-2">
+                            <p className={cn("text-xs leading-tight truncate", !n.read ? "font-bold text-slate-900 dark:text-white" : "font-medium text-slate-700 dark:text-slate-300")}>
+                              {n.title}
+                            </p>
+                            {!n.read && <span className="size-2 rounded-full bg-blue-600 shrink-0" />}
+                          </div>
+                          <p className="text-[11px] text-slate-500 dark:text-slate-400 line-clamp-2 leading-relaxed">
+                            {n.description}
+                          </p>
+                          <span className="text-[10px] text-slate-400 font-mono block pt-0.5">{n.time}</span>
+                        </div>
+                      </div>
+                    ))
+                  )}
+                </div>
+
+                {notifications.length > 0 && (
+                  <div className="p-2 border-t border-border bg-slate-50/80 dark:bg-slate-900/80 flex items-center justify-between px-3">
+                    <button
+                      type="button"
+                      onClick={clearAllNotifications}
+                      className="text-[11px] text-rose-600 hover:text-rose-700 dark:text-rose-400 font-medium flex items-center gap-1"
+                    >
+                      <Trash2 className="size-3" /> Clear panel
+                    </button>
+                    <Link
+                      to="/patient/telemedicine"
+                      className="text-[11px] font-bold text-blue-600 hover:underline flex items-center gap-1"
+                    >
+                      View Consultations <ExternalLink className="size-3" />
+                    </Link>
+                  </div>
+                )}
+              </DropdownMenuContent>
+            </DropdownMenu>
             
             {isLoading ? null : session ? (
               <DropdownMenu>
@@ -146,6 +355,7 @@ export function PortalShell({
                   <DropdownMenuSeparator />
                   <DropdownMenuItem
                     onClick={async () => {
+                      localStorage.setItem("meddoc_user_signed_out", "true");
                       await signOut();
                       navigate({ to: "/auth" });
                     }}

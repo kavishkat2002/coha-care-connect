@@ -51,22 +51,65 @@ function ProfilePage() {
 
   useEffect(() => {
     async function load() {
+      if (isEditing) return;
       const data = await patientService.getPatientProfile();
-      setP(data);
-      if (data) setEditData(data);
+      if (data) {
+        setP(data);
+        setEditData(data);
+      }
     }
-    load();
-  }, []);
+    void load();
+
+    // Listen for live profile updates from other browser windows/tabs automatically
+    const channel = typeof window !== "undefined" && "BroadcastChannel" in window 
+      ? new BroadcastChannel("coha_profile_sync") 
+      : null;
+
+    if (channel) {
+      channel.onmessage = (event) => {
+        if (event.data?.profile && !isEditing) {
+          setP(event.data.profile);
+          setEditData(event.data.profile);
+        }
+      };
+    }
+
+    const handleStorage = (e: StorageEvent) => {
+      if (e.key === "coha_patient_profile_shared" && e.newValue && !isEditing) {
+        try {
+          const parsed = JSON.parse(e.newValue);
+          setP(parsed);
+          setEditData(parsed);
+        } catch (err) {}
+      }
+    };
+    window.addEventListener("storage", handleStorage);
+
+    // Background polling every 3 seconds (only when not editing)
+    const pollInterval = setInterval(() => {
+      if (!isEditing) {
+        void load();
+      }
+    }, 3000);
+
+    return () => {
+      channel?.close();
+      window.removeEventListener("storage", handleStorage);
+      clearInterval(pollInterval);
+    };
+  }, [isEditing]);
 
   const handleSave = async () => {
     if (!p) return;
     setSaving(true);
     try {
       const updated = { ...p, ...editData } as PatientProfile;
+      setP(updated);
+      setIsEditing(false);
+
       const result = await patientService.updatePatientProfile(updated);
       if (result) {
         setP(result);
-        setIsEditing(false);
         toast.success("Profile updated successfully");
       } else {
         toast.error("Failed to update profile");

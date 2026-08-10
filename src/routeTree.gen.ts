@@ -16,6 +16,7 @@ import { Route as DoctorRouteImport } from './routes/doctor'
 import { Route as HospitalRouteImport } from './routes/hospital'
 import { Route as PatientRouteImport } from './routes/patient'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
+import { Route as ApiProfileRouteImport } from './routes/api.profile'
 import { Route as DoctorIndexRouteImport } from './routes/doctor.index'
 import { Route as DoctorProfileRouteImport } from './routes/doctor.profile'
 import { Route as HospitalIndexRouteImport } from './routes/hospital.index'
@@ -26,6 +27,7 @@ import { Route as PatientIndexRouteImport } from './routes/patient.index'
 import { Route as PatientAppointmentsRouteImport } from './routes/patient.appointments'
 import { Route as PatientAssistantRouteImport } from './routes/patient.assistant'
 import { Route as PatientBookRouteImport } from './routes/patient.book'
+import { Route as PatientEpassRouteImport } from './routes/patient.epass'
 import { Route as PatientImagesRouteImport } from './routes/patient.images'
 import { Route as PatientMedmindEcareRouteImport } from './routes/patient.medmind-ecare'
 import { Route as PatientProfileRouteImport } from './routes/patient.profile'
@@ -67,6 +69,11 @@ const AdminIndexRoute = AdminIndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => AdminRoute,
+} as any)
+const ApiProfileRoute = ApiProfileRouteImport.update({
+  id: '/api/profile',
+  path: '/api/profile',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const DoctorIndexRoute = DoctorIndexRouteImport.update({
   id: '/',
@@ -118,6 +125,11 @@ const PatientBookRoute = PatientBookRouteImport.update({
   path: '/book',
   getParentRoute: () => PatientRoute,
 } as any)
+const PatientEpassRoute = PatientEpassRouteImport.update({
+  id: '/epass',
+  path: '/epass',
+  getParentRoute: () => PatientRoute,
+} as any)
 const PatientImagesRoute = PatientImagesRouteImport.update({
   id: '/images',
   path: '/images',
@@ -156,6 +168,7 @@ export interface FileRoutesByFullPath {
   '/doctor': typeof DoctorRouteWithChildren
   '/hospital': typeof HospitalRouteWithChildren
   '/patient': typeof PatientRouteWithChildren
+  '/api/profile': typeof ApiProfileRoute
   '/doctor/profile': typeof DoctorProfileRoute
   '/hospital/branches': typeof HospitalBranchesRoute
   '/hospital/doctors': typeof HospitalDoctorsRoute
@@ -163,6 +176,7 @@ export interface FileRoutesByFullPath {
   '/patient/appointments': typeof PatientAppointmentsRoute
   '/patient/assistant': typeof PatientAssistantRoute
   '/patient/book': typeof PatientBookRoute
+  '/patient/epass': typeof PatientEpassRoute
   '/patient/images': typeof PatientImagesRoute
   '/patient/medmind-ecare': typeof PatientMedmindEcareRoute
   '/patient/profile': typeof PatientProfileRoute
@@ -177,6 +191,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/api/profile': typeof ApiProfileRoute
   '/doctor/profile': typeof DoctorProfileRoute
   '/hospital/branches': typeof HospitalBranchesRoute
   '/hospital/doctors': typeof HospitalDoctorsRoute
@@ -184,6 +199,7 @@ export interface FileRoutesByTo {
   '/patient/appointments': typeof PatientAppointmentsRoute
   '/patient/assistant': typeof PatientAssistantRoute
   '/patient/book': typeof PatientBookRoute
+  '/patient/epass': typeof PatientEpassRoute
   '/patient/images': typeof PatientImagesRoute
   '/patient/medmind-ecare': typeof PatientMedmindEcareRoute
   '/patient/profile': typeof PatientProfileRoute
@@ -203,6 +219,7 @@ export interface FileRoutesById {
   '/doctor': typeof DoctorRouteWithChildren
   '/hospital': typeof HospitalRouteWithChildren
   '/patient': typeof PatientRouteWithChildren
+  '/api/profile': typeof ApiProfileRoute
   '/doctor/profile': typeof DoctorProfileRoute
   '/hospital/branches': typeof HospitalBranchesRoute
   '/hospital/doctors': typeof HospitalDoctorsRoute
@@ -210,6 +227,7 @@ export interface FileRoutesById {
   '/patient/appointments': typeof PatientAppointmentsRoute
   '/patient/assistant': typeof PatientAssistantRoute
   '/patient/book': typeof PatientBookRoute
+  '/patient/epass': typeof PatientEpassRoute
   '/patient/images': typeof PatientImagesRoute
   '/patient/medmind-ecare': typeof PatientMedmindEcareRoute
   '/patient/profile': typeof PatientProfileRoute
@@ -230,6 +248,7 @@ export interface FileRouteTypes {
     | '/doctor'
     | '/hospital'
     | '/patient'
+    | '/api/profile'
     | '/doctor/profile'
     | '/hospital/branches'
     | '/hospital/doctors'
@@ -237,6 +256,7 @@ export interface FileRouteTypes {
     | '/patient/appointments'
     | '/patient/assistant'
     | '/patient/book'
+    | '/patient/epass'
     | '/patient/images'
     | '/patient/medmind-ecare'
     | '/patient/profile'
@@ -251,6 +271,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/auth'
+    | '/api/profile'
     | '/doctor/profile'
     | '/hospital/branches'
     | '/hospital/doctors'
@@ -258,6 +279,7 @@ export interface FileRouteTypes {
     | '/patient/appointments'
     | '/patient/assistant'
     | '/patient/book'
+    | '/patient/epass'
     | '/patient/images'
     | '/patient/medmind-ecare'
     | '/patient/profile'
@@ -276,6 +298,7 @@ export interface FileRouteTypes {
     | '/doctor'
     | '/hospital'
     | '/patient'
+    | '/api/profile'
     | '/doctor/profile'
     | '/hospital/branches'
     | '/hospital/doctors'
@@ -283,6 +306,7 @@ export interface FileRouteTypes {
     | '/patient/appointments'
     | '/patient/assistant'
     | '/patient/book'
+    | '/patient/epass'
     | '/patient/images'
     | '/patient/medmind-ecare'
     | '/patient/profile'
@@ -302,6 +326,7 @@ export interface RootRouteChildren {
   DoctorRoute: typeof DoctorRouteWithChildren
   HospitalRoute: typeof HospitalRouteWithChildren
   PatientRoute: typeof PatientRouteWithChildren
+  ApiProfileRoute: typeof ApiProfileRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -354,6 +379,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/admin/'
       preLoaderRoute: typeof AdminIndexRouteImport
       parentRoute: typeof AdminRoute
+    }
+    '/api/profile': {
+      id: '/api/profile'
+      path: '/api/profile'
+      fullPath: '/api/profile'
+      preLoaderRoute: typeof ApiProfileRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/doctor/': {
       id: '/doctor/'
@@ -423,6 +455,13 @@ declare module '@tanstack/react-router' {
       path: '/book'
       fullPath: '/patient/book'
       preLoaderRoute: typeof PatientBookRouteImport
+      parentRoute: typeof PatientRoute
+    }
+    '/patient/epass': {
+      id: '/patient/epass'
+      path: '/epass'
+      fullPath: '/patient/epass'
+      preLoaderRoute: typeof PatientEpassRouteImport
       parentRoute: typeof PatientRoute
     }
     '/patient/images': {
@@ -515,6 +554,7 @@ interface PatientRouteChildren {
   PatientAppointmentsRoute: typeof PatientAppointmentsRoute
   PatientAssistantRoute: typeof PatientAssistantRoute
   PatientBookRoute: typeof PatientBookRoute
+  PatientEpassRoute: typeof PatientEpassRoute
   PatientImagesRoute: typeof PatientImagesRoute
   PatientMedmindEcareRoute: typeof PatientMedmindEcareRoute
   PatientProfileRoute: typeof PatientProfileRoute
@@ -528,6 +568,7 @@ const PatientRouteChildren: PatientRouteChildren = {
   PatientAppointmentsRoute: PatientAppointmentsRoute,
   PatientAssistantRoute: PatientAssistantRoute,
   PatientBookRoute: PatientBookRoute,
+  PatientEpassRoute: PatientEpassRoute,
   PatientImagesRoute: PatientImagesRoute,
   PatientMedmindEcareRoute: PatientMedmindEcareRoute,
   PatientProfileRoute: PatientProfileRoute,
@@ -547,6 +588,7 @@ const rootRouteChildren: RootRouteChildren = {
   DoctorRoute: DoctorRouteWithChildren,
   HospitalRoute: HospitalRouteWithChildren,
   PatientRoute: PatientRouteWithChildren,
+  ApiProfileRoute: ApiProfileRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

@@ -6,10 +6,10 @@ import {
   FileText,
   Image,
   LayoutDashboard,
-  Video,
   UserRound,
   Building2,
   Stethoscope,
+  CreditCard,
 } from "lucide-react";
 import type { NavItem } from "./PortalShell";
 
@@ -21,7 +21,6 @@ export const patientNav: NavItem[] = [
   { label: "Medical Images", to: "/patient/images", icon: Image },
   { label: "Reports", to: "/patient/reports", icon: FileText },
   { label: "Health Timeline", to: "/patient/timeline", icon: Activity },
-  { label: "Telemedicine", to: "/patient/telemedicine", icon: Video },
   { label: "Profile", to: "/patient/profile", icon: UserRound },
 ];
 

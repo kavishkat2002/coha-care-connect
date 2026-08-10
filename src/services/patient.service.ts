@@ -1,5 +1,6 @@
 import { supabase } from "@/lib/supabase";
-import { type Appointment, type ReportItem, type TimelineItem, patientProfile as mockPatientProfile } from "@/data/mock";
+import { type Appointment, type ReportItem, type TimelineItem, patientProfile as mockPatientProfile, reports as mockReports, timeline as mockTimeline } from "@/data/mock";
+import { fetchServerProfile, updateServerProfile as updateServerProfileFn } from "@/services/profile.server";
 
 // Type for the new Supabase appointment row
 export type DbAppointment = {
@@ -29,27 +30,45 @@ export type PatientProfile = {
   city: string;
   phone: string;
   email: string;
+  nic?: string;
   pastDiseases: string[];
   medications: string[];
   allergies: string[];
   familyHistory: string[];
 };
 
+const profileSyncChannel = typeof window !== "undefined" && "BroadcastChannel" in window 
+  ? new BroadcastChannel("coha_profile_sync") 
+  : null;
+
 export const patientService = {
   /**
    * Fetch all appointments from Supabase
    */
   async getAppointments(): Promise<DbAppointment[]> {
+    // 1. Try file-backed server API endpoint (works across all browsers & devices)
+    try {
+      const res = await fetch("/api/appointments");
+      if (res.ok) {
+        const data = await res.json();
+        if (Array.isArray(data) && data.length > 0) return data;
+      }
+    } catch (e) {}
+
+    // 2. Try Supabase
     const { data, error } = await supabase
       .from("appointments")
       .select("*");
     
-    if (error) {
-      console.error("Error fetching appointments:", error);
-      return [];
-    }
-    
-    return data || [];
+    if (!error && data && data.length > 0) return data;
+
+    // 3. Try LocalStorage
+    try {
+      const localApps = JSON.parse(localStorage.getItem('mock_appointments') || '[]');
+      if (Array.isArray(localApps)) return localApps;
+    } catch (e) {}
+
+    return [];
   },
 
   /**
@@ -106,6 +125,17 @@ export const patientService = {
     const assignedQueueNumber = currentQueueCount + 1;
 
     // 2. Insert the appointment
+    const newApp = { ...appointment, queue_number: assignedQueueNumber, id: 'app-' + Date.now() };
+    
+    // Save to server API endpoint (syncs to all browsers)
+    try {
+      void fetch("/api/appointments", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(newApp),
+      });
+    } catch (e) {}
+
     const { data, error } = await supabase
       .from("appointments")
       .insert([{ ...appointment, queue_number: assignedQueueNumber }])
@@ -116,94 +146,195 @@ export const patientService = {
       console.warn("Supabase insert failed, falling back to LocalStorage:", error);
       try {
         const localApps = JSON.parse(localStorage.getItem('mock_appointments') || '[]');
-        const newApp = { ...appointment, queue_number: assignedQueueNumber, id: 'local-' + Date.now() };
         localApps.push(newApp);
         localStorage.setItem('mock_appointments', JSON.stringify(localApps));
         return newApp;
       } catch (e) {
-        return null;
+        return newApp;
       }
     }
 
-    return data;
+    return data || newApp;
   },
 
   /**
    * Fetch all reports from Supabase
    */
   async getReports(): Promise<ReportItem[]> {
-    const { data, error } = await supabase
-      .from("reports")
-      .select("*");
+    try {
+      const { data, error } = await supabase
+        .from("reports")
+        .select("*");
+      
+      if (!error && data && data.length > 0) return data;
+    } catch (e) {}
     
-    if (error) {
-      console.error("Error fetching reports:", error);
-      return [];
-    }
-    
-    return data || [];
+    return mockReports;
   },
 
   /**
-   * Fetch timeline from Supabase
+   * Fetch timeline from Supabase or fallback
    */
   async getTimeline(): Promise<TimelineItem[]> {
-    const { data, error } = await supabase
-      .from("timeline")
-      .select("*")
-      .order("date", { ascending: false }); // Note: Since date is a string (e.g., '28 Jul 2026'), string sorting applies. Better to use proper timestamp columns in production.
+    try {
+      const { data, error } = await supabase
+        .from("timeline")
+        .select("*")
+        .order("date", { ascending: false });
+      
+      if (!error && data && data.length > 0) return data;
+    } catch (e) {}
     
-    if (error) {
-      console.error("Error fetching timeline:", error);
-      return [];
-    }
-    
-    return data || [];
+    return mockTimeline;
   },
 
   /**
-   * Fetch patient profile from Supabase
+   * Fetch patient profile from domain cookie, Supabase, or local storage
    */
-  async getPatientProfile(id: string = "p1"): Promise<PatientProfile | null> {
-    const { data, error } = await supabase
-      .from("patient_profiles")
-      .select("*")
-      .eq("id", id)
-      .single();
-    
-    if (error || !data) {
-      console.warn("Error fetching patient profile from Supabase, falling back to mock:", error);
+  async getPatientProfile(id?: string): Promise<PatientProfile | null> {
+    let activeId = id || "p1";
+
+    // 1. Try file-backed server API endpoint (syncs across all browsers & devices)
+    try {
+      const res = await fetch("/api/profile");
+      if (res.ok) {
+        const data = await res.json();
+        if (data && data.name) return data;
+      }
+    } catch (e) {}
+
+    // 2. Try TanStack Start Server Function RPC
+    try {
+      const serverProfile = await fetchServerProfile();
+      if (serverProfile && serverProfile.name) {
+        return serverProfile;
+      }
+    } catch (e) {}
+
+    // 3. Try reading shared domain cookie
+    if (typeof document !== "undefined") {
       try {
-        const local = localStorage.getItem(`mock_patient_profile_${id}`);
-        if (local) return JSON.parse(local);
+        const match = document.cookie.match(/(?:^|; )coha_patient_profile=([^;]*)/);
+        if (match && match[1]) {
+          const parsed = JSON.parse(decodeURIComponent(match[1]));
+          if (parsed && parsed.name) return parsed;
+        }
       } catch (e) {}
-      return { id: "p1", ...mockPatientProfile } as PatientProfile;
     }
-    
-    return data;
+
+    // 4. Try reading local shared storage
+    try {
+      const shared = localStorage.getItem("coha_patient_profile_shared");
+      if (shared) {
+        const parsed = JSON.parse(shared);
+        if (parsed && parsed.name) return parsed;
+      }
+      const local = localStorage.getItem(`mock_patient_profile_${activeId}`);
+      if (local) {
+        const parsed = JSON.parse(local);
+        if (parsed && parsed.name) return parsed;
+      }
+    } catch (e) {}
+
+    // 5. Try Supabase table
+    try {
+      const { data, error } = await supabase
+        .from("patient_profiles")
+        .select("*")
+        .eq("id", activeId)
+        .single();
+      if (!error && data) return data;
+    } catch (e) {}
+
+    return { id: activeId, ...mockPatientProfile } as PatientProfile;
   },
 
   /**
-   * Update patient profile
+   * Update patient profile with domain cookie and shared storage persistence
    */
   async updatePatientProfile(profile: PatientProfile): Promise<PatientProfile | null> {
-    const { data, error } = await supabase
-      .from("patient_profiles")
-      .upsert(profile)
-      .select()
-      .single();
-    
-    if (error) {
-      console.warn("Supabase profile update failed, falling back to LocalStorage:", error);
+    // 0. Mutate in-memory mock object so all fallbacks across the app reflect updated profile
+    try {
+      Object.assign(mockPatientProfile, profile);
+    } catch (e) {}
+
+    // 1. Save to server API endpoint (syncs to all browsers)
+    try {
+      void fetch("/api/profile", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(profile),
+      });
+    } catch (e) {}
+
+    // 2. Save to domain cookie (accessible across all browser windows on same host)
+    if (typeof document !== "undefined") {
       try {
-        localStorage.setItem(`mock_patient_profile_${profile.id}`, JSON.stringify(profile));
-        return profile;
-      } catch (e) {
-        return null;
-      }
+        const cookieVal = encodeURIComponent(JSON.stringify(profile));
+        document.cookie = `coha_patient_profile=${cookieVal}; path=/; max-age=31536000; SameSite=Lax`;
+      } catch (e) {}
     }
-    
-    return data;
+
+    // 2. Save to local shared storage & broadcast
+    try {
+      localStorage.setItem(`mock_patient_profile_${profile.id}`, JSON.stringify(profile));
+      localStorage.setItem("coha_patient_profile_shared", JSON.stringify(profile));
+      profileSyncChannel?.postMessage({ type: "PROFILE_UPDATED", profile });
+    } catch (e) {}
+
+    // 3. Save to Supabase table
+    try {
+      const { data, error } = await supabase
+        .from("patient_profiles")
+        .upsert(profile)
+        .select()
+        .single();
+      if (!error && data) return data;
+    } catch (e) {}
+
+    return profile;
+  },
+
+  /**
+   * Instantly sync active MedDoc ePass membership & profile details to Supabase
+   */
+  async syncEPassMembershipToSupabase(membership: {
+    patient_id: string;
+    patient_name: string;
+    patient_phone: string;
+    patient_nic?: string;
+    plan_id: string;
+    plan_name: string;
+    status: string;
+  }) {
+    // 1. Save to Supabase patient_memberships table
+    try {
+      const { data, error } = await supabase
+        .from("patient_memberships")
+        .upsert({
+          id: membership.patient_id,
+          patient_name: membership.patient_name,
+          patient_phone: membership.patient_phone,
+          patient_nic: membership.patient_nic,
+          plan_id: membership.plan_id,
+          plan_name: membership.plan_name,
+          status: membership.status,
+          updated_at: new Date().toISOString(),
+        })
+        .select();
+      if (!error) console.log("Supabase ePass sync success:", data);
+    } catch (e) {
+      console.warn("Supabase ePass sync notice:", e);
+    }
+
+    // 2. Also sync to file-backed server API endpoint
+    try {
+      void fetch("/api/epass", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(membership),
+      });
+    } catch (e) {}
   },
 
   /**

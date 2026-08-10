@@ -1,0 +1,26 @@
+{
+  "id": "11d71e65-2e29-4f37-b2d7-5a4183f95dc3",
+  "name": "Mahinda Rajapaksha",
+  "age": 84,
+  "gender": "Male",
+  "bloodGroup": "O+",
+  "city": "Colombo",
+  "phone": "+94 77 123 4567",
+  "email": "Mahinda@pohottuwa.com",
+  "pastDiseases": [
+    "Iron deficiency anaemia (2023)",
+    "Seasonal allergic rhinitis"
+  ],
+  "medications": [
+    "Ferrous sulphate 200mg",
+    "Cetirizine 10mg (as needed)"
+  ],
+  "allergies": [
+    "Penicillin"
+  ],
+  "familyHistory": [
+    "Breast cancer — maternal aunt",
+    "Type 2 diabetes — father"
+  ],
+  "nic": "781293849V"
+}

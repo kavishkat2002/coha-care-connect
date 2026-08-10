@@ -414,13 +414,13 @@ export const timeline: TimelineItem[] = [
 ];
 
 export const patientProfile = {
-  name: "Dilani Rathnayake",
-  age: 34,
-  gender: "Female",
+  name: "Mahinda Rajapaksha",
+  age: 84,
+  gender: "Male",
   bloodGroup: "O+",
   city: "Colombo",
   phone: "+94 77 123 4567",
-  email: "dilani@example.com",
+  email: "Mahinda@pohottuwa.com",
   pastDiseases: ["Iron deficiency anaemia (2023)", "Seasonal allergic rhinitis"],
   medications: ["Ferrous sulphate 200mg", "Cetirizine 10mg (as needed)"],
   allergies: ["Penicillin"],

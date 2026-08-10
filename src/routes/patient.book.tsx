@@ -320,6 +320,8 @@ function BookPage() {
                   navigate({ to: "/patient/telemedicine" });
                 } else if (item.id === "dl") {
                   navigate({ to: "/patient/medmind-ecare" });
+                } else if (item.id === "mfa") {
+                  navigate({ to: "/patient/epass" });
                 }
               }}
               className="relative p-5 bg-card border border-border shadow-soft rounded-2xl flex flex-col items-center justify-center gap-4 hover:shadow-md transition-shadow cursor-pointer"
