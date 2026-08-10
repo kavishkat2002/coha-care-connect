@@ -224,6 +224,15 @@ function ImagesPage() {
                   <p className="text-sm font-medium">Clinical explanation</p>
                   <p className="mt-1.5 text-sm text-muted-foreground">{result.explanation}</p>
                 </div>
+                {result.plainLanguageExplanation && (
+                  <div className="rounded-2xl border border-emerald-200 bg-emerald-50/60 dark:border-emerald-800 dark:bg-emerald-950/30 p-4">
+                    <div className="flex items-center gap-2 mb-1.5">
+                      <span className="text-base" role="img" aria-label="lightbulb">💡</span>
+                      <p className="text-sm font-semibold text-emerald-800 dark:text-emerald-300">What this means in simple terms</p>
+                    </div>
+                    <p className="text-sm text-emerald-700 dark:text-emerald-400 leading-relaxed">{result.plainLanguageExplanation}</p>
+                  </div>
+                )}
                 <div>
                   <p className="text-sm font-medium">Recommendation</p>
                   <ul className="mt-2 space-y-1.5 text-sm text-muted-foreground">

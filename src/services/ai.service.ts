@@ -207,6 +207,7 @@ export type ImageAnalysis = {
   risk: RiskLevel;
   confidence: number;
   explanation: string;
+  plainLanguageExplanation: string; // simple, jargon-free version for non-medical users
   recommendation: string[];
   suggestedSpecialty: string;
   boundingBox?: [number, number, number, number]; // [x, y, width, height] as percentages (0.0 to 1.0)
@@ -305,6 +306,7 @@ Return ONLY a valid JSON object matching this strict structure (and absolutely n
   "risk": "low" | "moderate" | "elevated",
   "confidence": number (0-100),
   "explanation": "A detailed clinical explanation including dermoscopic pattern analysis, color distribution, border characteristics, and ABCDE criteria findings",
+  "plainLanguageExplanation": "A simple, easy-to-understand explanation written for someone with no medical background. Avoid all medical jargon. Use everyday words to explain what the image shows, what it might mean, and what the person should do next. Think of explaining it to a friend or family member.",
   "recommendation": ["action item 1", "action item 2", "action item 3"],
   "suggestedSpecialty": "The best medical specialty (e.g. Dermatologist, Ophthalmologist, Dentist)"${region.toLowerCase() === "skin" ? `,
   "skinCancerClassification": {
@@ -388,6 +390,8 @@ Return ONLY a valid JSON object matching this strict structure (and absolutely n
     confidence: 81,
     explanation:
       "A single well-demarcated area was highlighted. Its borders appear regular and colour distribution is even, which is typical of benign changes.",
+    plainLanguageExplanation:
+      "We found one spot in your image. It looks like it has a clear shape with even colouring, which is usually a sign that it's nothing to worry about. To be safe, keep an eye on it for the next two weeks and take another photo if anything changes.",
     recommendation: [
       "Monitor the area for 14 days and re-capture an image",
       `Book a ${region.toLowerCase()} specialist review if it grows or changes colour`,
