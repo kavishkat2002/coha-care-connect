@@ -1,0 +1,1 @@
+import{t as e}from"./jsx-runtime-Ciaf_P-h.js";import{a as t,n}from"./navs-BzLBV-RC.js";import{a as r}from"./index-CLXMUQl7.js";var i=e(),a=()=>(0,i.jsx)(t,{nav:n,portalLabel:`Doctor portal`,children:(0,i.jsx)(r,{})});export{a as component};
