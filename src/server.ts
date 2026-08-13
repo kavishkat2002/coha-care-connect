@@ -1,5 +1,6 @@
 import fs from "node:fs";
 import path from "node:path";
+import os from "node:os";
 import "./lib/error-capture";
 import { consumeLastCapturedError } from "./lib/error-capture";
 import { renderErrorPage } from "./lib/error-page";
@@ -19,8 +20,8 @@ async function getServerEntry(): Promise<ServerEntry> {
   return serverEntryPromise;
 }
 
-const PROFILE_FILE = path.join(process.cwd(), ".shared_profile.json");
-const APPOINTMENTS_FILE = path.join(process.cwd(), ".shared_appointments.json");
+const PROFILE_FILE = path.join(os.tmpdir(), ".shared_profile.json");
+const APPOINTMENTS_FILE = path.join(os.tmpdir(), ".shared_appointments.json");
 
 function readStoredProfile() {
   try {

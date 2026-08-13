@@ -1,5 +1,6 @@
 import fs from "node:fs";
 import path from "node:path";
+import os from "node:os";
 //#region node_modules/.nitro/vite/services/ssr/index.js
 var lastCapturedError;
 var TTL_MS = 5e3;
@@ -98,8 +99,8 @@ async function getServerEntry() {
 	if (!serverEntryPromise) serverEntryPromise = import("./server-BBwoW3Vo.mjs").then((n) => n.t).then((m) => m.default ?? m);
 	return serverEntryPromise;
 }
-var PROFILE_FILE = path.join(process.cwd(), ".shared_profile.json");
-var APPOINTMENTS_FILE = path.join(process.cwd(), ".shared_appointments.json");
+var PROFILE_FILE = path.join(os.tmpdir(), ".shared_profile.json");
+var APPOINTMENTS_FILE = path.join(os.tmpdir(), ".shared_appointments.json");
 function readStoredProfile() {
 	try {
 		if (fs.existsSync(PROFILE_FILE)) {
