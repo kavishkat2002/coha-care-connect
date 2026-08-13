@@ -12,7 +12,7 @@ import { t as PageHeader } from "./PageHeader-CqM8ISGV.mjs";
 import { a as CardHeader, n as CardContent, o as CardTitle, r as CardDescription, t as Card } from "./card-BfBj_YIE.mjs";
 import { t as Input } from "./input-B8Q2ztVi.mjs";
 import { t as Label } from "./label-DBD1bRRP.mjs";
-import { c as doctors, d as mock_exports, s as __toCommonJS, u as init_mock } from "./server-BBwoW3Vo.mjs";
+import { c as doctors, d as mock_exports, s as __toCommonJS, u as init_mock } from "./server-IqVcekK3.mjs";
 import { i as TabsTrigger, n as TabsContent, r as TabsList, t as Tabs } from "./tabs-CCJRliUM.mjs";
 import { a as TableHeader, i as TableHead, n as TableBody, o as TableRow, r as TableCell, t as Table } from "./table-C0WYWEQX.mjs";
 import { a as DialogHeader, i as DialogFooter, n as DialogContent, o as DialogTitle, r as DialogDescription, s as DialogTrigger, t as Dialog } from "./dialog-DIo89e4g.mjs";
