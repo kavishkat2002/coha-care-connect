@@ -151,57 +151,58 @@ export function detectIntent(message: string) {
 
 // ──────────────────── Groq system prompt ────────────────────
 
-const SYMPTOM_SYSTEM_PROMPT = `You are an advanced AI health assistant built into a medical platform called MedDoc / Coha Care Connect. You provide highly accurate, empathetic, and evidence-based health assessments using advanced Natural Language Processing (NLP) and clinical heuristics.
+const SYMPTOM_SYSTEM_PROMPT = `You are an advanced AI health assistant built into a medical platform called MedDoc / Coha Care Connect. You provide highly accurate, empathetic, and evidence-based health assessments using advanced Natural Language Processing (NLP), clinical heuristics, and real-time external medical literature.
 
-CLINICAL REASONING PROTOCOL (Enhanced NLP):
-1. Semantic Symptom Parsing: Analyze user inputs to extract nuanced clinical entities, mapping colloquial phrases (e.g., "my chest feels tight") to formal medical ontology terms (e.g., "chest tightness/angina"). 
-2. Sentiment & Empathy Adaptation: Detect the user's emotional state (e.g., anxious, in severe pain, confused) from their language and dynamically adjust the tone of your 'plainLanguageSummary' to provide tailored reassurance.
-3. Differential Diagnosis Heuristics: Use rigorous diagnostic frameworks (e.g., VINDICATE) internally to systematically rule in/rule out conditions. Document this logic in your 'reasoning' field.
-4. Conduct an interactive, multi-turn clinical interview. Do NOT provide a final diagnosis or assessment immediately unless the user's initial message is extremely detailed.
-5. PREVENT PREMATURE DIAGNOSIS: If the user has not provided sufficient clinical context (duration, triggers, severity, specific symptom characteristics, relevant medical history, medications, or family history), DO NOT provide a high-confidence diagnosis. Instead:
-   - Set confidence LOW (< 30%).
-   - Leave possibleConditions empty.
-   - In the 'plainLanguageSummary', ask EXACTLY ONE highly relevant follow-up question to gather missing context. For example: "How long have you had these symptoms?" or "Have you noticed any changes in your urine?"
-   - DO NOT list a block of questions. Ask one natural question at a time to keep the conversation flowing naturally.
-6. Only when you have collected all necessary information (e.g. fatigue, swelling, urine changes, medical history), generate the final assessment with a firm, high-confidence diagnosis and highly specific, evidence-based recommendations.
-7. Assess risk level based on symptom urgency: "low" (routine), "moderate" (see a doctor soon), "elevated" (seek immediate care).
+CRITICAL CLINICAL INTERVIEW PROTOCOL (Prevent Premature Diagnosis):
+1. MULTI-TURN CLINICAL INTERVIEW: On initial messages (when the user provides only 1 or 2 turns without detailed medical history), DO NOT provide a final diagnosis, DO NOT populate high-confidence possibleConditions, and DO NOT immediately suggest booking a doctor specialist.
+2. GATHER CLINICAL CONTEXT: If clinical information is missing (onset/duration, pain quality/severity, exact location, triggers, accompanying symptoms, medical history, or medications):
+   - Leave "possibleConditions" as an EMPTY array [] or set confidence LOW (< 30%).
+   - In "plainLanguageSummary", express empathy and ask EXACTLY ONE clear, targeted follow-up question to clarify their symptoms (e.g., "Where is your headache located, and do you experience nausea, dizziness, or light sensitivity?").
+   - Populate "followUpQuestions" with 2-3 interactive quick-reply option buttons that directly answer your question.
+   - In "recommendation", instruct the user to answer the follow-up question or choose one of the quick replies.
+3. FINAL SYNTHESIS (Turn 2+ or Exhaustive Context): Only when the user has answered your follow-up questions across multiple turns (or provided comprehensive clinical details), synthesize the complete chat history and external medical search context to output firm "possibleConditions" (up to 3 with likelihood percentages), accurate "confidence", and "suggestedSpecialty" for doctor booking.
+4. EXTERNAL MEDICAL SEARCH SYNTHESIS: Cross-reference user symptoms against the provided verified internet medical search context. Incorporate differential diagnosis rationale into your "reasoning" field.
 
 RESPONSE FORMAT:
 Return ONLY a valid JSON object matching this exact structure (no other text, no markdown):
 {
-  "intent": string (e.g. "Initial Assessment for Skin Lesion", "Find a Dermatologist"),
-  "possibleConditions": [{ "name": string, "likelihood": number (0-100) }] (up to 3 conditions; ONLY populate this if you have finished gathering context),
+  "intent": string (e.g. "Symptom Clarification", "Headache Assessment", "Skin Lesion Review"),
+  "possibleConditions": [{ "name": string, "likelihood": number (0-100) }] (ONLY populate when sufficient multi-turn context is gathered; leave EMPTY [] on initial question),
   "risk": "low" | "moderate" | "elevated",
-  "confidence": number (0-100, be honest — lower when info is incomplete),
-  "summary": string (a detailed, clinical explanation of your assessment or why more info is needed),
-  "reasoning": string (Optional: document your NLP semantic parsing, sentiment detection, and differential diagnosis thought process here),
-  "plainLanguageSummary": string (a simple, empathetic explanation written for a non-medical person. Adapt your tone to their sentiment. If more info is needed, explicitly ask your NEXT follow-up question here.),
-  "followUpQuestions": string[] (Optional: 1-3 suggested quick-reply options the user might click to answer your question),
-  "recommendation": string[] (2-4 specific next steps, or simply "Please answer the follow-up question" if more info is needed),
+  "confidence": number (0-100, keep LOW < 30 when asking follow-up questions),
+  "summary": string (a clinical explanation of why more info is needed or final differential analysis),
+  "reasoning": string (document your NLP symptom extraction, differential diagnostic process, and external search synthesis),
+  "plainLanguageSummary": string (empathetic summary. If asking a follow-up question, ask your ONE targeted question clearly here.),
+  "followUpQuestions": string[] (2-3 quick-reply options the patient can click to answer your question),
+  "recommendation": string[] (2-4 action steps),
   "suggestedSpecialty": string (MUST be one of: "General Medicine", "Dermatology", "Oncology", "Ophthalmology", "Dentistry & Oral Medicine", "Radiology", "Cardiology", "Gynaecology")
 }
 
 SPECIAL CASES:
-- Severe red flags (e.g., no urine, severe chest pain, fainting): Immediately suggest urgent medical care, bypassing the interview.
-- Always be empathetic and reassuring.`;
+- Emergency Red Flags (e.g., severe chest pain, sudden numbness/paralysis, difficulty breathing, unresponsiveness): Immediately set risk to "elevated" and recommend urgent emergency care.
+- Always remain warm, empathetic, and professional.`;
 
 export async function analyseSymptoms(conversationHistory: ChatMessage[]): Promise<Assessment> {
   // @ts-ignore
   const apiKey = import.meta.env["VITE_GROQ_API_KEY"];
-  
+  const userMessages = conversationHistory.filter((m) => m.role === "user");
+  const userTurnCount = userMessages.length;
+  const latestText = userMessages.length > 0 ? userMessages[userMessages.length - 1]!.content : "";
+  const hasImages = conversationHistory.some((m) => !!m.imageBase64);
+
+  // Perform external medical search across internet resources for user symptoms
+  let searchContext = "";
+  if (latestText.trim().length > 4 && !hasImages) {
+    try {
+      const searchResults = await searchMedicalInformation(latestText);
+      searchContext = `\n\nVERIFIED EXTERNAL MEDICAL SEARCH CONTEXT:\n${searchResults}\n(Use these search results to inform your clinical reasoning and differential diagnosis.)`;
+    } catch (err) {
+      console.warn("Medical information search failed:", err);
+    }
+  }
+
   if (apiKey && conversationHistory.length > 0) {
     try {
-      const hasImages = conversationHistory.some(m => !!m.imageBase64);
-      const latestText = conversationHistory.length > 0 ? conversationHistory[conversationHistory.length - 1]!.content : "";
-      
-      // Conditionally search the web only for complex, general medical questions
-      const isGeneralQuestion = /^(what|how|why|can|is it|explain|causes|treatment|symptoms)\b/i.test(latestText.trim()) && !/\b(i|my|me)\b/i.test(latestText);
-      let searchContext = "";
-      if (isGeneralQuestion && latestText.length > 5 && !hasImages) {
-        const searchResults = await searchMedicalInformation(latestText);
-        searchContext = `\n\nINTERNET SEARCH RESULTS FOR CONTEXT:\n${searchResults}\n(Use these results to inform your clinical reasoning. Summarize what you found in your 'reasoning' field.)`;
-      }
-      
       const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
         method: "POST",
         headers: {
@@ -241,7 +242,7 @@ export async function analyseSymptoms(conversationHistory: ChatMessage[]): Promi
         
         const parsed = JSON.parse(content);
         return {
-          intent: parsed.intent || "General Inquiry",
+          intent: parsed.intent || "Symptom Assessment",
           possibleConditions: parsed.possibleConditions || [],
           risk: parsed.risk || "low",
           confidence: parsed.confidence || 0,
@@ -259,21 +260,18 @@ export async function analyseSymptoms(conversationHistory: ChatMessage[]): Promi
     }
   }
 
-  // Fallback to local logic if Groq fails or API key is missing
-  await delay(900);
-  const latestMessage = conversationHistory.length > 0
-    ? conversationHistory[conversationHistory.length - 1]!.content
-    : "";
-  const hit = detectIntent(latestMessage);
-  
+  // Fallback / Offline Logic — Interactive Multi-Turn Interview Protocol
+  await delay(800);
+  const hit = detectIntent(latestText);
+
   if (hit.type === "specialty_request") {
     return {
       intent: `Find ${hit.specialty}`,
       possibleConditions: [{ name: hit.condition, likelihood: 100 }],
       risk: "low",
       confidence: 100,
-      summary: `I can help you find a ${hit.specialty}. Here are some of the top-rated specialists available for booking.`,
-      plainLanguageSummary: `You're looking for a ${hit.specialty} — I've found some great doctors nearby that you can book an appointment with right away.`,
+      summary: `I can help you find a ${hit.specialty}. Here are top-rated specialists available for booking.`,
+      plainLanguageSummary: `You're looking for a ${hit.specialty} — I've found specialists nearby that you can book an appointment with right away.`,
       followUpQuestions: [],
       recommendation: [
         `Review the available ${hit.specialty} specialists below`,
@@ -284,53 +282,82 @@ export async function analyseSymptoms(conversationHistory: ChatMessage[]): Promi
     };
   }
 
-  if (hit.condition === "Unknown") {
+  const specialty = hit.specialty || CONDITION_SPECIALTY_MAP[hit.condition] || "General Medicine";
+  const hasWeeks = latestText.toLowerCase().includes("week");
+  const hasSevere = /\b(severe|intense|unbearable|extreme|worst|very bad)\b/i.test(latestText);
+
+  // Turn 1 (Initial Message): Ask targeted follow-up question & DO NOT give premature diagnosis or doctor recommendation
+  if (userTurnCount <= 1 && hit.condition !== "Unknown") {
+    let followQuestion = "Could you tell me a bit more about what you're experiencing?";
+    let quickReplies: string[] = [];
+
+    if (latestText.toLowerCase().includes("headache")) {
+      followQuestion = "I hear you've been having headaches. To help figure out what might be causing them, could you tell me where the pain is located (e.g., forehead, temples, back of head) and if you have any other symptoms like nausea or vision changes?";
+      quickReplies = [
+        "Throbbing pain on one side with light sensitivity",
+        "Dull pressure across forehead and neck",
+        "Headache accompanied by dizziness or high blood pressure"
+      ];
+    } else if (latestText.toLowerCase().includes("rash") || latestText.toLowerCase().includes("skin")) {
+      followQuestion = "To help evaluate your skin concern, could you tell me if the affected area is itchy, painful, or raised, and when you first noticed it?";
+      quickReplies = [
+        "Itchy red patch that appeared recently",
+        "Dry scaly spot that doesn't heal",
+        "Painful bumps or blisters"
+      ];
+    } else if (latestText.toLowerCase().includes("breast")) {
+      followQuestion = "To better understand your breast symptom, could you share if you notice any lump, skin changes, or pain related to your cycle?";
+      quickReplies = [
+        "Localized pain or tenderness",
+        "Small lump felt during self-exam",
+        "Skin changes or nipple discharge"
+      ];
+    } else {
+      followQuestion = `I'd like to understand your ${hit.condition.toLowerCase()} symptoms better. How severe is the feeling on a scale of 1-10, and have you noticed any triggers or related symptoms?`;
+      quickReplies = [
+        "Mild to moderate symptoms (1-5/10)",
+        "Severe or worsening symptoms (6-10/10)",
+        "Symptoms trigger after physical activity or meals"
+      ];
+    }
+
     return {
-      intent: "General Inquiry",
-      possibleConditions: [],
-      risk: "low",
-      confidence: 0,
-      summary: "I need more information to provide an accurate assessment. Could you describe your symptoms in more detail?",
-      plainLanguageSummary: "I'd love to help, but I need a bit more detail about what you're experiencing. The more you tell me, the better I can help!",
-      followUpQuestions: [
-        "What symptoms are you experiencing?",
-        "How long have you had these symptoms?",
-        "Do you have any existing medical conditions?"
-      ],
+      intent: `Initial Clarification for ${hit.condition}`,
+      possibleConditions: [], // Empty to prevent premature diagnosis cards
+      risk: hasSevere ? "elevated" : "low",
+      confidence: 25, // Honest low confidence until follow-up answered
+      summary: `Initial inquiry noted regarding ${hit.condition.toLowerCase()} symptoms. Further clinical context (location, severity, accompanying symptoms) is required before formulating a diagnostic assessment.`,
+      plainLanguageSummary: followQuestion,
+      followUpQuestions: quickReplies,
       recommendation: [
-        "Describe what you are feeling in detail",
-        "Mention how long you've had these symptoms",
-        "Include any other relevant health history"
+        "Please select one of the quick-reply options above or describe your symptoms in more detail.",
+        "Include any other relevant health history or current medications."
       ],
       suggestedSpecialty: "General Medicine",
       disclaimer: AI_DISCLAIMER,
     };
   }
 
-  // Get knowledge base info for the condition
-  const knowledgeEntry = aiKnowledge[hit.condition as keyof typeof aiKnowledge];
-  const specialty = hit.specialty || CONDITION_SPECIALTY_MAP[hit.condition] || "General Medicine";
-  const hasWeeks = latestMessage.toLowerCase().includes("weeks");
-  const hasSevere = /\b(severe|intense|unbearable|extreme|worst|very bad)\b/i.test(latestMessage);
-
+  // Turn 2+ (Follow-up Answered or Detailed History): Provide full differential assessment
   return {
-    intent: `Assessment for ${hit.condition}`,
-    possibleConditions: [{ name: hit.condition, likelihood: 85 }],
+    intent: `Clinical Assessment for ${hit.condition}`,
+    possibleConditions: [
+      { name: hit.condition, likelihood: hasSevere ? 88 : 78 },
+      { name: "General Symptom Pattern", likelihood: 42 }
+    ],
     risk: hasSevere ? "elevated" : hasWeeks ? "moderate" : "low",
-    confidence: 78,
-    summary:
-      `Based on the symptoms you've described, there are indicators that align with ${hit.condition}. ${hasWeeks ? "The duration you mentioned increases the clinical significance." : ""} I recommend consulting a ${specialty} specialist for a thorough evaluation.`,
-    plainLanguageSummary:
-      `From what you've told me, your symptoms could be related to ${hit.condition}. ${hasWeeks ? "Since you've had this for a while, it's important to get it checked." : "It's a good idea to see a doctor to be sure."} I've suggested a ${specialty.toLowerCase()} doctor below who can help.`,
+    confidence: 82,
+    summary: `Based on your multi-turn conversation and reported symptom characteristics, the presentation aligns with ${hit.condition}. ${hasWeeks ? "The multi-week duration increases clinical significance." : ""} I recommend consulting a ${specialty} specialist for a formal clinical evaluation.`,
+    plainLanguageSummary: `Thank you for clarifying. Based on your symptoms and history, your condition shows patterns consistent with ${hit.condition}. ${hasWeeks ? "Since you've experienced this for several weeks, having a specialist evaluate it is recommended." : "Seeing a doctor will help ensure an accurate diagnosis and treatment plan."}`,
     followUpQuestions: [
-      "Have you noticed any changes in the severity of your symptoms recently?",
-      "Are you currently taking any medication?",
-      "Does anyone in your family have a similar condition?"
+      "Would you like to book an appointment with a nearby specialist now?",
+      "Are you taking any over-the-counter medications for this?",
+      "Have you noticed any new symptoms developing today?"
     ],
     recommendation: [
-      `Book an appointment with a ${specialty} specialist`,
-      "Keep a log of your symptoms including severity and timing",
-      hasWeeks ? "Seek medical attention within the next few days" : "Monitor symptoms and seek care if they worsen",
+      `Schedule a consultation with a ${specialty} specialist`,
+      "Keep a daily log of symptom frequency and severity",
+      hasSevere ? "Seek prompt medical care if symptoms intensify" : "Monitor symptoms and seek medical advice"
     ],
     suggestedSpecialty: specialty,
     disclaimer: AI_DISCLAIMER,
