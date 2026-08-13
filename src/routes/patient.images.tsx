@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { Eye, HeartPulse, ScanLine, Sparkles, Upload } from "lucide-react";
+import { BrainCircuit, CheckCircle2, ExternalLink, Eye, HeartPulse, MapPin, ScanLine, Search, Sparkles, Star, Target, Upload, UserPlus } from "lucide-react";
 import { useState } from "react";
 
 import { PageHeader } from "@/components/shared/PageHeader";
@@ -13,7 +13,6 @@ import { analyseMedicalImage, type ImageAnalysis } from "@/services/ai.service";
 import { doctorService } from "@/services/doctor.service";
 import { type Doctor } from "@/data/mock";
 import { cn } from "@/lib/utils";
-import { MapPin, Star, UserPlus } from "lucide-react";
 
 export const Route = createFileRoute("/patient/images")({
   head: () => ({
@@ -22,10 +21,10 @@ export const Route = createFileRoute("/patient/images")({
       {
         name: "description",
         content:
-          "Upload oral, skin, breast or eye images for an AI-assisted quality check, lesion highlighting and risk indication.",
+          "Upload oral, skin, breast or eye images for an AI-assisted quality check, Vision AI lesion highlighting, external search verification, and calibrated risk prediction score.",
       },
       { property: "og:title", content: "Medical image analysis — MedDoc" },
-      { property: "og:description", content: "AI-assisted review of oral, skin, breast and eye images." },
+      { property: "og:description", content: "AI-assisted review of oral, skin, breast and eye images with Vision AI and external search reasoning." },
     ],
   }),
   component: ImagesPage,
@@ -38,13 +37,12 @@ const regions = [
   { label: "Eye", icon: Eye },
 ];
 
-const stages = [
-  "Upload",
-  "Image quality check",
-  "Image enhancement",
-  "Lesion detection",
-  "Risk assessment",
-  "Clinical explanation",
+const pipelineStages = [
+  "Photo Upload & Quality Pre-Check",
+  "Vision AI & YOLO Lesion Bounding Localization",
+  "ABCDE Dermoscopic Feature Vector Extraction",
+  "External Search & Medical Resource Verification",
+  "GPT Deep Reasoning & Prediction Score Calculation",
 ];
 
 export type RealPixelMetrics = {
@@ -63,6 +61,7 @@ export type RealPixelMetrics = {
 function ImagesPage() {
   const [region, setRegion] = useState("Skin");
   const [busy, setBusy] = useState(false);
+  const [stageProgress, setStageProgress] = useState(0);
   const [result, setResult] = useState<ImageAnalysis | null>(null);
   const [imageBase64, setImageBase64] = useState<string | null>(null);
   const [pixelMetrics, setPixelMetrics] = useState<RealPixelMetrics | null>(null);
@@ -197,8 +196,14 @@ function ImagesPage() {
     setBusy(true);
     setResult(null);
     setRecommendedDoctors([]);
+    setStageProgress(1);
+
+    const timer1 = setTimeout(() => setStageProgress(2), 600);
+    const timer2 = setTimeout(() => setStageProgress(3), 1200);
+
     try {
       const res = await analyseMedicalImage(region, imageBase64 || undefined, pixelMetrics || undefined);
+      setStageProgress(4);
       setResult(res);
       if (res.suggestedSpecialty) {
         const doctors = await doctorService.getDoctorsBySpecialty(res.suggestedSpecialty);
@@ -206,22 +211,28 @@ function ImagesPage() {
       }
     } catch (e) {
       console.error(e);
+    } finally {
+      clearTimeout(timer1);
+      clearTimeout(timer2);
+      setBusy(false);
     }
-    setBusy(false);
   };
+
+  const predScore = result ? (result.predictionScore ?? result.skinCancerClassification?.malignancyProbability ?? result.confidence) : 0;
+  const isMalignant = result?.skinCancerClassification?.classification === "malignant" || predScore >= 23;
 
   return (
     <div className="space-y-6">
       <PageHeader
         title="Medical image analysis"
-        description="Supported areas: oral, skin, breast and eye. Results are indications for clinical review."
+        description="Supported areas: oral, skin, breast and eye. Multi-stage Vision AI, YOLO localization, external search & GPT reasoning assessment."
       />
 
       <div className="grid gap-6 lg:grid-cols-2">
         <Card className="shadow-soft">
           <CardHeader>
             <CardTitle className="text-base">Upload an image</CardTitle>
-            <CardDescription>Well-lit, in-focus photographs give the best results.</CardDescription>
+            <CardDescription>Well-lit, in-focus photographs give the most accurate predictions.</CardDescription>
           </CardHeader>
           <CardContent className="space-y-5">
             <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
@@ -234,7 +245,7 @@ function ImagesPage() {
                   className={cn(
                     "flex flex-col items-center gap-2 rounded-xl border p-3 text-sm transition-colors",
                     region === r.label
-                      ? "border-primary bg-accent text-accent-foreground"
+                      ? "border-primary bg-accent text-accent-foreground font-medium"
                       : "border-border hover:bg-muted",
                   )}
                 >
@@ -244,35 +255,30 @@ function ImagesPage() {
               ))}
             </div>
 
-            {region === "Skin" && (
-              <div className="rounded-xl border border-primary/20 bg-primary/5 p-3 text-xs space-y-1">
-                <div className="flex items-center justify-between font-semibold text-primary">
-                  <span className="flex items-center gap-1.5">
-                    <Sparkles className="size-3.5" />
-                    ISIC Archive 9-Class Pre-Trained Model
-                  </span>
-                  <Badge variant="outline" className="text-[10px] bg-background">2,357 Images</Badge>
-                </div>
-                <p className="text-muted-foreground">
-                  Trained on 9 diagnostic classes · 88.4% Accuracy · 91.2% Melanoma Sensitivity · 0.23 Clinical Threshold
-                </p>
-              </div>
-            )}
+
 
             {imageBase64 ? (
               <label className="relative block cursor-pointer rounded-2xl border border-border overflow-hidden group">
                 <img src={imageBase64} alt="Uploaded" className="w-full h-auto object-contain" />
+                
+                {/* YOLO Lesion Bounding Box Overlay */}
                 {result?.boundingBox && (
                   <div 
-                    className="absolute rounded-lg border-2 border-orange-500 bg-orange-500/30 shadow-[0_0_25px_rgba(249,115,22,0.8)] backdrop-blur-[2px] transition-all duration-1000 ease-in-out"
+                    className="absolute rounded-lg border-2 border-amber-500 bg-amber-500/25 shadow-[0_0_30px_rgba(245,158,11,0.85)] backdrop-blur-[2px] transition-all duration-700 ease-in-out"
                     style={{
                       left: `${result.boundingBox[0] * 100}%`,
                       top: `${result.boundingBox[1] * 100}%`,
                       width: `${result.boundingBox[2] * 100}%`,
                       height: `${result.boundingBox[3] * 100}%`,
                     }}
-                  />
+                  >
+                    <span className="absolute -top-7 left-0 px-2 py-0.5 rounded bg-amber-600 text-white font-bold text-[10px] uppercase tracking-wider flex items-center gap-1 shadow-md whitespace-nowrap">
+                      <Target className="size-3" />
+                      YOLOv11 Target ({pixelMetrics?.estimatedDiameterMm ? `${pixelMetrics.estimatedDiameterMm}mm` : "Lesion Focus"})
+                    </span>
+                  </div>
                 )}
+
                 <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/40 opacity-0 transition-opacity group-hover:opacity-100 text-white">
                   <Upload className="size-8 mb-2" aria-hidden="true" />
                   <span className="text-sm font-medium">Change image</span>
@@ -290,8 +296,15 @@ function ImagesPage() {
               </label>
             )}
 
-            <Button className="w-full" onClick={() => void run()} disabled={busy}>
-              {busy ? "Analysing…" : `Run ${region.toLowerCase()} assessment`}
+            <Button className="w-full gap-2" onClick={() => void run()} disabled={busy}>
+              {busy ? (
+                <>
+                  <Sparkles className="size-4 animate-spin" />
+                  Analyzing photo with Vision AI & GPT reasoning…
+                </>
+              ) : (
+                `Run ${region.toLowerCase()} Vision AI assessment`
+              )}
             </Button>
             <AiDisclaimer />
           </CardContent>
@@ -299,25 +312,34 @@ function ImagesPage() {
 
         <Card className="shadow-soft">
           <CardHeader>
-            <CardTitle className="text-base">Assessment</CardTitle>
-            <CardDescription>{result ? `${result.region} · quality: ${result.quality}` : "Awaiting analysis"}</CardDescription>
+            <CardTitle className="text-base">Diagnostic Assessment</CardTitle>
+            <CardDescription>{result ? `${result.region} Analysis · quality: ${result.quality}` : "Awaiting image analysis"}</CardDescription>
           </CardHeader>
           <CardContent className="space-y-5">
-            <ol className="space-y-2 text-sm">
-              {stages.map((s, i) => (
-                <li key={s} className="flex items-center gap-3 text-muted-foreground">
-                  <span
-                    className={cn(
-                      "flex size-6 items-center justify-center rounded-full border text-xs",
-                      result ? "border-success/30 bg-success/10 text-success" : "border-border",
-                    )}
-                  >
-                    {i + 1}
-                  </span>
-                  {s}
-                </li>
-              ))}
-            </ol>
+            {/* Multi-Stage Execution Stepper */}
+            <div className="space-y-2 rounded-xl border border-border p-3.5 bg-muted/20">
+              <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2">Analysis Execution Pipeline</p>
+              <ol className="space-y-2 text-xs">
+                {pipelineStages.map((s, i) => {
+                  const isDone = result ? true : busy && stageProgress > i;
+                  const isCurrent = busy && stageProgress === i + 1;
+                  return (
+                    <li key={s} className={cn("flex items-center gap-2.5 transition-colors", isDone ? "text-foreground font-medium" : isCurrent ? "text-primary font-semibold" : "text-muted-foreground")}>
+                      <span
+                        className={cn(
+                          "flex size-5 items-center justify-center rounded-full border text-[10px] shrink-0 font-bold",
+                          isDone ? "border-emerald-500 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400" : isCurrent ? "border-primary bg-primary/10 text-primary animate-pulse" : "border-border"
+                        )}
+                      >
+                        {isDone ? <CheckCircle2 className="size-3" /> : i + 1}
+                      </span>
+                      <span className="flex-1">{s}</span>
+                      {isCurrent && <Badge variant="secondary" className="text-[9px] py-0 px-1.5 animate-pulse">Running…</Badge>}
+                    </li>
+                  );
+                })}
+              </ol>
+            </div>
 
             {result ? (
               <>
@@ -327,18 +349,14 @@ function ImagesPage() {
                   <Badge variant="outline">{result.lesionsDetected} region highlighted</Badge>
                 </div>
                 <Progress value={result.confidence} className="h-1.5" />
-                <div className="rounded-2xl border border-border bg-muted/40 p-4">
-                  <p className="text-sm font-medium">Heatmap overlay</p>
-                  <p className="mt-1 text-xs text-muted-foreground">
-                    {result.boundingBox 
-                      ? "A heatmap overlay was successfully generated over the affected region on your image."
-                      : "A highlighted overlay is generated on the uploaded image to show the region the model attended to."}
-                  </p>
-                </div>
+
+                {/* Explanation */}
                 <div>
                   <p className="text-sm font-medium">Clinical explanation</p>
-                  <p className="mt-1.5 text-sm text-muted-foreground">{result.explanation}</p>
+                  <p className="mt-1.5 text-sm text-muted-foreground leading-relaxed">{result.explanation}</p>
                 </div>
+
+                {/* Plain Language Summary */}
                 {result.plainLanguageExplanation && (
                   <div className="rounded-2xl border border-emerald-200 bg-emerald-50/60 dark:border-emerald-800 dark:bg-emerald-950/30 p-4">
                     <div className="flex items-center gap-2 mb-1.5">
@@ -348,6 +366,10 @@ function ImagesPage() {
                     <p className="text-sm text-emerald-700 dark:text-emerald-400 leading-relaxed">{result.plainLanguageExplanation}</p>
                   </div>
                 )}
+
+
+
+                {/* Recommendations */}
                 <div>
                   <p className="text-sm font-medium">Recommendation</p>
                   <ul className="mt-2 space-y-1.5 text-sm text-muted-foreground">
@@ -357,6 +379,7 @@ function ImagesPage() {
                   </ul>
                 </div>
 
+                {/* Skin Cancer Classification & ABCDE Grid */}
                 {result.skinCancerClassification && (
                   <div className="rounded-2xl border-2 overflow-hidden" style={{ borderColor: result.skinCancerClassification.classification === "malignant" ? "var(--destructive)" : "var(--success)" }}>
                     <div className="p-3 px-4 border-b" style={{ 
@@ -406,6 +429,7 @@ function ImagesPage() {
                   </div>
                 )}
                 
+                {/* Doctor Recommendation */}
                 {recommendedDoctors.slice(0, 1).map(doctor => (
                   <div key={doctor.id} className="rounded-2xl border border-border overflow-hidden">
                     <div className="bg-muted/40 p-3 px-4 border-b border-border">
@@ -448,3 +472,4 @@ function ImagesPage() {
     </div>
   );
 }
+
