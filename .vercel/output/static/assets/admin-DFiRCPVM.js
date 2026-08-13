@@ -1,0 +1,1 @@
+import{t as e}from"./jsx-runtime-Ciaf_P-h.js";import{a as t,t as n}from"./navs-DvFj_lBf.js";import{a as r}from"./index-1nbMOLLj.js";var i=e(),a=()=>(0,i.jsx)(t,{nav:n,portalLabel:`Admin portal`,children:(0,i.jsx)(r,{})});export{a as component};
