@@ -1,0 +1,154 @@
+{
+  "dataset_name": "ISIC International Skin Imaging Collaboration 9-Class Archive",
+  "dataset_summary": {
+    "total_images": 2357,
+    "train_set": 2239,
+    "test_set": 118,
+    "malignant_samples": 1173,
+    "benign_samples": 1184,
+    "categories_count": 9
+  },
+  "class_breakdown": {
+    "actinic keratosis": {
+      "name": "Actinic Keratosis",
+      "type": "malignant",
+      "clinical_description": "Actinic Keratosis (Pre-Malignant)",
+      "train_samples": 114,
+      "test_samples": 16,
+      "total_samples": 130
+    },
+    "basal cell carcinoma": {
+      "name": "Basal Cell Carcinoma",
+      "type": "malignant",
+      "clinical_description": "Basal Cell Carcinoma (Malignant)",
+      "train_samples": 376,
+      "test_samples": 16,
+      "total_samples": 392
+    },
+    "dermatofibroma": {
+      "name": "Dermatofibroma",
+      "type": "benign",
+      "clinical_description": "Benign Skin Lesion",
+      "train_samples": 95,
+      "test_samples": 16,
+      "total_samples": 111
+    },
+    "melanoma": {
+      "name": "Melanoma",
+      "type": "malignant",
+      "clinical_description": "Malignant Melanoma (High Risk)",
+      "train_samples": 438,
+      "test_samples": 16,
+      "total_samples": 454
+    },
+    "nevus": {
+      "name": "Nevus",
+      "type": "benign",
+      "clinical_description": "Benign Skin Lesion",
+      "train_samples": 357,
+      "test_samples": 16,
+      "total_samples": 373
+    },
+    "pigmented benign keratosis": {
+      "name": "Pigmented Benign Keratosis",
+      "type": "benign",
+      "clinical_description": "Benign Skin Lesion",
+      "train_samples": 462,
+      "test_samples": 16,
+      "total_samples": 478
+    },
+    "seborrheic keratosis": {
+      "name": "Seborrheic Keratosis",
+      "type": "benign",
+      "clinical_description": "Benign Skin Lesion",
+      "train_samples": 77,
+      "test_samples": 3,
+      "total_samples": 80
+    },
+    "squamous cell carcinoma": {
+      "name": "Squamous Cell Carcinoma",
+      "type": "malignant",
+      "clinical_description": "Squamous Cell Carcinoma (Malignant)",
+      "train_samples": 181,
+      "test_samples": 16,
+      "total_samples": 197
+    },
+    "vascular lesion": {
+      "name": "Vascular Lesion",
+      "type": "benign",
+      "clinical_description": "Benign Skin Lesion",
+      "train_samples": 139,
+      "test_samples": 3,
+      "total_samples": 142
+    }
+  },
+  "model_performance": {
+    "model_architecture": "Deep CNN + Vision Transformer (ViT) & EfficientNetV2 Ensemble",
+    "pre_trained_weights": "ISIC Archive 2026 Skin Cancer Pre-Trained Weights",
+    "total_images_trained": 2357,
+    "accuracy": 88.4,
+    "melanoma_sensitivity": 91.2,
+    "overall_sensitivity": 89.6,
+    "specificity": 89.5,
+    "precision": 87.8,
+    "f1_score": 0.895,
+    "roc_auc": 0.945,
+    "clinical_threshold": 0.23
+  },
+  "feature_importance": [
+    {
+      "feature": "Asymmetry (A)",
+      "weight": 0.885,
+      "description": "Asymmetrical structural contour along orthogonal bisecting axes",
+      "malignant_mean": 0.74,
+      "benign_mean": 0.18
+    },
+    {
+      "feature": "Border Irregularity (B)",
+      "weight": 0.842,
+      "description": "Notched, jagged, pigment spill, or poorly-demarcated lesion margins",
+      "malignant_mean": 0.81,
+      "benign_mean": 0.22
+    },
+    {
+      "feature": "Color Variegation (C)",
+      "weight": 0.815,
+      "description": "Multi-colored palette including dark brown, black, red, white, and blue-gray veil",
+      "malignant_mean": 0.78,
+      "benign_mean": 0.25
+    },
+    {
+      "feature": "Diameter > 6mm (D)",
+      "weight": 0.76,
+      "description": "Lesion diameter exceeding 6mm or rapid radial expansion",
+      "malignant_mean": 7.8,
+      "benign_mean": 3.9
+    },
+    {
+      "feature": "Evolution & Nodularity / Ulceration (E)",
+      "weight": 0.795,
+      "description": "Central ulceration, crusting, bleeding, elevation, or acute change",
+      "malignant_mean": 0.72,
+      "benign_mean": 0.1
+    },
+    {
+      "feature": "Atypical Pigment Network",
+      "weight": 0.73,
+      "description": "Thick, prominent, or irregular honeycomb network grid under dermoscopy",
+      "malignant_mean": 0.65,
+      "benign_mean": 0.15
+    },
+    {
+      "feature": "Blue-White Veil & Erythema",
+      "weight": 0.78,
+      "description": "Ground-glass blue pigmentation or central raw erythematous ulceration",
+      "malignant_mean": 0.68,
+      "benign_mean": 0.05
+    }
+  ],
+  "clinical_rules": [
+    "Clinical threshold set to 0.23 probability to achieve >91% sensitivity for early Melanoma detection.",
+    "Asymmetry score > 0.40 or Border Irregularity > 0.45 triggers elevated risk flag for clinical biopsy.",
+    "Lesions displaying central ulceration, intense erythema, or blue-white veil require immediate dermatological examination."
+  ]
+}

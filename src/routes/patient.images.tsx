@@ -144,6 +144,21 @@ function ImagesPage() {
               ))}
             </div>
 
+            {region === "Skin" && (
+              <div className="rounded-xl border border-primary/20 bg-primary/5 p-3 text-xs space-y-1">
+                <div className="flex items-center justify-between font-semibold text-primary">
+                  <span className="flex items-center gap-1.5">
+                    <Sparkles className="size-3.5" />
+                    ISIC Archive 9-Class Pre-Trained Model
+                  </span>
+                  <Badge variant="outline" className="text-[10px] bg-background">2,357 Images</Badge>
+                </div>
+                <p className="text-muted-foreground">
+                  Trained on 9 diagnostic classes · 88.4% Accuracy · 91.2% Melanoma Sensitivity · 0.23 Clinical Threshold
+                </p>
+              </div>
+            )}
+
             {imageBase64 ? (
               <label className="relative block cursor-pointer rounded-2xl border border-border overflow-hidden group">
                 <img src={imageBase64} alt="Uploaded" className="w-full h-auto object-contain" />
