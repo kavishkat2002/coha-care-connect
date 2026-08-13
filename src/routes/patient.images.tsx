@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { Eye, HeartPulse, ScanLine, Sparkles, Upload } from "lucide-react";
+import { Eye, HeartPulse, ScanLine, Sparkles, Upload, Database, ShieldCheck, Activity, Brain } from "lucide-react";
 import { useState } from "react";
 
 import { PageHeader } from "@/components/shared/PageHeader";
@@ -287,6 +287,85 @@ function ImagesPage() {
                         </div>
                         <p className="text-xs text-muted-foreground mt-1.5">Clinical threshold: 23% (sensitivity-optimized to minimize false negatives for malignant detection)</p>
                       </div>
+                    </div>
+                  </div>
+                )}
+
+                {result.skinCancerModelMetrics && (
+                  <div className="rounded-2xl border border-rose-500/30 bg-rose-500/5 dark:bg-rose-950/20 p-4 space-y-3">
+                    <div className="flex items-center justify-between flex-wrap gap-2">
+                      <div className="flex items-center gap-2">
+                        <Brain className="size-4 text-rose-600 dark:text-rose-400" />
+                        <p className="text-sm font-semibold text-rose-700 dark:text-rose-300">Pre-Trained 9-Class ISIC Skin Cancer ML Model</p>
+                      </div>
+                      <Badge className="bg-rose-500/20 text-rose-700 dark:text-rose-300 border-rose-500/30 text-xs">
+                        <ShieldCheck className="size-3 mr-1" />
+                        Pre-Trained on {result.skinCancerModelMetrics.dataset_summary.total_images} Lesion Scans
+                      </Badge>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-2 sm:grid-cols-4 text-xs">
+                      <div className="rounded-lg bg-background p-2 border border-border">
+                        <p className="text-muted-foreground">Accuracy</p>
+                        <p className="text-sm font-bold text-foreground">{result.skinCancerModelMetrics.model_performance.accuracy}%</p>
+                      </div>
+                      <div className="rounded-lg bg-background p-2 border border-border">
+                        <p className="text-muted-foreground">Melanoma Sensitivity</p>
+                        <p className="text-sm font-bold text-rose-600 dark:text-rose-400">{result.skinCancerModelMetrics.model_performance.melanoma_sensitivity}%</p>
+                      </div>
+                      <div className="rounded-lg bg-background p-2 border border-border">
+                        <p className="text-muted-foreground">Specificity</p>
+                        <p className="text-sm font-bold text-emerald-600 dark:text-emerald-400">{result.skinCancerModelMetrics.model_performance.specificity}%</p>
+                      </div>
+                      <div className="rounded-lg bg-background p-2 border border-border">
+                        <p className="text-muted-foreground">ROC-AUC</p>
+                        <p className="text-sm font-bold text-purple-600 dark:text-purple-400">{result.skinCancerModelMetrics.model_performance.roc_auc}</p>
+                      </div>
+                    </div>
+
+                    <div className="text-xs space-y-1.5 text-muted-foreground pt-1 border-t border-border/50">
+                      <p><span className="font-medium text-foreground">Diagnostic Categories:</span> Melanoma, Basal Cell, Squamous Cell, Actinic Keratosis, Nevus, Seborrheic Keratosis ({result.skinCancerModelMetrics.dataset_summary.categories_count} total classes)</p>
+                      <p><span className="font-medium text-foreground">Model Architecture:</span> {result.skinCancerModelMetrics.model_performance.model_architecture}</p>
+                      <p><span className="font-medium text-foreground">Clinical Threshold:</span> {result.skinCancerModelMetrics.model_performance.clinical_threshold} (sensitivity-optimized for early malignant melanoma detection)</p>
+                    </div>
+                  </div>
+                )}
+
+                {result.cancerModelVerified && result.cancerModelMetrics && (
+                  <div className="rounded-2xl border border-primary/30 bg-primary/5 p-4 space-y-3">
+                    <div className="flex items-center justify-between flex-wrap gap-2">
+                      <div className="flex items-center gap-2">
+                        <Database className="size-4 text-primary" />
+                        <p className="text-sm font-semibold text-primary">Trained Breast Cancer Dataset ML Model</p>
+                      </div>
+                      <Badge className="bg-primary/20 text-primary border-primary/30 text-xs">
+                        <ShieldCheck className="size-3 mr-1" />
+                        Dataset Trained & Verified
+                      </Badge>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-2 sm:grid-cols-4 text-xs">
+                      <div className="rounded-lg bg-background p-2 border border-border">
+                        <p className="text-muted-foreground">Accuracy</p>
+                        <p className="text-sm font-bold text-foreground">{result.cancerModelMetrics.model_performance.accuracy}%</p>
+                      </div>
+                      <div className="rounded-lg bg-background p-2 border border-border">
+                        <p className="text-muted-foreground">Sensitivity</p>
+                        <p className="text-sm font-bold text-emerald-600 dark:text-emerald-400">{result.cancerModelMetrics.model_performance.sensitivity}%</p>
+                      </div>
+                      <div className="rounded-lg bg-background p-2 border border-border">
+                        <p className="text-muted-foreground">Specificity</p>
+                        <p className="text-sm font-bold text-blue-600 dark:text-blue-400">{result.cancerModelMetrics.model_performance.specificity}%</p>
+                      </div>
+                      <div className="rounded-lg bg-background p-2 border border-border">
+                        <p className="text-muted-foreground">ROC-AUC</p>
+                        <p className="text-sm font-bold text-purple-600 dark:text-purple-400">{result.cancerModelMetrics.model_performance.roc_auc}</p>
+                      </div>
+                    </div>
+
+                    <div className="text-xs space-y-1 text-muted-foreground pt-1">
+                      <p><span className="font-medium text-foreground">Dataset:</span> {result.cancerModelMetrics.dataset_name} ({result.cancerModelMetrics.dataset_info.total_samples} samples)</p>
+                      <p><span className="font-medium text-foreground">Top Predictors:</span> {result.cancerModelMetrics.top_features.slice(0, 4).map(f => f.feature).join(", ")}</p>
                     </div>
                   </div>
                 )}
