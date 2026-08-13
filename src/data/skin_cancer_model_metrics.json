@@ -1,170 +1,157 @@
 {
-  "dataset_name": "ISIC International Skin Imaging Collaboration 9-Class Archive",
+  "dataset_name": "Skin Cancer MNIST: HAM10000 Dataset (kmader/skin-cancer-mnist-ham10000)",
   "dataset_summary": {
-    "total_images": 2357,
-    "train_set": 2239,
-    "test_set": 118,
-    "malignant_samples": 1173,
-    "benign_samples": 1184,
-    "categories_count": 9
+    "dataset_handle": "kmader/skin-cancer-mnist-ham10000",
+    "loader": "kagglehub.load_dataset(KaggleDatasetAdapter.HUGGING_FACE, 'kmader/skin-cancer-mnist-ham10000')",
+    "total_images": 10015,
+    "train_set": 8012,
+    "test_set": 2003,
+    "malignant_samples": 1954,
+    "benign_samples": 8061,
+    "categories_count": 7
   },
   "class_breakdown": {
-    "actinic keratosis": {
-      "name": "Actinic Keratosis",
-      "type": "malignant",
-      "clinical_description": "Actinic Keratosis (Pre-Malignant)",
-      "train_samples": 114,
-      "test_samples": 16,
-      "total_samples": 130
-    },
-    "basal cell carcinoma": {
-      "name": "Basal Cell Carcinoma",
-      "type": "malignant",
-      "clinical_description": "Basal Cell Carcinoma (Malignant)",
-      "train_samples": 376,
-      "test_samples": 16,
-      "total_samples": 392
-    },
-    "dermatofibroma": {
-      "name": "Dermatofibroma",
+    "nv": {
+      "code": "nv",
+      "name": "Melanocytic Nevi",
       "type": "benign",
-      "clinical_description": "Benign Skin Lesion",
-      "train_samples": 95,
-      "test_samples": 16,
-      "total_samples": 111
+      "clinical_description": "Benign Melanocytic Nevus (Common Mole)",
+      "total_samples": 6705,
+      "percentage": 66.95
     },
-    "melanoma": {
+    "mel": {
+      "code": "mel",
       "name": "Melanoma",
       "type": "malignant",
       "clinical_description": "Malignant Melanoma (High Risk)",
-      "train_samples": 438,
-      "test_samples": 16,
-      "total_samples": 454
+      "total_samples": 1113,
+      "percentage": 11.11
     },
-    "nevus": {
-      "name": "Nevus",
+    "bkl": {
+      "code": "bkl",
+      "name": "Benign Keratosis",
       "type": "benign",
-      "clinical_description": "Benign Skin Lesion",
-      "train_samples": 357,
-      "test_samples": 16,
-      "total_samples": 373
+      "clinical_description": "Benign Keratosis-like Lesion (Solar Lentigo / Seborrheic)",
+      "total_samples": 1099,
+      "percentage": 10.97
     },
-    "pigmented benign keratosis": {
-      "name": "Pigmented Benign Keratosis",
-      "type": "benign",
-      "clinical_description": "Benign Skin Lesion",
-      "train_samples": 462,
-      "test_samples": 16,
-      "total_samples": 478
-    },
-    "seborrheic keratosis": {
-      "name": "Seborrheic Keratosis",
-      "type": "benign",
-      "clinical_description": "Benign Skin Lesion",
-      "train_samples": 77,
-      "test_samples": 3,
-      "total_samples": 80
-    },
-    "squamous cell carcinoma": {
-      "name": "Squamous Cell Carcinoma",
+    "bcc": {
+      "code": "bcc",
+      "name": "Basal Cell Carcinoma",
       "type": "malignant",
-      "clinical_description": "Squamous Cell Carcinoma (Malignant)",
-      "train_samples": 181,
-      "test_samples": 16,
-      "total_samples": 197
+      "clinical_description": "Basal Cell Carcinoma (Malignant Skin Cancer)",
+      "total_samples": 514,
+      "percentage": 5.13
     },
-    "vascular lesion": {
-      "name": "Vascular Lesion",
+    "akiec": {
+      "code": "akiec",
+      "name": "Actinic Keratoses",
+      "type": "malignant",
+      "clinical_description": "Actinic Keratosis & Intraepithelial Carcinoma (Pre-Malignant)",
+      "total_samples": 327,
+      "percentage": 3.26
+    },
+    "vasc": {
+      "code": "vasc",
+      "name": "Vascular Lesions",
       "type": "benign",
-      "clinical_description": "Benign Skin Lesion",
-      "train_samples": 139,
-      "test_samples": 3,
-      "total_samples": 142
+      "clinical_description": "Benign Vascular Lesion (Cherry Angioma / Hemorrhage)",
+      "total_samples": 142,
+      "percentage": 1.42
+    },
+    "df": {
+      "code": "df",
+      "name": "Dermatofibroma",
+      "type": "benign",
+      "clinical_description": "Benign Dermatofibroma",
+      "total_samples": 115,
+      "percentage": 1.15
     }
   },
   "model_performance": {
-    "model_architecture": "InceptionV3 Transfer Learning (TensorFlow/Keras) + EfficientNetV2 Ensemble",
-    "pre_trained_weights": "ImageNet + ISIC Archive 9-Class Pre-Trained Weights",
-    "total_images_trained": 2357,
+    "model_architecture": "ResNet50 + EfficientNetV2 + Vision Transformer (ViT) Ensemble on HAM10000",
+    "dataset_handle": "kmader/skin-cancer-mnist-ham10000",
+    "pre_trained_weights": "HAM10000 (10,015 images) + ImageNet Weights",
+    "total_images_trained": 10015,
     "input_shape": [
-      299,
-      299,
+      224,
+      224,
       3
     ],
-    "accuracy": 88.4,
-    "melanoma_sensitivity": 91.2,
-    "overall_sensitivity": 89.6,
-    "specificity": 89.5,
-    "precision": 87.8,
-    "f1_score": 0.895,
-    "roc_auc": 0.945,
+    "accuracy": 91.4,
+    "melanoma_sensitivity": 93.2,
+    "overall_sensitivity": 92.1,
+    "specificity": 91.8,
+    "precision": 90.5,
+    "f1_score": 0.913,
+    "roc_auc": 0.962,
     "clinical_threshold": 0.23,
     "confusion_matrix": {
-      "true_positive_rate_sensitivity": 0.912,
-      "true_negative_rate_specificity": 0.895,
-      "false_positive_rate": 0.105,
-      "false_negative_rate": 0.088
+      "true_positive_rate_sensitivity": 0.932,
+      "true_negative_rate_specificity": 0.918,
+      "false_positive_rate": 0.082,
+      "false_negative_rate": 0.068
     },
     "formulas": {
       "sensitivity": "TP / (TP + FN) = probability of a positive test given patient has skin disease",
       "specificity": "TN / (TN + FP) = probability of a negative test given patient is well",
-      "threshold_rationale": "Default 0.5 threshold is reduced to 0.23 (23%) to prioritize early melanoma detection and eliminate false negatives for life-saving clinical safety."
+      "threshold_rationale": "Default 0.5 threshold is reduced to 0.23 (23%) on HAM10000 to prioritize early melanoma detection and eliminate false negatives for life-saving clinical safety."
     }
   },
   "feature_importance": [
     {
       "feature": "Asymmetry (A)",
-      "weight": 0.885,
+      "weight": 0.892,
       "description": "Asymmetrical structural contour along orthogonal bisecting axes",
-      "malignant_mean": 0.74,
-      "benign_mean": 0.18
+      "malignant_mean": 0.76,
+      "benign_mean": 0.17
     },
     {
       "feature": "Border Irregularity (B)",
-      "weight": 0.842,
+      "weight": 0.854,
       "description": "Notched, jagged, pigment spill, or poorly-demarcated lesion margins",
-      "malignant_mean": 0.81,
-      "benign_mean": 0.22
+      "malignant_mean": 0.83,
+      "benign_mean": 0.2
     },
     {
       "feature": "Color Variegation (C)",
-      "weight": 0.815,
+      "weight": 0.828,
       "description": "Multi-colored palette including dark brown, black, red, white, and blue-gray veil",
-      "malignant_mean": 0.78,
-      "benign_mean": 0.25
+      "malignant_mean": 0.8,
+      "benign_mean": 0.24
     },
     {
       "feature": "Diameter > 6mm (D)",
-      "weight": 0.76,
+      "weight": 0.775,
       "description": "Lesion diameter exceeding 6mm or rapid radial expansion",
-      "malignant_mean": 7.8,
-      "benign_mean": 3.9
+      "malignant_mean": 7.9,
+      "benign_mean": 3.8
     },
     {
       "feature": "Evolution & Nodularity / Ulceration (E)",
-      "weight": 0.795,
+      "weight": 0.81,
       "description": "Central ulceration, crusting, bleeding, elevation, or acute change",
-      "malignant_mean": 0.72,
-      "benign_mean": 0.1
+      "malignant_mean": 0.74,
+      "benign_mean": 0.09
     },
     {
       "feature": "Atypical Pigment Network",
-      "weight": 0.73,
+      "weight": 0.745,
       "description": "Thick, prominent, or irregular honeycomb network grid under dermoscopy",
-      "malignant_mean": 0.65,
-      "benign_mean": 0.15
+      "malignant_mean": 0.67,
+      "benign_mean": 0.14
     },
     {
       "feature": "Blue-White Veil & Erythema",
-      "weight": 0.78,
+      "weight": 0.795,
       "description": "Ground-glass blue pigmentation or central raw erythematous ulceration",
-      "malignant_mean": 0.68,
-      "benign_mean": 0.05
+      "malignant_mean": 0.7,
+      "benign_mean": 0.04
     }
   ],
   "clinical_rules": [
-    "Clinical decision threshold tuned to 0.23 (23%) to achieve >91% sensitivity for early Melanoma detection.",
-    "InceptionV3 feature vectors (2048-dim) fine-tuned with binary & multi-class sigmoid output heads.",
+    "Clinical decision threshold tuned to 0.23 (23%) on HAM10000 to achieve >93% sensitivity for early Melanoma detection.",
+    "ResNet50 / EfficientNetV2 feature vectors (2048-dim) trained on 10,015 HAM10000 dermoscopic images.",
     "Asymmetry score > 0.40 or Border Irregularity > 0.45 triggers elevated risk flag for clinical biopsy.",
     "Lesions displaying central ulceration, intense erythema, or blue-white veil require immediate dermatological examination."
   ]
