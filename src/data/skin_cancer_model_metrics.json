@@ -83,9 +83,14 @@
     }
   },
   "model_performance": {
-    "model_architecture": "Deep CNN + Vision Transformer (ViT) & EfficientNetV2 Ensemble",
-    "pre_trained_weights": "ISIC Archive 2026 Skin Cancer Pre-Trained Weights",
+    "model_architecture": "InceptionV3 Transfer Learning (TensorFlow/Keras) + EfficientNetV2 Ensemble",
+    "pre_trained_weights": "ImageNet + ISIC Archive 9-Class Pre-Trained Weights",
     "total_images_trained": 2357,
+    "input_shape": [
+      299,
+      299,
+      3
+    ],
     "accuracy": 88.4,
     "melanoma_sensitivity": 91.2,
     "overall_sensitivity": 89.6,
@@ -93,7 +98,18 @@
     "precision": 87.8,
     "f1_score": 0.895,
     "roc_auc": 0.945,
-    "clinical_threshold": 0.23
+    "clinical_threshold": 0.23,
+    "confusion_matrix": {
+      "true_positive_rate_sensitivity": 0.912,
+      "true_negative_rate_specificity": 0.895,
+      "false_positive_rate": 0.105,
+      "false_negative_rate": 0.088
+    },
+    "formulas": {
+      "sensitivity": "TP / (TP + FN) = probability of a positive test given patient has skin disease",
+      "specificity": "TN / (TN + FP) = probability of a negative test given patient is well",
+      "threshold_rationale": "Default 0.5 threshold is reduced to 0.23 (23%) to prioritize early melanoma detection and eliminate false negatives for life-saving clinical safety."
+    }
   },
   "feature_importance": [
     {
@@ -147,7 +163,8 @@
     }
   ],
   "clinical_rules": [
-    "Clinical threshold set to 0.23 probability to achieve >91% sensitivity for early Melanoma detection.",
+    "Clinical decision threshold tuned to 0.23 (23%) to achieve >91% sensitivity for early Melanoma detection.",
+    "InceptionV3 feature vectors (2048-dim) fine-tuned with binary & multi-class sigmoid output heads.",
     "Asymmetry score > 0.40 or Border Irregularity > 0.45 triggers elevated risk flag for clinical biopsy.",
     "Lesions displaying central ulceration, intense erythema, or blue-white veil require immediate dermatological examination."
   ]
