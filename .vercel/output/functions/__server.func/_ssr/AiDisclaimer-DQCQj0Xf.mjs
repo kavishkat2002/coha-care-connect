@@ -1,6 +1,6 @@
 import { v as require_jsx_runtime } from "../_libs/@radix-ui/react-accordion+[...].mjs";
 import { X as Info } from "../_libs/lucide-react.mjs";
-import { i as AI_DISCLAIMER, u as init_mock } from "./server-IqVcekK3.mjs";
+import { i as AI_DISCLAIMER, u as init_mock } from "./server-DlLVIWDa.mjs";
 //#region node_modules/.nitro/vite/services/ssr/assets/AiDisclaimer-DQCQj0Xf.js
 var import_jsx_runtime = require_jsx_runtime();
 init_mock();
