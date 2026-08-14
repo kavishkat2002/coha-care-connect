@@ -1,207 +1,177 @@
 # 🏥 MedDoc Coha Care Connect (COHA AI)
-### Enterprise AI-Powered Healthcare Ecosystem & Telemedicine Platform
+## Enterprise Healthcare Ecosystem & Telemedicine Platform
 
-> **Architectural Paradigm**: Hybrid Clinical Telemedicine, SSR Web Application, & Multimodal Early Disease / Cancer Screening Platform  
-> **Target Industry**: Healthcare SaaS, Clinical Oncology, Digital Health Membership (MedDoc ePass), Remote Patient Care  
-
----
-
-## 🌟 Executive Summary
-
-**MedDoc Coha Care Connect (COHA AI)** is a state-of-the-art enterprise healthcare architecture designed by Senior AI Engineers and Clinical SaaS Architects. The platform bridges traditional healthcare delivery with cutting-edge machine learning and generative artificial intelligence.
-
-The platform provides a dual-engine capability:
-1. **Clinical Telemedicine & Remote Consultations**: Seamless 2-way HD video conferencing, real-time messaging, photo/PDF prescription exchange, doctor pre-approval queues, and automated scheduling.
-2. **AI Multimodal Diagnostic Engine**: Automated early cancer risk classification (breast cancer ensemble ML), medical image vision diagnosis, structured OCR lab report extraction, AI health triage, and MedMind eCare medication scheduling.
+> **System Architecture Document**  
+> **Version:** 2.1.0 (Edge Runtime Ready)  
+> **Prepared by:** Senior Clinical SaaS Architecture Team  
 
 ---
 
-## 📐 System Architecture
+## 1. Executive Summary
 
-The application is built on a modern **Isomorphic Server-Side Rendered (SSR) architecture** using TanStack Start and Nitro, allowing it to run efficiently on Edge networks (e.g., Cloudflare Workers, Vercel Edge).
+**MedDoc Coha Care Connect (COHA AI)** is an enterprise-grade healthcare architecture bridging traditional telemedicine with generative artificial intelligence and multimodal machine learning models. Built on an Isomorphic Server-Side Rendered (SSR) infrastructure using TanStack Start and Nitro, the system is designed for high-availability Edge network deployment (e.g., Vercel Edge, Cloudflare Workers). 
+
+The platform supports a dual-engine capability:
+1. **Clinical Telemedicine Engine**: Low-latency 2-way HD video conferencing, real-time messaging, secure e-prescription exchange, and robust scheduling concurrency.
+2. **AI Multimodal Diagnostic Pipeline**: A hybrid cloud/edge diagnostic system combining early cancer risk classification (Random Forest ML), medical image vision analysis (Llama 3.2 Vision), structured OCR lab report extraction, and automated medication scheduling (MedMind eCare).
+
+---
+
+## 2. High-Level Architecture (C4 Context)
+
+The architecture strictly adheres to a decoupled client-edge-database paradigm to minimize Time-To-Interactive (TTI) and isolate clinical data per HIPAA/GDPR best practices.
 
 ```mermaid
 graph TD
-    User([Patient / Doctor]) -->|HTTPS / WSS| CDN[Vite / TanStack Start Edge Node]
+    subgraph Client [Browser / Client Devices]
+        User([Patient / Doctor]) -->|HTTPS / WSS| Web[TanStack React 19 Client]
+    end
     
-    subgraph Client Layer (React 19 + TypeScript)
-        CDN --> Auth[Auth Gatekeeper / Session Manager]
-        CDN --> Telemed[Telemedicine Module]
-        CDN --> EPass[MedDoc ePass Membership]
-        CDN --> Notifications[Global Notification Panel]
+    subgraph Edge_Tier [Edge Runtime / Server Layer]
+        Web <--> |Hydration & API| Nitro[Nitro Edge Server / H3]
+        Nitro --> Router[TanStack Router SSR]
+        Nitro --> FallbackFS[Local FS Fallback Storage]
     end
 
-    subgraph Server Layer (Nitro Edge / H3)
-        CDN --> API[Server API Routes]
-        API --> ProfileSync[Shared Profile Sync .json]
-        API --> ApptSync[Shared Appointments Sync .json]
-        API --> SSRError[Custom Error Normalization]
+    subgraph Data_Tier [Persistence & Auth]
+        Router <--> SupabaseAuth[Supabase JWT Auth]
+        Router <--> PostgreSQL[(PostgreSQL Database)]
+        Router <--> PayHere[PayHere Payment Gateway]
     end
 
-    subgraph Backend Services & Storage
-        Auth --> SupabaseAuth[Supabase / Custom JWT Auth]
-        Telemed --> ApptDB[(PostgreSQL / Supabase Database)]
-        EPass --> PayHere[PayHere Payment Gateway]
-    end
-
-    subgraph AI Diagnostic Pipeline
-        Telemed --> AI_Service[AI Diagnostic Hub]
-        AI_Service --> ML_Model[ML Classification Engine - Python / Scikit-Learn]
-        AI_Service --> Vision_AI[Multimodal Image & Report Analyzer - Llama Vision API]
+    subgraph AI_Tier [Diagnostic Engines]
+        Router --> GroqAPI[Groq / Llama Vision API]
+        Router --> GeminiAPI[Google Gemini API]
+        Router --> MLModels[Local Python ML Models]
     end
 ```
 
 ---
 
-## ⚙️ Technical Deep Dive & Data Flow
+## 3. Subsystem Technical Specifications
 
-### 1. Routing & Server-Side Rendering (SSR)
-The application leverages **@tanstack/react-router** and **@tanstack/react-start** for universal routing. 
-- **Nitro Edge Runtime**: The `server.ts` entry point intercepts all HTTP requests. 
-- **API Interception**: Routes like `/api/profile` and `/api/appointments` are manually intercepted to provide lightweight, file-backed state sync across sessions (useful for multi-tab or multi-device state without relying entirely on Supabase during development).
-- **Error Normalization**: A custom `normalizeCatastrophicSsrResponse` intercepts swallowed H3 errors, safely rendering a custom `renderErrorPage()` HTML fallback to prevent ugly stack traces from leaking to the client on 500 errors.
+### 3.1. Frontend Architecture & State Management
+- **Core Framework**: React 19 with TypeScript, utilizing concurrent rendering features for non-blocking UI updates.
+- **Routing & SSR**: `@tanstack/react-router` integrated with `@tanstack/react-start`. The application is fully isomorphic, hydrating state instantly upon initial HTML delivery from the Edge.
+- **State Management**: Distributed between URL state (via TanStack Router), server-state caching (React Query), and localized ephemeral state (React hooks).
+- **Styling Pipeline**: Tailwind CSS v4 paired with Radix UI headless components and the `shadcn/ui` design system for accessible, composable interface primitives.
 
-### 2. Authentication & Authorization
-- **Supabase JWT**: `services/auth.service.ts` wraps Supabase's authentication client, mapping users to strict roles (`patient`, `doctor`, `hospital`, `admin`).
-- **Registration IDs**: Doctors are assigned unique IDs (`DOC-XXXXXX`) allowing hospitals to link profiles directly.
-- **Route Guards**: `Route.beforeLoad` hooks dynamically protect routes based on the authenticated session's role, redirecting unauthorized users to `/auth`.
+### 3.2. Server & Edge Runtime (Nitro / H3)
+- **Edge-Safe Interception**: The custom `server.ts` handles raw `fetch` events, dynamically mapping requests to the SSR entry point. Top-level Node.js `fs` imports are strictly eliminated to guarantee compatibility with Vercel Edge and Cloudflare Workers.
+- **Error Normalization**: A catastrophic error boundary (`normalizeCatastrophicSsrResponse`) intercepts unhandled H3 server exceptions. Instead of returning a raw 500 stack trace, it gracefully degrades to a statically rendered `renderErrorPage()` HTML payload, ensuring continuity in user experience even during critical backend failures.
+- **Asset Handling**: Favicons (`/favicon.ico`, `/favicon.svg`) and static assets are bypassed at the top of the request lifecycle, preventing expensive SSR pipeline execution for static files.
 
-### 3. Database Schema (PostgreSQL)
-The Supabase PostgreSQL backend handles relational data:
-- `appointments`: Tracks `patient_id` (foreign key to `auth.users`), `doctor_id`, `hospital_id`, `date`, `time`, and `queue_number`.
-- `hospital_reviews`: Stores 1-5 star ratings and textual comments linking patients to hospitals.
-- `doctor_availability`: Tracks dynamic arrays of available `time_slots` mapped to specific dates, ensuring real-time concurrency handling when patients book.
+### 3.3. Database & Security Model (Supabase)
+The system leverages PostgreSQL via Supabase, utilizing Row Level Security (RLS) for granular data isolation.
+- **Authentication**: JWT-based stateless authentication mapped to discrete roles (`patient`, `doctor`, `hospital`, `admin`).
+- **Entity Relations**:
+  - `appointments`: Foreign key constraints link `patient_id` (auth.users) to `doctor_id` strings, enforcing referential integrity.
+  - `doctor_availability`: Employs Postgres `TEXT[]` arrays to handle dynamic time-slot matrices. Unique constraints on `(doctor_id, date)` prevent duplicate scheduling collisions.
+- **Route Guarding**: TanStack Router `beforeLoad` functions act as middleware, validating JWT claims before lazy-loading chunked route payloads.
 
-### 4. AI & Machine Learning Pipeline
-The AI architecture utilizes a hybrid **Cloud LLM + Local ML Strategy**:
+### 3.4. AI & Machine Learning Pipeline
+The AI architecture utilizes a highly available **Hybrid Cloud LLM + Local ML Strategy**:
 
-- **Multimodal Medical Vision (Llama 3.2 11B Vision)**: Image uploads (skin lesions, reports) are converted to Base64 and sent to the Groq API. The prompt enforces a strict JSON schema for ABCDE (Asymmetry, Border, Color, Diameter, Evolution) dermoscopic feature extraction and bounding box detection.
-- **Offline/Fallback Heuristics**: If the API fails, `ai.service.ts` falls back to an advanced local image heuristic parser (`extractImageFeaturesFromBase64`), calculating:
-  - **Color Variegation & Redness Ratio** (RGB pixel grouping)
-  - **Border Irregularity** (High-contrast transition counts)
-  - **Entropy & Asymmetry Scoring**
-- **Offline ML Training (`fetch_breast_cancer.py`)**: Uses Scikit-Learn's `RandomForestClassifier` trained on the Wisconsin Breast Cancer Dataset. It serializes the model performance and ROC-AUC metrics directly into JSON for the frontend to consume.
-
----
-
-## 🔥 Key System Capabilities & Modules
-
-### 1. 🛡️ MedDoc ePass Digital Health Membership
-- **3-Tier Subscription Engine**: Basic Health, Gold Care, and Platinum Oncology.
-- **30-Day Active Validity**: Automated expiration tracking (`valid_until` timestamp enforcement).
-- **PayHere Payment Integration**: Interactive checkout with instant tier activation.
-
-### 2. 📹 HD Video Telemedicine & Scheduled Consultations
-- **Date-Locked Patient Video Access**: The **"Join Video Call"** button is automatically unlocked **only on or after the scheduled appointment date**.
-- **Interactive HD Video Meeting Rooms**: Includes picture-in-picture patient view, live encrypted call timer (`00:45`), mic mute toggles, camera stream controls, and single-click termination.
-
-### 3. 💬 2-Way Doctor-Patient Chat & File Sharing
-- **Photo & Document Uploads**: Bi-directional file exchange supporting symptom photos and PDF medical documents/e-prescriptions.
-- **Rich Chat Bubbles**: Inline image preview thumbnails and PDF document download cards.
-
-### 4. 🧬 AI Early Cancer & Diagnostic Screening Engine
-- **Medical Report OCR & Structured Insights**: Extracts key biomarkers, blood counts, and diagnostic flags from uploaded lab PDFs and images.
-- **MedMind eCare Medication Scheduler**: Automated pill reminders, dosage tracking, and timing notifications.
+1. **Multimodal Medical Vision (Llama 3.2 11B Vision / Groq)**
+   - Uploaded lesion photos or radiology reports are heavily compressed, Base64-encoded, and transmitted.
+   - The LLM prompt enforces a strict JSON schema for clinical feature extraction (e.g., ABCDE dermoscopic rules: Asymmetry, Border, Color, Diameter, Evolution).
+2. **Deterministic Heuristic Fallback (Edge-Native)**
+   - To guarantee uptime during API outages, `ai.service.ts` includes an offline, heuristic-based image parser (`extractImageFeaturesFromBase64`).
+   - It calculates structural entropy, color variegation (RGB variance mapping), and border irregularity (high-contrast transition frequencies) using pure JavaScript canvas manipulation.
+3. **Local ML Training (`fetch_breast_cancer.py` / `train_skin_cancer_model.py`)**
+   - Offline Python modules utilize Scikit-Learn's `RandomForestClassifier` trained on the Wisconsin Breast Cancer Dataset and ISIC Skin Cancer datasets. 
+   - Model geometries and ROC-AUC performance thresholds are serialized into JSON for frontend consumption, removing the need for a persistent Python inference server.
 
 ---
 
-## 🛠️ Technology Stack
+## 4. Scalability & Resilience Patterns
 
-| Layer | Technologies |
-|---|---|
-| **Frontend Framework** | React 19, TypeScript, Vite, TanStack Start |
-| **Styling & UI** | TailwindCSS 4, shadcn/ui, Radix UI, Framer Motion, Lucide |
-| **State & Navigation** | TanStack React Router, React Query |
-| **AI / Machine Learning** | Python 3.10+, Scikit-Learn, Google Gemini API, Groq Llama Vision |
-| **Database & Auth** | Supabase, PostgreSQL, Nitro Edge FS Fallbacks |
-| **Payment Gateway** | PayHere Integration Sandbox & Live API |
+- **Hydration Mismatch Mitigation**: React components rendering timestamps or localized strings are wrapped in `useEffect` or `<ClientOnly>` boundaries to prevent SSR hydration errors.
+- **Concurrency Control**: Appointment booking leverages database-level atomicity.
+- **Progressive Enhancement**: Telemedicine video/audio gracefully falls back to audio-only on degraded network conditions using standard WebRTC APIs.
+- **Stateless Edge Computing**: By avoiding in-memory session states and relying on JWTs and Postgres, the Nitro Edge server can scale horizontally to infinite nodes instantly.
 
 ---
 
-## 📂 Project Directory Structure
+## 5. Project Directory Structure
 
 ```text
 coha-care-connect/
-├── fetch_breast_cancer.py         # ML Model Generator for Breast Cancer Risk Analysis
-├── train_skin_cancer_model.py     # ML Model Generator for Dermoscopic Analysis
-├── supabase_setup.sql             # Relational Database Schema 
+├── fetch_breast_cancer.py         # Scikit-Learn Breast Cancer Engine
+├── train_skin_cancer_model.py     # Scikit-Learn Dermoscopy Engine
+├── supabase_setup.sql             # Relational Database DDL & RLS Policies
 ├── src/
 │   ├── components/
-│   │   ├── portal/                # App Layout & Global Notification Panel
-│   │   ├── shared/                # Headers, Cards, Logo & AI Disclaimers
-│   │   └── ui/                    # shadcn/ui Reusable Component Library
+│   │   ├── portal/                # Global Notification & Shell Layouts
+│   │   ├── shared/                # Clinical Disclaimers, Cards, Logos
+│   │   └── ui/                    # Accessible UI Primitives (shadcn/ui)
 │   ├── routes/
-│   │   ├── __root.tsx             # Root Layout & Global Providers
-│   │   ├── auth.tsx               # Authentication (Login / Register Gate)
-│   │   ├── doctor.index.tsx       # Doctor Clinical Dashboard & Session Management
-│   │   ├── patient.epass.tsx      # MedDoc ePass Membership & Payment Gateway
-│   │   ├── patient.telemedicine.tsx # Doctor Search, Favorites, Schedule & Video Calls
-│   │   ├── patient.medmind-ecare.tsx # AI Medication & Pill Scheduler
-│   │   └── patient.reports.tsx    # Medical Report & Lab OCR Analyzer
+│   │   ├── __root.tsx             # Root Layout & Global Context Providers
+│   │   ├── auth.tsx               # JWT Authentication Gate
+│   │   ├── doctor.index.tsx       # Clinical Dashboard & Video Launcher
+│   │   ├── patient.epass.tsx      # MedDoc ePass Subscription Engine
+│   │   ├── patient.telemedicine.tsx # Appointment Scheduler & WebRTC Rooms
+│   │   ├── patient.medmind-ecare.tsx # Intelligent Pill & Dosage Tracker
+│   │   └── patient.reports.tsx    # Llama Vision OCR & Lab Analyzer
 │   ├── services/
-│   │   ├── ai.service.ts          # AI Diagnostics & LLM Prompt Engineering
-│   │   ├── auth.service.ts        # Supabase Authentication & Session Logic
-│   │   └── patient.service.ts     # Appointment & Health Data Operations
+│   │   ├── ai.service.ts          # Prompt Engineering & Heuristic Fallbacks
+│   │   ├── auth.service.ts        # Supabase Identity Management
+│   │   └── patient.service.ts     # PostgreSQL CRUD Operations
 │   ├── lib/
-│   │   ├── error-capture.ts       # H3 SSR Error Interceptor
-│   │   └── server.ts              # Nitro Edge Request Handler & Fallback APIs
+│   │   ├── error-capture.ts       # H3 Catastrophic Error Interceptor
+│   │   └── server.ts              # Edge Request Handler & Routing Logic
 │   ├── router.tsx                 # TanStack Router Configuration
-│   └── start.ts                   # TanStack Start Edge Entry
-├── package.json                   # Dependencies & Build Scripts
-└── vite.config.ts                 # Vite & Nitro Bundler Configuration
+│   └── start.ts                   # TanStack Start Server Entry point
+├── package.json                   # Dependency Matrix
+└── vite.config.ts                 # Vite & Nitro Edge Bundler Config
 ```
 
 ---
 
-## 🚀 Getting Started
+## 6. Developer Onboarding & Deployment
 
-### Prerequisites
-- **Node.js**: `v20.0.0` or higher
+### 6.1. Prerequisites
+- **Node.js**: `v20.0.0+`
 - **Package Manager**: `npm`, `pnpm`, or `bun`
-- **Python**: `v3.10+` (optional for running standalone ML scripts)
+- **Python**: `v3.10+` (optional for local ML script regeneration)
 
-### Installation
+### 6.2. Environment Configuration
+Create a `.env` file at the root:
+```env
+# Database Identity
+VITE_SUPABASE_URL=your_supabase_project_url
+VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
 
-1. **Clone the Repository**:
-   ```bash
-   git clone https://github.com/kavishkat2002/coha-care-connect.git
-   cd coha-care-connect
-   ```
+# AI Diagnostic APIs
+VITE_GROQ_API_KEY=your_groq_api_key
+VITE_GEMINI_API_KEY=your_gemini_api_key
+```
 
-2. **Install Dependencies**:
-   ```bash
-   npm install
-   ```
+### 6.3. Local Development
+```bash
+# Install dependencies
+npm install
 
-3. **Environment Setup**:
-   Create a `.env` file in the root directory:
-   ```env
-   VITE_SUPABASE_URL=your_supabase_project_url
-   VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
-   VITE_GROQ_API_KEY=your_groq_api_key
-   VITE_GEMINI_API_KEY=your_gemini_api_key
-   ```
+# Launch Edge-simulated development server
+npm run dev
+```
 
-4. **Launch Development Server**:
-   ```bash
-   npm run dev
-   ```
-   Access the application at `http://localhost:5173`.
+### 6.4. CI/CD & Production Build
+The application is pre-configured for zero-downtime Edge deployment.
+```bash
+# 1. Enforce strict static typing (NoEmit prevents broken builds)
+npx tsc --noEmit
 
-5. **Type Checking & Production Build**:
-   ```bash
-   npx tsc --noEmit
-   npm run build
-   ```
+# 2. Build Isomorphic Server and Client assets
+npm run build
+```
 
 ---
 
-## 🔒 Safety & Medical Disclaimer
+## 7. Compliance & Clinical Disclaimer
 
-> **IMPORTANT**: MedDoc Coha Care Connect provides AI-assisted diagnostic insights for informational, triage, and educational support only. It does not replace formal clinical medical diagnoses. All diagnostic outputs and image analyses must be reviewed by licensed medical professionals.
+> **MEDICAL LIABILITY WAIVER**: MedDoc Coha Care Connect (COHA AI) provides computational diagnostic heuristics and probabilistic ML inferences designed for clinical triage, educational support, and second-opinion workflows. It is **not** a certified FDA/CE Medical Device. All outputs generated by the Llama Vision API or the Random Forest models must be thoroughly reviewed, verified, and signed off by licensed medical oncology professionals prior to treatment planning.
 
 ---
 
-## 📄 License & Attribution
-
-Designed and engineered by **Coha Care Health Architecture Team**. All rights reserved.
+*Designed and Engineered by the **Coha Care Health Architecture Team**.*
