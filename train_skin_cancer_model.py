@@ -1,18 +1,16 @@
-"""
-HAM10000 & ISIC Skin Cancer Dataset Model Training & Feature Pipeline
-=======================================================================
-Trains machine learning classification models on the HAM10000 dataset 
-(kmader/skin-cancer-mnist-ham10000 via kagglehub & Hugging Face) and ISIC Skin Cancer dataset.
-
-Categories evaluated (7 Diagnostic Classes, 10,015 total dermoscopic images):
-- nv: Melanocytic Nevi (6,705 images)
-- mel: Melanoma (1,113 images - Malignant)
-- bkl: Benign Keratosis-like Lesions (1,099 images)
-- bcc: Basal Cell Carcinoma (514 images - Malignant)
-- akiec: Actinic Keratoses & Intraepithelial Carcinoma (327 images - Malignant)
-- vasc: Vascular Lesions (142 images)
-- df: Dermatofibroma (115 images)
-"""
+# HAM10000 & ISIC Skin Cancer Dataset Model Training & Feature Pipeline
+# =======================================================================
+# Trains machine learning classification models on the HAM10000 dataset 
+# (kmader/skin-cancer-mnist-ham10000 via kagglehub & Hugging Face) and ISIC Skin Cancer dataset.
+# 
+# Categories evaluated (7 Diagnostic Classes, 10,015 total dermoscopic images):
+# - nv: Melanocytic Nevi (6,705 images)
+# - mel: Melanoma (1,113 images - Malignant)
+# - bkl: Benign Keratosis-like Lesions (1,099 images)
+# - bcc: Basal Cell Carcinoma (514 images - Malignant)
+# - akiec: Actinic Keratoses & Intraepithelial Carcinoma (327 images - Malignant)
+# - vasc: Vascular Lesions (142 images)
+# - df: Dermatofibroma (115 images)
 
 import os
 import json

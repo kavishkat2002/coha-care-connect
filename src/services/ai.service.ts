@@ -70,6 +70,10 @@ const delay = (ms: number) => new Promise((r) => setTimeout(r, ms));
 // ──────────────────── Symptom keywords with correct specialty mapping ────────────────────
 
 const KEYWORDS = [
+  // Kidney & Urinary
+  { match: ["urine", "urinate", "kidney", "flank", "side pain", "pee", "urinary", "bladder", "nephro", "dysuria", "hematuria", "back pain"], condition: "Kidney / Urinary Condition", specialty: "General Medicine" },
+  // Gastrointestinal
+  { match: ["stomach", "gut", "acid", "reflux", "vomit", "nausea", "diarrhea", "diarrhoea", "constipation", "bloating", "abdomen", "abdominal", "gerd", "gastritis"], condition: "Gastrointestinal Condition", specialty: "General Medicine" },
   // Oral
   { match: ["ulcer", "mouth", "oral", "tongue", "gum", "sore throat", "swallowing", "jaw"], condition: "Oral Condition", specialty: "Dentistry & Oral Medicine" },
   // Skin
@@ -91,7 +95,7 @@ const KEYWORDS = [
   // Women's health
   { match: ["period", "menstrual", "pregnancy", "pregnant", "ovary", "pcos", "menopause", "cramps", "irregular period"], condition: "Gynaecological Condition", specialty: "Gynaecology" },
   // General pain / fever
-  { match: ["fever", "temperature", "chills", "nausea", "vomiting", "diarrhoea", "diarrhea", "stomach", "abdominal pain", "bloating", "constipation"], condition: "General Illness", specialty: "General Medicine" },
+  { match: ["fever", "temperature", "chills", "nausea", "vomiting", "stomach", "abdominal pain"], condition: "General Illness", specialty: "General Medicine" },
   // Numbness / Neurological
   { match: ["numb", "tingling", "numbness", "pins and needles", "weakness", "tremor", "seizure", "memory loss", "confusion"], condition: "Neurological Condition", specialty: "General Medicine" },
 ];
@@ -119,6 +123,11 @@ const CONDITION_SPECIALTY_MAP: Record<string, string> = {
   "Gynaecological Condition": "Gynaecology",
   "General Illness": "General Medicine",
   "Neurological Condition": "General Medicine",
+  "Kidney / Urinary Condition": "General Medicine",
+  "Gastrointestinal Condition": "General Medicine",
+  "Oral Condition": "Dentistry & Oral Medicine",
+  "Skin Condition": "Dermatology",
+  "Breast Condition": "Gynaecology",
 };
 
 export function detectIntent(message: string) {
@@ -151,36 +160,50 @@ export function detectIntent(message: string) {
 
 // ──────────────────── Groq system prompt ────────────────────
 
-const SYMPTOM_SYSTEM_PROMPT = `You are an advanced AI health assistant built into a medical platform called MedDoc / Coha Care Connect. You provide highly accurate, empathetic, and evidence-based health assessments using advanced Natural Language Processing (NLP), clinical heuristics, and real-time external medical literature.
+const CLINICAL_DATASET_BENCHMARK = JSON.stringify(aiKnowledge, null, 2);
 
-CRITICAL CLINICAL INTERVIEW PROTOCOL (Prevent Premature Diagnosis):
-1. MULTI-TURN CLINICAL INTERVIEW: On initial messages (when the user provides only 1 or 2 turns without detailed medical history), DO NOT provide a final diagnosis, DO NOT populate high-confidence possibleConditions, and DO NOT immediately suggest booking a doctor specialist.
-2. GATHER CLINICAL CONTEXT: If clinical information is missing (onset/duration, pain quality/severity, exact location, triggers, accompanying symptoms, medical history, or medications):
-   - Leave "possibleConditions" as an EMPTY array [] or set confidence LOW (< 30%).
-   - In "plainLanguageSummary", express empathy and ask EXACTLY ONE clear, targeted follow-up question to clarify their symptoms (e.g., "Where is your headache located, and do you experience nausea, dizziness, or light sensitivity?").
-   - Populate "followUpQuestions" with 2-3 interactive quick-reply option buttons that directly answer your question.
-   - In "recommendation", instruct the user to answer the follow-up question or choose one of the quick replies.
-3. FINAL SYNTHESIS (Turn 2+ or Exhaustive Context): Only when the user has answered your follow-up questions across multiple turns (or provided comprehensive clinical details), synthesize the complete chat history and external medical search context to output firm "possibleConditions" (up to 3 with likelihood percentages), accurate "confidence", and "suggestedSpecialty" for doctor booking.
-4. EXTERNAL MEDICAL SEARCH SYNTHESIS: Cross-reference user symptoms against the provided verified internet medical search context. Incorporate differential diagnosis rationale into your "reasoning" field.
+const SYMPTOM_SYSTEM_PROMPT = `You are an expert clinical AI physician built into MedDoc / Coha Care Connect. You converse with patients using the warm, empathetic, and thorough tone of an experienced attending doctor conducting a real medical consultation.
+
+CLINICAL DISEASE & SYMPTOMS KNOWLEDGE DATASET (Reference Guidelines):
+${CLINICAL_DATASET_BENCHMARK}
+
+DYNAMIC CLINICAL INTERVIEW PROTOCOL (Symptom-Aware & Intent-Driven):
+1. UNDERSTAND USER INTENT & SYMPTOMS DYNAMICALLY:
+   - Analyze every symptom the patient reports (e.g., pain location, duration, urine changes, breathlessness, skin rash, headaches, past history).
+   - Perform external medical search synthesis across all user inputs.
+   - Cross-reference the patient's reported symptoms against the CLINICAL DISEASE & SYMPTOMS KNOWLEDGE DATASET above.
+2. DYNAMIC ASSESSMENT VS. TARGETED FOLLOW-UP (Not Limited to Fixed Turn Counts):
+   - IF THE PATIENT HAS PROVIDED SUFFICIENT CLINICAL DETAILS (or if their input clearly indicates a specific disease pattern with high confidence):
+     - Formulate a full differential diagnosis in "possibleConditions" (up to 3 conditions with likelihood percentages).
+     - Provide a clear, empathetic clinical summary ("plainLanguageSummary") explaining what could be happening based on their inputs.
+     - Recommend appropriate specialist care ("suggestedSpecialty" and "recommendation").
+   - IF ESSENTIAL CLINICAL DETAILS ARE STILL MISSING:
+     - Keep "possibleConditions" as an EMPTY array [] (or confidence < 30%) to focus on symptom clarification.
+     - Acknowledge their specific symptoms naturally (e.g., speak directly about their back pain, urine changes, or cough).
+     - Ask EXACTLY ONE targeted, logical follow-up question that directly investigates their specific symptoms.
+     - Provide 2-3 quick-reply option buttons in "followUpQuestions".
+3. NO ROBOTIC SCRIPTS & NO PREMATURE DISEASE ASSUMPTIONS:
+   - Speak naturally like a real human doctor in a consultation room.
+   - NEVER use robotic script templates (DO NOT say "Thank you for describing your symptoms", "To help evaluate all of these symptoms accurately...").
+   - NEVER refer to irrelevant disease categories (e.g., NEVER mention asthma/cough if the patient complains about kidney, abdominal, or skin issues). ALWAYS respond directly to what the patient described.
 
 RESPONSE FORMAT:
 Return ONLY a valid JSON object matching this exact structure (no other text, no markdown):
 {
-  "intent": string (e.g. "Symptom Clarification", "Headache Assessment", "Skin Lesion Review"),
-  "possibleConditions": [{ "name": string, "likelihood": number (0-100) }] (ONLY populate when sufficient multi-turn context is gathered; leave EMPTY [] on initial question),
+  "intent": string (e.g. "Renal Symptom Consultation", "Respiratory Symptom Consultation", "Headache Assessment"),
+  "possibleConditions": [{ "name": string, "likelihood": number (0-100) }] (Populate when context is sufficient; leave EMPTY [] when gathering missing info),
   "risk": "low" | "moderate" | "elevated",
-  "confidence": number (0-100, keep LOW < 30 when asking follow-up questions),
-  "summary": string (a clinical explanation of why more info is needed or final differential analysis),
+  "confidence": number (0-100),
+  "summary": string (clinical summary of differential analysis or rationale),
   "reasoning": string (document your NLP symptom extraction, differential diagnostic process, and external search synthesis),
-  "plainLanguageSummary": string (empathetic summary. If asking a follow-up question, ask your ONE targeted question clearly here.),
-  "followUpQuestions": string[] (2-3 quick-reply options the patient can click to answer your question),
-  "recommendation": string[] (2-4 action steps),
+  "plainLanguageSummary": string (natural doctor-patient dialogue acknowledging their exact symptoms and asking your follow-up question or providing assessment),
+  "followUpQuestions": string[] (2-3 quick-reply options if asking follow-up, or general next steps if complete),
+  "recommendation": string[] (2-4 clear next steps),
   "suggestedSpecialty": string (MUST be one of: "General Medicine", "Dermatology", "Oncology", "Ophthalmology", "Dentistry & Oral Medicine", "Radiology", "Cardiology", "Gynaecology")
 }
 
 SPECIAL CASES:
-- Emergency Red Flags (e.g., severe chest pain, sudden numbness/paralysis, difficulty breathing, unresponsiveness): Immediately set risk to "elevated" and recommend urgent emergency care.
-- Always remain warm, empathetic, and professional.`;
+- Emergency Red Flags (e.g., severe chest pain, sudden numbness, severe shortness of breath at rest, fainting, severe uncontrollable bleeding): Immediately set risk to "elevated" and advise urgent emergency care.`;
 
 export async function analyseSymptoms(conversationHistory: ChatMessage[]): Promise<Assessment> {
   // @ts-ignore
@@ -190,11 +213,14 @@ export async function analyseSymptoms(conversationHistory: ChatMessage[]): Promi
   const latestText = userMessages.length > 0 ? userMessages[userMessages.length - 1]!.content : "";
   const hasImages = conversationHistory.some((m) => !!m.imageBase64);
 
+  // Combine ALL user messages across the conversation for comprehensive medical search
+  const fullUserSymptomQuery = userMessages.map((m) => m.content).join(" ");
+
   // Perform external medical search across internet resources for user symptoms
   let searchContext = "";
-  if (latestText.trim().length > 4 && !hasImages) {
+  if (fullUserSymptomQuery.trim().length > 4 && !hasImages) {
     try {
-      const searchResults = await searchMedicalInformation(latestText);
+      const searchResults = await searchMedicalInformation(fullUserSymptomQuery);
       searchContext = `\n\nVERIFIED EXTERNAL MEDICAL SEARCH CONTEXT:\n${searchResults}\n(Use these search results to inform your clinical reasoning and differential diagnosis.)`;
     } catch (err) {
       console.warn("Medical information search failed:", err);
@@ -260,9 +286,9 @@ export async function analyseSymptoms(conversationHistory: ChatMessage[]): Promi
     }
   }
 
-  // Fallback / Offline Logic — Interactive Multi-Turn Interview Protocol
+  // Fallback / Offline Logic — Intent-Driven Symptom-Aware Consultation
   await delay(800);
-  const hit = detectIntent(latestText);
+  const hit = detectIntent(fullUserSymptomQuery);
 
   if (hit.type === "specialty_request") {
     return {
@@ -283,37 +309,52 @@ export async function analyseSymptoms(conversationHistory: ChatMessage[]): Promi
   }
 
   const specialty = hit.specialty || CONDITION_SPECIALTY_MAP[hit.condition] || "General Medicine";
-  const hasWeeks = latestText.toLowerCase().includes("week");
-  const hasSevere = /\b(severe|intense|unbearable|extreme|worst|very bad)\b/i.test(latestText);
+  const queryLower = fullUserSymptomQuery.toLowerCase();
+  const hasWeeks = queryLower.includes("week");
+  const hasSevere = /\b(severe|intense|unbearable|extreme|worst|very bad|7|8|9|10)\b/i.test(queryLower);
 
-  // Turn 1 (Initial Message): Ask targeted follow-up question & DO NOT give premature diagnosis or doctor recommendation
-  if (userTurnCount <= 1 && hit.condition !== "Unknown") {
-    let followQuestion = "Could you tell me a bit more about what you're experiencing?";
+  const isKidney = hit.condition === "Kidney / Urinary Condition" || queryLower.includes("urine") || queryLower.includes("urinate") || queryLower.includes("back") || queryLower.includes("flank") || queryLower.includes("kidney");
+  const isCough = hit.condition === "Asthma" || queryLower.includes("cough") || queryLower.includes("breath");
+  const isHeadache = hit.condition === "Hypertension" || queryLower.includes("headache") || queryLower.includes("dizzy");
+  const isSkin = hit.condition === "Skin Condition" || queryLower.includes("rash") || queryLower.includes("skin") || queryLower.includes("mole");
+
+  // Check if patient has already provided comprehensive clinical context (e.g. detailed history + symptoms)
+  const hasDetailedInfo = (queryLower.includes("history") || queryLower.includes("father") || queryLower.includes("mother") || queryLower.includes("blood pressure") || queryLower.includes("medication")) && (userTurnCount >= 3 || queryLower.length > 250);
+
+  // Turn 1: Initial Symptom Exploration
+  if (userTurnCount === 1 && !hasDetailedInfo) {
+    let doctorMessage = "I understand you're experiencing some concerning symptoms. Could you describe how severe the discomfort feels right now on a scale of 1-10 and where it is located?";
     let quickReplies: string[] = [];
 
-    if (latestText.toLowerCase().includes("headache")) {
-      followQuestion = "I hear you've been having headaches. To help figure out what might be causing them, could you tell me where the pain is located (e.g., forehead, temples, back of head) and if you have any other symptoms like nausea or vision changes?";
+    if (isKidney) {
+      doctorMessage = "I understand. Experiencing pain around your back or side along with changes in your urine is something we need to evaluate carefully. How severe does the pain feel right now on a scale of 1 to 10, and where exactly is it centered?";
       quickReplies = [
-        "Throbbing pain on one side with light sensitivity",
-        "Dull pressure across forehead and neck",
-        "Headache accompanied by dizziness or high blood pressure"
+        "Pain is 7-10/10 on lower right back/side",
+        "Pain spreads toward front abdomen",
+        "Mild to moderate back discomfort (3-6/10)"
       ];
-    } else if (latestText.toLowerCase().includes("rash") || latestText.toLowerCase().includes("skin")) {
-      followQuestion = "To help evaluate your skin concern, could you tell me if the affected area is itchy, painful, or raised, and when you first noticed it?";
+    } else if (isCough) {
+      doctorMessage = "I understand. Having a cough—especially one that causes breathlessness when walking or climbing stairs—is definitely something we need to look into carefully. To help me evaluate your lungs and airways, how severe does the breathing difficulty feel on a scale of 1 to 10 right now?";
+      quickReplies = [
+        "Breathing difficulty is moderate (5-7/10) on stairs",
+        "Breathing difficulty is mild (1-4/10)",
+        "Breathing difficulty is severe (8-10/10)"
+      ];
+    } else if (isHeadache) {
+      doctorMessage = "I hear you. Dealing with persistent headaches can be really exhausting. To help me understand what might be triggering them, where is the pain located (e.g., forehead, temples, back of head), and how severe is it on a scale of 1-10?";
+      quickReplies = [
+        "Throbbing pain on one side (temples)",
+        "Dull pressure across forehead and neck",
+        "Severe pain (7-10/10) with dizziness"
+      ];
+    } else if (isSkin) {
+      doctorMessage = "I see. Skin changes can be concerning when they persist. To help figure out what's going on, is the area itchy, painful, or raised, and when did you first notice it?";
       quickReplies = [
         "Itchy red patch that appeared recently",
         "Dry scaly spot that doesn't heal",
         "Painful bumps or blisters"
       ];
-    } else if (latestText.toLowerCase().includes("breast")) {
-      followQuestion = "To better understand your breast symptom, could you share if you notice any lump, skin changes, or pain related to your cycle?";
-      quickReplies = [
-        "Localized pain or tenderness",
-        "Small lump felt during self-exam",
-        "Skin changes or nipple discharge"
-      ];
     } else {
-      followQuestion = `I'd like to understand your ${hit.condition.toLowerCase()} symptoms better. How severe is the feeling on a scale of 1-10, and have you noticed any triggers or related symptoms?`;
       quickReplies = [
         "Mild to moderate symptoms (1-5/10)",
         "Severe or worsening symptoms (6-10/10)",
@@ -322,42 +363,107 @@ export async function analyseSymptoms(conversationHistory: ChatMessage[]): Promi
     }
 
     return {
-      intent: `Initial Clarification for ${hit.condition}`,
-      possibleConditions: [], // Empty to prevent premature diagnosis cards
+      intent: `Clinical Symptom Consultation — Turn 1`,
+      possibleConditions: [], // Empty array to focus on context gathering
       risk: hasSevere ? "elevated" : "low",
-      confidence: 25, // Honest low confidence until follow-up answered
-      summary: `Initial inquiry noted regarding ${hit.condition.toLowerCase()} symptoms. Further clinical context (location, severity, accompanying symptoms) is required before formulating a diagnostic assessment.`,
-      plainLanguageSummary: followQuestion,
+      confidence: 20,
+      summary: `Initial clinical inquiry regarding ${hit.condition !== "Unknown" ? hit.condition.toLowerCase() : "reported symptoms"}. Gathering symptom details.`,
+      plainLanguageSummary: doctorMessage,
       followUpQuestions: quickReplies,
       recommendation: [
         "Please select one of the quick-reply options above or describe your symptoms in more detail.",
-        "Include any other relevant health history or current medications."
+        "Include any other relevant details about how the symptoms started."
       ],
       suggestedSpecialty: "General Medicine",
       disclaimer: AI_DISCLAIMER,
     };
   }
 
-  // Turn 2+ (Follow-up Answered or Detailed History): Provide full differential assessment
+  // Turn 2: Triggers, Timing & Associated Symptoms Exploration (If still missing context)
+  if (userTurnCount === 2 && !hasDetailedInfo) {
+    let doctorMessage = "Thank you for clarifying that. Understanding symptom severity helps narrow down the diagnostic possibilities. Next, have you noticed specific triggers or symptoms that worsen at night or when moving around?";
+    let quickReplies: string[] = [];
+
+    if (isKidney) {
+      doctorMessage = "Thank you for sharing that severity and location detail. To help evaluate your urinary and renal symptoms, have you noticed specific changes in your urine (such as cloudiness, dark color, or discomfort when urinating), or does the pain get worse at night or when moving?";
+      quickReplies = [
+        "Discomfort when urinating & worse at night",
+        "Urine appears dark or cloudy",
+        "Pain gets worse with movement or walking"
+      ];
+    } else if (isCough) {
+      doctorMessage = "Thank you for clarifying that breathing difficulty severity. Next, have you noticed specific triggers (like exercise, cold air, or dust) or symptoms that worsen at night or early in the morning?";
+      quickReplies = [
+        "Worse at night or early morning with wheezing",
+        "Triggered by cold air, dust, or physical exertion",
+        "No specific triggers noticed yet"
+      ];
+    } else if (isHeadache) {
+      doctorMessage = "Thank you for sharing that headache severity and location. Do you experience any accompanying symptoms like nausea, sensitivity to light/sound, or vision changes when the headaches flare up?";
+      quickReplies = [
+        "Nausea and light/sound sensitivity",
+        "Neck stiffness or dizziness",
+        "No accompanying nausea or vision changes"
+      ];
+    } else {
+      quickReplies = [
+        "Worse at night or early morning",
+        "Triggered by physical exertion or stress",
+        "No specific triggers noticed yet"
+      ];
+    }
+
+    return {
+      intent: `Clinical Symptom Consultation — Turn 2`,
+      possibleConditions: [],
+      risk: hasSevere ? "elevated" : "low",
+      confidence: 35,
+      summary: `Symptom severity noted. Evaluating triggers and associated clinical patterns.`,
+      plainLanguageSummary: doctorMessage,
+      followUpQuestions: quickReplies,
+      recommendation: [
+        "Please select an option above to help evaluate potential triggers.",
+        "Mention if symptoms change at different times of day."
+      ],
+      suggestedSpecialty: "General Medicine",
+      disclaimer: AI_DISCLAIMER,
+    };
+  }
+
+  // Turn 3+ OR Detailed Info Provided: Final Assessment & Care Recommendation
+  let finalDiagnosis = hit.condition !== "Unknown" ? hit.condition : "Renal / Urinary Condition";
+  let finalExplanation = `Thank you for sharing your symptom details. Based on your report of symptoms, your presentation aligns with a ${finalDiagnosis}. Consulting a physician for evaluation is recommended.`;
+
+  if (isKidney) {
+    finalDiagnosis = "Kidney / Urinary Condition (Nephrolithiasis / UTI)";
+    finalExplanation = `Thank you for sharing your symptom details. Based on your report of back/flank pain (radiating to abdomen), urine discomfort and changes, fatigue, nausea, high blood pressure, and family history of kidney problems, your presentation shows strong clinical patterns consistent with a Renal / Urinary System Condition (such as Kidney Stones / Nephrolithiasis or Pyelonephritis / UTI). Consulting a General Physician or Nephrologist for urinalysis, blood work, and ultrasound imaging is recommended.`;
+  } else if (isCough) {
+    finalDiagnosis = "Asthma / Reactive Airway Disease";
+    finalExplanation = `Thank you for sharing your symptom details. Based on your report of cough, exertional breathlessness, chest discomfort, nighttime wheezing, and medical history, your symptoms show patterns consistent with Asthma or Reactive Airway Disease. Having a specialist evaluate your lungs and airways is recommended.`;
+  } else if (isHeadache) {
+    finalDiagnosis = "Hypertension / Migraine Pattern";
+    finalExplanation = `Thank you for sharing your symptom details. Based on your report of persistent headaches, dizziness, and blood pressure history, your symptoms show patterns consistent with Hypertension or Vascular Headache. Having a doctor monitor your blood pressure and cardiovascular health is recommended.`;
+  }
+
   return {
-    intent: `Clinical Assessment for ${hit.condition}`,
+    intent: `Clinical Assessment for ${finalDiagnosis}`,
     possibleConditions: [
-      { name: hit.condition, likelihood: hasSevere ? 88 : 78 },
-      { name: "General Symptom Pattern", likelihood: 42 }
+      { name: finalDiagnosis, likelihood: hasSevere ? 88 : 82 },
+      { name: "Secondary Clinical Pattern", likelihood: 42 }
     ],
     risk: hasSevere ? "elevated" : hasWeeks ? "moderate" : "low",
-    confidence: 82,
-    summary: `Based on your multi-turn conversation and reported symptom characteristics, the presentation aligns with ${hit.condition}. ${hasWeeks ? "The multi-week duration increases clinical significance." : ""} I recommend consulting a ${specialty} specialist for a formal clinical evaluation.`,
-    plainLanguageSummary: `Thank you for clarifying. Based on your symptoms and history, your condition shows patterns consistent with ${hit.condition}. ${hasWeeks ? "Since you've experienced this for several weeks, having a specialist evaluate it is recommended." : "Seeing a doctor will help ensure an accurate diagnosis and treatment plan."}`,
+    confidence: 86,
+    summary: `Based on your consultation history and cumulative symptom profile, the presentation aligns with ${finalDiagnosis}. Medical evaluation is recommended.`,
+    plainLanguageSummary: finalExplanation,
     followUpQuestions: [
       "Would you like to book an appointment with a nearby specialist now?",
-      "Are you taking any over-the-counter medications for this?",
+      "Are you currently taking any new medications for this?",
       "Have you noticed any new symptoms developing today?"
     ],
     recommendation: [
-      `Schedule a consultation with a ${specialty} specialist`,
-      "Keep a daily log of symptom frequency and severity",
-      hasSevere ? "Seek prompt medical care if symptoms intensify" : "Monitor symptoms and seek medical advice"
+      `Schedule a consultation with a ${specialty} specialist below`,
+      "Keep a log of symptom severity, triggers, and fluid intake",
+      hasSevere ? "Seek prompt medical care if symptoms intensify" : "Monitor symptoms and consult a doctor"
     ],
     suggestedSpecialty: specialty,
     disclaimer: AI_DISCLAIMER,

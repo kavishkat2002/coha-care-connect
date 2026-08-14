@@ -1,53 +1,11 @@
 {
-  "Cancer": {
-    "symptoms": ["unexplained lump or swelling", "persistent sore or ulcer that doesn't heal", "unusual bleeding or discharge", "changes in skin moles", "unexplained weight loss", "persistent fatigue", "difficulty swallowing"],
-    "riskFactors": ["family history of cancer", "smoking or tobacco use", "excessive sun exposure", "age over 50", "obesity", "excessive alcohol consumption"],
-    "whenToSeekHelp": "If you notice any persistent, unexplained changes in your body lasting more than 2-3 weeks, see a doctor promptly.",
-    "doctors": [
-      { "name": "Michael Johnson", "count": 6 },
-      { "name": "Mark Johnson", "count": 5 },
-      { "name": "Christopher Williams", "count": 5 }
-    ],
-    "hospitals": [
-      { "name": "PLC Williams", "count": 10 },
-      { "name": "Smith Group", "count": 10 },
-      { "name": "Johnson Inc", "count": 10 }
-    ]
-  },
-  "Obesity": {
-    "symptoms": ["excess body weight", "difficulty with physical activity", "shortness of breath", "joint pain from excess weight", "fatigue", "sleep apnea", "excessive sweating"],
-    "riskFactors": ["sedentary lifestyle", "high-calorie diet", "genetic predisposition", "certain medications", "hormonal conditions", "stress and emotional eating"],
-    "whenToSeekHelp": "If your weight is affecting your daily activities, breathing, or you have a BMI over 30, consult a healthcare provider.",
-    "doctors": [
-      { "name": "Andrew Williams", "count": 7 },
-      { "name": "Robert Brown", "count": 5 },
-      { "name": "Robert Smith", "count": 5 }
-    ],
-    "hospitals": [
-      { "name": "Ltd Smith", "count": 11 },
-      { "name": "Smith Group", "count": 10 },
-      { "name": "Johnson Inc", "count": 8 }
-    ]
-  },
-  "Diabetes": {
-    "symptoms": ["increased thirst", "frequent urination", "unexplained weight loss", "extreme fatigue", "blurred vision", "slow-healing sores", "tingling in hands or feet", "frequent infections"],
-    "riskFactors": ["family history of diabetes", "overweight or obese", "age over 45", "sedentary lifestyle", "history of gestational diabetes", "polycystic ovary syndrome"],
-    "whenToSeekHelp": "If you experience persistent thirst, frequent urination, or unexplained weight changes, get your blood sugar tested as soon as possible.",
-    "doctors": [
-      { "name": "Christopher Brown", "count": 6 },
-      { "name": "Michael Smith", "count": 6 },
-      { "name": "David Smith", "count": 5 }
-    ],
-    "hospitals": [
-      { "name": "LLC Smith", "count": 11 },
-      { "name": "Group Smith", "count": 10 },
-      { "name": "PLC Brown", "count": 10 }
-    ]
-  },
   "Asthma": {
-    "symptoms": ["shortness of breath", "wheezing", "chest tightness", "persistent cough (especially at night)", "difficulty breathing during exercise", "rapid breathing", "frequent respiratory infections"],
-    "riskFactors": ["family history of asthma or allergies", "childhood respiratory infections", "exposure to allergens or pollutants", "smoking or secondhand smoke", "obesity", "occupational exposures"],
-    "whenToSeekHelp": "Seek immediate care if you have severe difficulty breathing, cannot speak in full sentences, or your lips/fingernails turn blue.",
+    "category": "Respiratory Medicine",
+    "symptoms": ["persistent cough (especially at night or early morning)", "shortness of breath on exertion or stairs", "wheezing or whistling sound when breathing out", "chest tightness or chest discomfort", "rapid shallow breathing", "exercise-induced bronchospasm", "cough triggered by cold air, dust, or allergens"],
+    "riskFactors": ["family history of asthma or atopic diseases", "childhood respiratory infections", "exposure to environmental pollutants or secondhand smoke", "obesity", "occupational allergen exposure"],
+    "differentialDiagnosis": ["Chronic Bronchitis", "Post-Infectious Cough", "Gastroesophageal Reflux Disease (GERD)", "Congestive Heart Failure"],
+    "emergencyRedFlags": ["severe shortness of breath at rest", "inability to speak full sentences in one breath", "bluish discoloration of lips or fingernails (cyanosis)", "chest retractions"],
+    "whenToSeekHelp": "If symptoms worsen, interrupt sleep, or require frequent rescue inhalers, consult a General Practitioner or Pulmonologist promptly.",
     "doctors": [
       { "name": "Amanda Williams", "count": 5 },
       { "name": "David Smith", "count": 5 },
@@ -60,9 +18,12 @@
     ]
   },
   "Hypertension": {
-    "symptoms": ["persistent headaches", "dizziness or lightheadedness", "blurred or double vision", "nosebleeds", "shortness of breath", "chest pain", "heart palpitations", "fatigue"],
-    "riskFactors": ["family history of high blood pressure", "high salt intake", "obesity", "sedentary lifestyle", "excessive alcohol", "stress", "age over 40", "smoking"],
-    "whenToSeekHelp": "If your blood pressure readings are consistently above 140/90, or you experience sudden severe headaches, chest pain, or vision changes, seek immediate medical attention.",
+    "category": "Cardiology & Vascular Medicine",
+    "symptoms": ["persistent morning headaches (especially occipital)", "dizziness or lightheadedness", "blurred or double vision", "recurrent nosebleeds (epistaxis)", "shortness of breath", "chest discomfort or tightness", "heart palpitations"],
+    "riskFactors": ["family history of essential hypertension", "high dietary sodium intake", "obesity (BMI > 30)", "sedentary lifestyle", "excessive alcohol consumption", "chronic psychological stress", "age over 40"],
+    "differentialDiagnosis": ["Secondary Hypertension (Renal Artery Stenosis)", "Essential Hypertension", "Pheochromocytoma", "White Coat Effect"],
+    "emergencyRedFlags": ["systolic BP > 180 mmHg or diastolic BP > 120 mmHg", "sudden severe headache with confusion", "chest pain radiating to left arm/jaw", "sudden weakness or numbness"],
+    "whenToSeekHelp": "If blood pressure readings consistently exceed 140/90 mmHg, or if you experience headaches with dizziness, consult a Cardiologist.",
     "doctors": [
       { "name": "Michael Smith", "count": 7 },
       { "name": "Stephanie Smith", "count": 6 },
@@ -74,19 +35,136 @@
       { "name": "Inc Williams", "count": 8 }
     ]
   },
-  "Arthritis": {
-    "symptoms": ["joint pain and stiffness", "swelling in joints", "reduced range of motion", "morning stiffness lasting over 30 minutes", "warmth or redness around joints", "fatigue", "joint deformity over time"],
-    "riskFactors": ["age over 50", "family history of arthritis", "previous joint injury", "obesity", "female sex (for rheumatoid arthritis)", "smoking", "occupational joint stress"],
-    "whenToSeekHelp": "If joint pain or stiffness persists for more than a few weeks, significantly limits your daily activities, or is accompanied by swelling and redness, see a doctor.",
+  "Diabetes": {
+    "category": "Endocrinology & General Medicine",
+    "symptoms": ["increased thirst (polydipsia)", "frequent urination (polyuria)", "increased hunger (polyphagia)", "unexplained weight loss", "extreme chronic fatigue", "blurred vision", "slow-healing cuts or sores", "tingling or numbness in feet/hands"],
+    "riskFactors": ["family history of Type 2 diabetes", "overweight or obesity", "age over 45", "physical inactivity", "history of gestational diabetes", "polycystic ovary syndrome (PCOS)"],
+    "differentialDiagnosis": ["Type 2 Diabetes Mellitus", "Type 1 Diabetes Mellitus", "Impaired Fasting Glucose / Prediabetes", "Diabetes Insipidus"],
+    "emergencyRedFlags": ["fruity breath odor with confusion (Diabetic Ketoacidosis)", "rapid deep breathing", "extreme drowsiness or loss of consciousness", "blood glucose > 300 mg/dL"],
+    "whenToSeekHelp": "If you notice persistent thirst, frequent urination, or unexplained weight loss, get your HbA1c or fasting blood glucose tested.",
     "doctors": [
-      { "name": "John Smith", "count": 8 },
-      { "name": "Daniel Jones", "count": 5 },
-      { "name": "Jennifer Johnson", "count": 5 }
+      { "name": "Christopher Brown", "count": 6 },
+      { "name": "Michael Smith", "count": 6 },
+      { "name": "David Smith", "count": 5 }
     ],
     "hospitals": [
-      { "name": "Smith PLC", "count": 12 },
-      { "name": "Smith LLC", "count": 11 },
-      { "name": "Ltd Smith", "count": 9 }
+      { "name": "LLC Smith", "count": 11 },
+      { "name": "Group Smith", "count": 10 },
+      { "name": "PLC Brown", "count": 10 }
+    ]
+  },
+  "Skin Condition": {
+    "category": "Dermatology",
+    "symptoms": ["asymmetrical skin lesion or mole", "irregular, notched, or poorly-defined borders", "variegated colors (brown, black, red, white)", "diameter larger than 6mm", "evolving size, shape, or surface elevation", "persistent pruritus (itching) or scaling", "non-healing sore or lesion bleeding easily"],
+    "riskFactors": ["excessive ultraviolet (UV) radiation or sunburn history", "fair skin, light hair, freckles", "multiple dysplastic nevi", "personal or family history of melanoma", "immunosuppression"],
+    "differentialDiagnosis": ["Melanoma", "Basal Cell Carcinoma (BCC)", "Squamous Cell Carcinoma (SCC)", "Seborrheic Keratosis", "Atopic Dermatitis"],
+    "emergencyRedFlags": ["rapidly growing pigmented lesion with central ulceration", "spontaneous bleeding from a mole", "satellitism or regional lymph node swelling"],
+    "whenToSeekHelp": "Any new, changing, or non-healing skin spot lasting more than 2-3 weeks should be evaluated by a Dermatologist using dermoscopy.",
+    "doctors": [
+      { "name": "John Doe", "count": 8 },
+      { "name": "Sarah Jenkins", "count": 7 },
+      { "name": "Robert Taylor", "count": 6 }
+    ],
+    "hospitals": [
+      { "name": "Lanka Hospitals Dermatology Center", "count": 12 },
+      { "name": "Asiri Surgical Hospital", "count": 10 },
+      { "name": "Nawaloka Hospital", "count": 9 }
+    ]
+  },
+  "Oral Condition": {
+    "category": "Dentistry & Oral Medicine",
+    "symptoms": ["persistent oral ulcer lasting more than 2 weeks", "painful or tender sore on tongue, gums, or buccal mucosa", "white patches (leukoplakia) or red patches (erythroplakia)", "difficulty or pain when swallowing (dysphagia)", "unexplained oral bleeding", "jaw stiffness or pain", "loose teeth without trauma"],
+    "riskFactors": ["tobacco use (smoking, chewing betel/paan)", "heavy alcohol consumption", "human papillomavirus (HPV) infection", "poor oral hygiene or ill-fitting dentures", "chronic mucosal irritation"],
+    "differentialDiagnosis": ["Aphthous Stomatitis", "Oral Squamous Cell Carcinoma", "Oral Candidiasis", "Lichen Planus", "Herpetic Stomatitis"],
+    "emergencyRedFlags": ["rapidly expanding painful floor-of-mouth mass", "inability to swallow liquids or saliva", "airway compromise from oral swelling"],
+    "whenToSeekHelp": "An oral ulcer or sore that fails to heal after 14 days requires immediate clinical examination by an Oral Medicine Specialist or Dentist.",
+    "doctors": [
+      { "name": "Kavinda Perera", "count": 8 },
+      { "name": "Nimali Fernando", "count": 6 },
+      { "name": "Sunil Jayasinghe", "count": 5 }
+    ],
+    "hospitals": [
+      { "name": "National Dental Hospital Colombo", "count": 14 },
+      { "name": "Durdans Hospital Oral Clinic", "count": 9 }
+    ]
+  },
+  "Gynaecological Condition": {
+    "category": "Gynaecology & Women's Health",
+    "symptoms": ["irregular, missed, or heavy menstrual bleeding", "severe pelvic pain or dysmenorrhea", "abnormal vaginal discharge or odor", "pelvic pressure or bloating", "pain during intercourse (dyspareunia)", "unexplained intermenstrual spotting"],
+    "riskFactors": ["hormonal imbalance or estrogen dominance", "polycystic ovary syndrome (PCOS)", "endometriosis history", "pelvic inflammatory disease (PID)", "family history of uterine or ovarian fibroids"],
+    "differentialDiagnosis": ["Polycystic Ovary Syndrome (PCOS)", "Endometriosis", "Uterine Fibroids", "Pelvic Inflammatory Disease (PID)", "Ovarian Cyst"],
+    "emergencyRedFlags": ["sudden severe sharp unilateral pelvic pain with vomiting (Ovarian Torsion / Ectopic Pregnancy)", "profuse vaginal hemorrhage", "fever with severe pelvic tenderness"],
+    "whenToSeekHelp": "Consult a Gynaecologist if you experience persistent pelvic pain, irregular cycles lasting over 3 months, or heavy painful periods.",
+    "doctors": [
+      { "name": "Chamari Wickramasinghe", "count": 9 },
+      { "name": "Priyani Silva", "count": 7 }
+    ],
+    "hospitals": [
+      { "name": "Castle Street Hospital for Women", "count": 15 },
+      { "name": "Ninewells Hospital", "count": 12 }
+    ]
+  },
+  "Eye Condition": {
+    "category": "Ophthalmology",
+    "symptoms": ["blurry, cloudy, or distorted vision", "eye pain or deep ocular pressure", "redness or conjunctival injection", "excessive tearing or dry eye sensation", "seeing halos around light sources", "new eye floaters or light flashes", "sensitivity to light (photophobia)"],
+    "riskFactors": ["prolonged digital screen exposure", "diabetes mellitus (diabetic retinopathy)", "elevated intraocular pressure (glaucoma)", "age over 50 (cataracts / macular degeneration)", "contact lens wear"],
+    "differentialDiagnosis": ["Acute Angle-Closure Glaucoma", "Cataracts", "Dry Eye Syndrome", "Conjuctivitis", "Age-Related Macular Degeneration"],
+    "emergencyRedFlags": ["sudden painless loss of vision in one eye (Retinal Detachment / Central Retinal Artery Occlusion)", "severe eye pain with red eye and nausea (Acute Glaucoma Attack)"],
+    "whenToSeekHelp": "If you experience sudden vision changes, severe eye pain, or persistent redness, consult an Ophthalmologist immediately.",
+    "doctors": [
+      { "name": "Rohan De Silva", "count": 8 },
+      { "name": "Mahesh Ratnayake", "count": 6 }
+    ],
+    "hospitals": [
+      { "name": "National Eye Hospital Colombo", "count": 16 },
+      { "name": "Vision Care Specialist Hospital", "count": 10 }
+    ]
+  },
+  "Cancer": {
+    "category": "Oncology",
+    "symptoms": ["unexplained palpable lump or swelling", "persistent sore or ulcer that doesn't heal", "unusual bleeding or discharge from body orifices", "changes in skin moles or lesions", "unexplained rapid weight loss (>10% body weight)", "persistent unremitting fatigue", "difficulty swallowing (dysphagia)"],
+    "riskFactors": ["family history of hereditary cancer syndromes", "tobacco smoking or chewing", "excessive ultraviolet or ionizing radiation", "age over 50", "chronic inflammation or viral infections (HPV, HBV, HCV)"],
+    "differentialDiagnosis": ["Malignancy (Carcinoma, Sarcoma, Lymphoma)", "Benign Neoplasm", "Chronic Granulomatous Disease"],
+    "emergencyRedFlags": ["superior vena cava obstruction symptoms (facial swelling, dyspnea)", "spinal cord compression (sudden paralysis/incontinence)", "febrile neutropenia"],
+    "whenToSeekHelp": "Persistent unexplained symptoms lasting over 2-3 weeks require comprehensive diagnostic evaluation by an Oncologist.",
+    "doctors": [
+      { "name": "Michael Johnson", "count": 6 },
+      { "name": "Mark Johnson", "count": 5 },
+      { "name": "Christopher Williams", "count": 5 }
+    ],
+    "hospitals": [
+      { "name": "Apeksha Hospital Maharagama (National Cancer Institute)", "count": 18 },
+      { "name": "Smith Group Oncology Division", "count": 10 }
+    ]
+  },
+  "Obesity": {
+    "category": "Metabolic & Bariatric Medicine",
+    "symptoms": ["excess body fat accumulation (BMI > 30)", "shortness of breath during light exertion", "joint pain in knees and hips", "daytime somnolence and heavy snoring", "fatigue and low stamina", "excessive sweating"],
+    "riskFactors": ["sedentary lifestyle and lack of physical activity", "high-calorie refined carbohydrate diet", "genetic predisposition", "certain medications (steroids, antipsychotics)", "endocrine disorders (hypothyroidism, Cushing syndrome)"],
+    "differentialDiagnosis": ["Exogenous Obesity", "Hypothyroidism", "Cushing's Syndrome", "Metabolic Syndrome"],
+    "emergencyRedFlags": ["severe chest pain on exertion", "sudden breathlessness while sleeping (Obstructive Sleep Apnea complication)"],
+    "whenToSeekHelp": "If excess weight affects daily mobility, joint health, or causes sleep apnea, consult an Endocrinologist or Bariatric Specialist.",
+    "doctors": [
+      { "name": "Andrew Williams", "count": 7 },
+      { "name": "Robert Brown", "count": 5 }
+    ],
+    "hospitals": [
+      { "name": "Asiri Central Hospital Metabolic Center", "count": 11 }
+    ]
+  },
+  "Arthritis": {
+    "category": "Rheumatology & Orthopaedics",
+    "symptoms": ["joint pain and persistent stiffness", "swelling and tenderness in multiple joints", "morning joint stiffness lasting over 30 minutes", "reduced joint range of motion", "warmth or erythema over joint skin", "fatigue and low-grade fever"],
+    "riskFactors": ["age over 50 (osteoarthritis)", "family history of autoimmune arthritis", "previous joint trauma or repetitive strain", "obesity", "female gender (for rheumatoid arthritis)"],
+    "differentialDiagnosis": ["Osteoarthritis", "Rheumatoid Arthritis", "Gouty Arthritis", "Psoriatic Arthritis"],
+    "emergencyRedFlags": ["single hot, red, extremely painful swollen joint with high fever (Septic Arthritis emergency)"],
+    "whenToSeekHelp": "If joint pain or morning stiffness lasts longer than 2 weeks or limits daily activities, consult a Rheumatologist.",
+    "doctors": [
+      { "name": "John Smith", "count": 8 },
+      { "name": "Daniel Jones", "count": 5 }
+    ],
+    "hospitals": [
+      { "name": "National Hospital Sri Lanka Rheumatology Clinic", "count": 14 }
     ]
   }
 }
