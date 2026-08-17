@@ -460,6 +460,64 @@ function ImagesPage() {
                   </div>
                 )}
                 
+                {/* Eye Cancer Classification & SEER Metrics Grid */}
+                {result.eyeCancerClassification && result.isMedicalImage !== false && (
+                  <div className="rounded-2xl border-2 overflow-hidden" style={{ borderColor: result.eyeCancerClassification.classification === "malignant" ? "var(--destructive)" : "var(--success)" }}>
+                    <div className="p-3 px-4 border-b" style={{ 
+                      backgroundColor: result.eyeCancerClassification.classification === "malignant" ? "hsl(0 72% 51% / 0.08)" : "hsl(142 71% 45% / 0.08)",
+                      borderColor: result.eyeCancerClassification.classification === "malignant" ? "var(--destructive)" : "var(--success)"
+                    }}>
+                      <div className="flex items-center justify-between">
+                        <p className="text-sm font-semibold">Eye Cancer Classification</p>
+                        <Badge variant={result.eyeCancerClassification.classification === "malignant" ? "destructive" : "secondary"} className="uppercase tracking-wider text-xs">
+                          {result.eyeCancerClassification.classification}
+                        </Badge>
+                      </div>
+                      <p className="text-xs text-muted-foreground mt-0.5">
+                        Subtype: <span className="font-medium capitalize">{result.eyeCancerClassification.subtype.replace("_", " ")}</span>
+                        {" · "}Abnormality probability: <span className="font-semibold">{result.eyeCancerClassification.malignancyProbability}%</span>
+                      </p>
+                    </div>
+                    <div className="p-4 space-y-4">
+                      <div>
+                        <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2">Clinical Features</p>
+                        <div className="grid gap-2">
+                          {[
+                            { label: "Leukocoria", value: result.eyeCancerClassification.clinicalFeatures.leukocoria },
+                            { label: "Pigmentation", value: result.eyeCancerClassification.clinicalFeatures.pigmentation },
+                            { label: "Asymmetry", value: result.eyeCancerClassification.clinicalFeatures.asymmetry }
+                          ].map((item, i) => (
+                            <div key={i} className="flex gap-3 items-start text-sm">
+                              <span className="flex size-6 items-center justify-center rounded-full bg-primary/10 text-primary font-bold text-xs shrink-0">{i + 1}</span>
+                              <div>
+                                <span className="font-medium">{item.label}: </span>
+                                <span className="text-muted-foreground">{item.value}</span>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                      <div className="pt-3 border-t border-border">
+                         <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2">SEER Database Predictions</p>
+                         <div className="grid gap-2">
+                           <div className="flex gap-2 items-start text-sm">
+                              <span className="font-medium">Marker:</span>
+                              <span className="text-muted-foreground">{result.eyeCancerClassification.seerPredictions.predictedGeneticMarker}</span>
+                           </div>
+                           <div className="flex gap-2 items-start text-sm">
+                              <span className="font-medium">Treatment:</span>
+                              <span className="text-muted-foreground">{result.eyeCancerClassification.seerPredictions.predictedTreatment}</span>
+                           </div>
+                           <div className="flex gap-2 items-start text-sm">
+                              <span className="font-medium">10Yr Survival:</span>
+                              <span className="text-muted-foreground">{result.eyeCancerClassification.seerPredictions.survivalProbability10Yr}</span>
+                           </div>
+                         </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+                
                 {/* Doctor Recommendation */}
                 {recommendedDoctors.slice(0, 1).map(doctor => (
                   <div key={doctor.id} className="rounded-2xl border border-border overflow-hidden">
