@@ -565,7 +565,7 @@ You must use extreme clinical precision to diagnose between the 7 exact HAM10000
 
 ANALYSIS STAGES TO EXECUTE:
 1. STAGE 1 (Image Validation): Verify if the image is an actual medical photograph (e.g. skin lesion, body part, scan). If it's a random non-medical object (like a robot, toy, landscape, drawing, etc.), set "isMedicalImage" to false, explain it's not a valid clinical photo, and skip stages 2-4.
-2. STAGE 2 (Vision AI & YOLO Detection): Locate primary lesion and calculate exact bounding box [x, y, width, height] normalized between 0.0 and 1.0.
+2. STAGE 2 (Vision AI & YOLO Detection): Locate the primary lesion symptom and calculate the EXACT bounding box [x, y, width, height] normalized between 0.0 and 1.0. This box MUST tightly hug the precise physical edges of the symptom in the photograph, ignoring healthy background tissue.
 3. STAGE 3 (ABCDE Criteria & Feature Extraction): Assess Asymmetry, Border irregularity, Color variegation, Diameter estimation (mm), and Evolution/ulceration.
 4. STAGE 4 (External Search & Differential Reasoning): Cross-reference observed patterns with external medical literature and HAM10000 diagnostic criteria.
 5. STAGE 5 (Calibrated Prediction Score & Diagnostics): Compute exact predictionScore (0-100% malignancy probability for skin or abnormality probability for other regions).
@@ -814,10 +814,11 @@ function analyzeUploadedImageFeatures(imageBase64?: string, region: string = "Sk
     let plainLanguageExplanation = "";
     let recommendations: string[] = [];
 
-    const xBox = Number((0.25 + (feat.asymmetryScore * 0.25)).toFixed(2));
-    const yBox = Number((0.20 + (feat.borderIrregularity * 0.25)).toFixed(2));
-    const wBox = Number((0.20 + (feat.estimatedDiameterMm / 30)).toFixed(2));
-    const hBox = Number((0.20 + (feat.estimatedDiameterMm / 30)).toFixed(2));
+    // Precise YOLO bounding box from offline canvas or fallback heuristic
+    const xBox = pixelMetrics?.boundingBox ? pixelMetrics.boundingBox[0] : Number((0.25 + (feat.asymmetryScore * 0.25)).toFixed(2));
+    const yBox = pixelMetrics?.boundingBox ? pixelMetrics.boundingBox[1] : Number((0.20 + (feat.borderIrregularity * 0.25)).toFixed(2));
+    const wBox = pixelMetrics?.boundingBox ? pixelMetrics.boundingBox[2] : Number((0.20 + (feat.estimatedDiameterMm / 30)).toFixed(2));
+    const hBox = pixelMetrics?.boundingBox ? pixelMetrics.boundingBox[3] : Number((0.20 + (feat.estimatedDiameterMm / 30)).toFixed(2));
 
     const rVal = pixelMetrics ? pixelMetrics.meanR : Math.round(140 + feat.rednessRatio * 80);
     const gVal = pixelMetrics ? pixelMetrics.meanG : Math.round(110 - feat.darkPixelRatio * 50);

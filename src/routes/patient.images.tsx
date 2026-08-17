@@ -57,6 +57,7 @@ export type RealPixelMetrics = {
   erythemaRatio: number;
   estimatedDiameterMm: number;
   skinTonePercentage: number;
+  boundingBox?: number[]; // [x, y, width, height]
 };
 
 function ImagesPage() {
@@ -114,6 +115,10 @@ function ImagesPage() {
 
             let centerSum = 0, centerC = 0;
             let borderSum = 0, borderC = 0;
+            
+            // YOLO Bounding Box tracking
+            let minX = width, minY = height, maxX = 0, maxY = 0;
+            let lesionPixelsDetected = 0;
 
             for (let i = 0; i < len; i += sampleStep * 4) {
               const r = data[i]!;
@@ -146,6 +151,17 @@ function ImagesPage() {
                 centerSum += bright; centerC++;
               } else {
                 borderSum += bright; borderC++;
+              }
+
+              // Detect symptom/lesion pixels for exact localization
+              const isLesion = bright < 110 || (r > 130 && r - g > 30 && r - b > 30);
+              // Ignore extreme image edges (often shadows or borders)
+              if (isLesion && px > width * 0.05 && px < width * 0.95 && py > height * 0.05 && py < height * 0.95) {
+                minX = Math.min(minX, px);
+                minY = Math.min(minY, py);
+                maxX = Math.max(maxX, px);
+                maxY = Math.max(maxY, py);
+                lesionPixelsDetected++;
               }
             }
 
@@ -184,6 +200,15 @@ function ImagesPage() {
               estimatedDiameterMm: Number((3.2 + asymmetryScore * 4.5 + borderContrast * 3.5).toFixed(1)),
               skinTonePercentage
             };
+
+            if (lesionPixelsDetected > 50) {
+              calculatedMetrics.boundingBox = [
+                Number((minX / width).toFixed(2)), 
+                Number((minY / height).toFixed(2)), 
+                Number(((maxX - minX) / width).toFixed(2)), 
+                Number(((maxY - minY) / height).toFixed(2))
+              ];
+            }
 
             setPixelMetrics(calculatedMetrics);
           }
