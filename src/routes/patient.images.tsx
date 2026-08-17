@@ -56,6 +56,7 @@ export type RealPixelMetrics = {
   borderContrast: number;
   erythemaRatio: number;
   estimatedDiameterMm: number;
+  skinTonePercentage: number;
 };
 
 function ImagesPage() {
@@ -101,8 +102,7 @@ function ImagesPage() {
           if (imageData) {
             const data = imageData.data;
             let sumR = 0, sumG = 0, sumB = 0;
-            let darkCount = 0;
-            let redCount = 0;
+            let darkCount = 0, redCount = 0, skinToneCount = 0;
             const len = data.length;
             const sampleStep = Math.max(1, Math.floor(len / 16000));
             let sampled = 0;
@@ -128,6 +128,10 @@ function ImagesPage() {
 
               if (bright < 85) darkCount++;
               if (r > 125 && r - g > 25 && r - b > 25) redCount++;
+              
+              if (r > 60 && g > 30 && b > 15 && r > g && r > b && (r - g) > 10 && (Math.max(r, g, b) - Math.min(r, g, b)) > 10) {
+                skinToneCount++;
+              }
 
               const pIdx = i / 4;
               const px = pIdx % width;
@@ -165,6 +169,7 @@ function ImagesPage() {
             const bMean = borderSum / Math.max(1, borderC);
             const borderContrast = Math.min(0.96, Math.max(0.05, Math.abs(cMean - bMean) / 110));
             const colorVariance = Math.min(1.0, Math.sqrt(Math.pow(mR - mG, 2) + Math.pow(mR - mB, 2) + Math.pow(mG - mB, 2)) / 220);
+            const skinTonePercentage = Number((skinToneCount / Math.max(1, sampled)).toFixed(2));
 
             const calculatedMetrics: RealPixelMetrics = {
               meanR: Math.round(mR),
@@ -176,7 +181,8 @@ function ImagesPage() {
               asymmetryScore: Number(asymmetryScore.toFixed(2)),
               borderContrast: Number(borderContrast.toFixed(2)),
               erythemaRatio: Number(erythemaRatio.toFixed(2)),
-              estimatedDiameterMm: Number((3.2 + asymmetryScore * 4.5 + borderContrast * 3.5).toFixed(1))
+              estimatedDiameterMm: Number((3.2 + asymmetryScore * 4.5 + borderContrast * 3.5).toFixed(1)),
+              skinTonePercentage
             };
 
             setPixelMetrics(calculatedMetrics);
@@ -262,7 +268,7 @@ function ImagesPage() {
                 <img src={imageBase64} alt="Uploaded" className="w-full h-auto object-contain" />
                 
                 {/* YOLO Lesion Bounding Box Overlay */}
-                {result?.boundingBox && (
+                {result?.boundingBox && result.isMedicalImage !== false && (
                   <div 
                     className="absolute rounded-lg border-2 border-amber-500 bg-amber-500/25 shadow-[0_0_30px_rgba(245,158,11,0.85)] backdrop-blur-[2px] transition-all duration-700 ease-in-out"
                     style={{
@@ -380,7 +386,7 @@ function ImagesPage() {
                 </div>
 
                 {/* Skin Cancer Classification & ABCDE Grid */}
-                {result.skinCancerClassification && (
+                {result.skinCancerClassification && result.isMedicalImage !== false && (
                   <div className="rounded-2xl border-2 overflow-hidden" style={{ borderColor: result.skinCancerClassification.classification === "malignant" ? "var(--destructive)" : "var(--success)" }}>
                     <div className="p-3 px-4 border-b" style={{ 
                       backgroundColor: result.skinCancerClassification.classification === "malignant" ? "hsl(0 72% 51% / 0.08)" : "hsl(142 71% 45% / 0.08)",
