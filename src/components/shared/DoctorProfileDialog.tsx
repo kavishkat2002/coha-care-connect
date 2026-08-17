@@ -48,9 +48,8 @@ export function DoctorProfileDialog({
       const user = await getSession();
       if (user) {
         setCurrentUser(user);
-        // Assume patient profile ID is same as user ID for now, or just use user ID
-        const hasBooking = await patientService.hasPreviousBooking(doctor.id, user.id);
-        setCanReview(hasBooking);
+        // Allow patients to review any doctor profile
+        setCanReview(user.role === "patient");
       }
 
       // Fetch real-time availability and queue for today
@@ -182,8 +181,7 @@ export function DoctorProfileDialog({
               </DialogDescription>
               <div className="mt-2 text-sm text-muted-foreground flex flex-wrap items-center gap-x-4 gap-y-1">
                 <span className="flex items-center gap-1">
-                  <Star className="size-3.5 fill-primary text-primary" />
-                  <span className="font-medium text-foreground">{avgRating}</span> ({reviewCount} reviews)
+                  {reviewCount} reviews
                 </span>
                 <span className="flex items-center gap-1">
                   <MapPin className="size-3.5" /> {doctor.hospital}
@@ -203,7 +201,7 @@ export function DoctorProfileDialog({
               </p>
             </div>
 
-            <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
+            <div className="grid grid-cols-2 gap-4 sm:grid-cols-3">
               <div className="rounded-lg border p-3 text-center">
                 <Users className="size-4 mx-auto mb-1 text-primary" />
                 <div className="text-sm font-semibold">{realQueue !== null ? realQueue : doctor.queue}</div>
@@ -217,11 +215,6 @@ export function DoctorProfileDialog({
                     : doctor.nextSlot}
                 </div>
                 <div className="text-[10px] text-muted-foreground uppercase tracking-wider">Next Slot</div>
-              </div>
-              <div className="rounded-lg border p-3 text-center">
-                <Star className="size-4 mx-auto mb-1 text-primary" />
-                <div className="text-sm font-semibold">{doctor.rating}</div>
-                <div className="text-[10px] text-muted-foreground uppercase tracking-wider">Rating</div>
               </div>
               <div className="rounded-lg border p-3 text-center">
                 <ThumbsUp className="size-4 mx-auto mb-1 text-primary" />
@@ -252,15 +245,7 @@ export function DoctorProfileDialog({
                           </Button>
                         )}
                       </div>
-                      <div className="flex items-center gap-2 mb-2">
-                        {[1, 2, 3, 4, 5].map((star) => (
-                          <Star 
-                            key={star} 
-                            className={`size-5 cursor-pointer transition-colors ${rating >= star ? 'fill-primary text-primary' : 'text-muted-foreground/30'}`} 
-                            onClick={() => setRating(star)}
-                          />
-                        ))}
-                      </div>
+
                       <Textarea 
                         placeholder="Share your experience with this doctor..." 
                         value={comment}
@@ -308,14 +293,7 @@ export function DoctorProfileDialog({
                               )}
                             </div>
                           </div>
-                          <div className="flex items-center gap-0.5 mb-2">
-                            {[1, 2, 3, 4, 5].map((star) => (
-                              <Star 
-                                key={star} 
-                                className={`size-3 ${review.rating >= star ? 'fill-yellow-400 text-yellow-400' : 'text-muted-foreground/30'}`} 
-                              />
-                            ))}
-                          </div>
+
                           <p className="text-sm text-foreground/80">{review.comment}</p>
                         </div>
                       ))

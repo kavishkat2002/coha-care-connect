@@ -95,8 +95,6 @@ export function DoctorCard({ doctor, compact = false, onProfileClick }: { doctor
           {!compact ? (
             <div className="mt-3 flex flex-wrap gap-x-5 gap-y-1.5 text-xs text-muted-foreground">
               <span className="flex items-center gap-1.5">
-                <Star className="size-3.5 fill-primary text-primary" aria-hidden="true" />
-                {doctor.rating}{" "}
                 <span 
                   className={onProfileClick ? "cursor-pointer hover:underline" : ""} 
                   onClick={(e) => {

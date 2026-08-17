@@ -550,9 +550,8 @@ function ImagesPage() {
                             <MapPin className="size-3" />
                             {doctor.distanceKm} km away
                           </span>
-                          <span className="flex items-center gap-1 text-amber-500 font-medium">
-                            <Star className="size-3 fill-current" />
-                            {doctor.rating} ({doctor.reviews})
+                          <span className="flex items-center gap-1 font-medium">
+                            {doctor.reviews} Reviews
                           </span>
                         </div>
                       </div>

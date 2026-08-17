@@ -105,27 +105,7 @@ export function HospitalReviewsDialog({ hospital, isOpen, onOpenChange }: Hospit
             </div>
           ) : isWriting ? (
             <div className="flex-1 p-6 flex flex-col gap-6 overflow-y-auto">
-              <div className="space-y-3">
-                <label className="text-sm font-medium">Your Rating</label>
-                <div className="flex gap-2">
-                  {[1, 2, 3, 4, 5].map((star) => (
-                    <button
-                      key={star}
-                      type="button"
-                      onClick={() => setRating(star)}
-                      className="focus:outline-none hover:scale-110 transition-transform"
-                    >
-                      <Star
-                        className={`size-8 ${
-                          star <= rating 
-                            ? "fill-yellow-400 text-yellow-500" 
-                            : "fill-muted text-muted"
-                        }`}
-                      />
-                    </button>
-                  ))}
-                </div>
-              </div>
+
               
               <div className="space-y-3 flex-1">
                 <label className="text-sm font-medium">Your Experience</label>
@@ -173,16 +153,7 @@ export function HospitalReviewsDialog({ hospital, isOpen, onOpenChange }: Hospit
                               </div>
                             </div>
                           </div>
-                          <div className="flex items-center gap-0.5">
-                            {[...Array(5)].map((_, i) => (
-                              <Star
-                                key={i}
-                                className={`size-3.5 ${
-                                  i < review.rating ? "fill-yellow-400 text-yellow-500" : "fill-muted text-muted"
-                                }`}
-                              />
-                            ))}
-                          </div>
+
                         </div>
                         <p className="text-sm text-foreground/90 whitespace-pre-wrap">{review.comment}</p>
                       </div>
