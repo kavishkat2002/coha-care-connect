@@ -32,15 +32,20 @@ import { getSession } from "@/services/auth.service";
 
 type BookSearch = {
   doctorId?: string;
+  date?: string;
+  timeslot?: string;
 };
 
 export const Route = createFileRoute("/patient/book")({
   validateSearch: (search: Record<string, unknown>): BookSearch => {
     const doctorId = search["doctorId"];
-    if (typeof doctorId === "string" && doctorId) {
-      return { doctorId };
-    }
-    return {};
+    const date = search["date"];
+    const timeslot = search["timeslot"];
+    const res: BookSearch = {};
+    if (typeof doctorId === "string" && doctorId) res.doctorId = doctorId;
+    if (typeof date === "string" && date) res.date = date;
+    if (typeof timeslot === "string" && timeslot) res.timeslot = timeslot;
+    return res;
   },
   head: () => ({
     meta: [
@@ -58,7 +63,7 @@ export const Route = createFileRoute("/patient/book")({
 });
 
 function BookPage() {
-  const { doctorId } = Route.useSearch();
+  const { doctorId, date: paramDate, timeslot: paramTimeslot } = Route.useSearch();
   const navigate = useNavigate();
   const [query, setQuery] = useState("");
   const [showSuggestions, setShowSuggestions] = useState(false);
@@ -71,9 +76,42 @@ function BookPage() {
   const [confirmed, setConfirmed] = useState(false);
   const [showReviewsDialog, setShowReviewsDialog] = useState(false);
   const [viewingDoctor, setViewingDoctor] = useState<Doctor | null>(null);
+
+  // Helper to parse param date string (e.g. "20th August") into YYYY-MM-DD format
+  const parseParamDate = (dStr?: string): string => {
+    const today = new Date();
+    if (!dStr) return (today.toISOString().split("T")[0] || "") as string;
+    if (/^\d{4}-\d{2}-\d{2}$/.test(dStr)) return dStr;
+
+    const lower = dStr.toLowerCase();
+    if (lower === "tomorrow") {
+      const tomorrow = new Date(today);
+      tomorrow.setDate(today.getDate() + 1);
+      return (tomorrow.toISOString().split("T")[0] || "") as string;
+    }
+    if (lower === "today") {
+      return (today.toISOString().split("T")[0] || "") as string;
+    }
+
+    const monthMap: Record<string, number> = {
+      jan: 0, feb: 1, mar: 2, apr: 3, may: 4, jun: 5, jul: 6, aug: 7, sep: 8, oct: 9, nov: 10, dec: 11,
+      january: 0, february: 1, march: 2, april: 3, june: 5, july: 6, august: 7, september: 8, october: 9, november: 10, december: 11
+    };
+
+    const dayMatch = dStr.match(/\d+/);
+    const monthMatch = dStr.match(/[a-zA-Z]+/);
+    if (dayMatch && monthMatch) {
+      const day = parseInt(dayMatch[0], 10);
+      const monthWord = monthMatch[0].toLowerCase();
+      const month = monthMap[monthWord] !== undefined ? monthMap[monthWord] : today.getMonth();
+      const targetDate = new Date(today.getFullYear(), month, day);
+      return (targetDate.toISOString().split("T")[0] || "") as string;
+    }
+    return (today.toISOString().split("T")[0] || "") as string;
+  };
   
   // Dynamic slot and queue state
-  const [selectedDate, setSelectedDate] = useState<string>(() => new Date().toISOString().split('T')[0] || "");
+  const [selectedDate, setSelectedDate] = useState<string>(() => parseParamDate(paramDate));
   const [availableSlots, setAvailableSlots] = useState<string[]>([]);
   const [slotQueues, setSlotQueues] = useState<Record<string, number>>({});
   const [assignedQueue, setAssignedQueue] = useState<number | null>(null);
@@ -129,6 +167,29 @@ function BookPage() {
       const slots = await patientService.getDoctorAvailability(selected.id, selectedDate);
       setAvailableSlots(slots);
       
+      // Auto-select slot if timeslot is specified
+      if (paramTimeslot && slots.length > 0) {
+        const slotLower = paramTimeslot.toLowerCase();
+        let autoSlot = slots[0] || null;
+        if (slotLower.includes("morning")) {
+          autoSlot = slots.find((s) => {
+            const hr = parseInt(s.split(":")[0] || "0", 10);
+            return hr < 12;
+          }) || slots[0] || null;
+        } else if (slotLower.includes("afternoon")) {
+          autoSlot = slots.find((s) => {
+            const hr = parseInt(s.split(":")[0] || "0", 10);
+            return hr >= 12 && hr < 17;
+          }) || slots[0] || null;
+        } else if (slotLower.includes("evening")) {
+          autoSlot = slots.find((s) => {
+            const hr = parseInt(s.split(":")[0] || "0", 10);
+            return hr >= 17;
+          }) || slots[0] || null;
+        }
+        setSlot(autoSlot);
+      }
+      
       const queues: Record<string, number> = {};
       for (const s of slots) {
         const count = await patientService.getSlotQueueCount(selected.id, selectedDate, s);
@@ -137,7 +198,7 @@ function BookPage() {
       setSlotQueues(queues);
     }
     fetchSlots();
-  }, [selected, selectedDate]);
+  }, [selected, selectedDate, paramTimeslot]);
 
   const selectedHospitalInfo = useMemo(() => {
     const hQ = hospital.trim().toLowerCase();

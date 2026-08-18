@@ -145,6 +145,14 @@ export type ChatMessage = {
   imageBase64?: string;
 };
 
+export type AgenticAction = {
+  type: "redirect" | "book_doctor" | "find_specialist" | "analyze_image" | "book_specific_doctor" | "none";
+  targetRoute?: string;
+  specialty?: string;
+  message?: string;
+  parameters?: Record<string, any>;
+};
+
 export type Assessment = {
   intent: string;
   possibleConditions: { name: string; likelihood: number }[];
@@ -157,6 +165,7 @@ export type Assessment = {
   suggestedSpecialty: string;
   disclaimer: string;
   reasoning?: string;
+  agenticAction?: AgenticAction;
 };
 
 const delay = (ms: number) => new Promise((r) => setTimeout(r, ms));
@@ -195,14 +204,14 @@ const KEYWORDS = [
 ];
 
 const SPECIALTY_KEYWORDS = [
-  { match: ["dermatolog", "skin doctor"], specialty: "Dermatology" },
-  { match: ["oncolog", "cancer doctor"], specialty: "Oncology" },
-  { match: ["ophthalmolog", "eye doctor"], specialty: "Ophthalmology" },
-  { match: ["dentist", "dental", "tooth", "teeth"], specialty: "Dentistry & Oral Medicine" },
-  { match: ["general physician", "general doctor", "gp"], specialty: "General Medicine" },
-  { match: ["radiolog"], specialty: "Radiology" },
-  { match: ["cardiolog", "heart doctor"], specialty: "Cardiology" },
-  { match: ["gynaecolog", "gynecolog", "women doctor"], specialty: "Gynaecology" },
+  { match: ["dermatolog", "skin doctor", "dermatology", "skin check"], specialty: "Dermatology" },
+  { match: ["oncolog", "cancer doctor", "oncology", "cancer specialist", "doctor for cancer", "doctor for a cancer"], specialty: "Oncology" },
+  { match: ["ophthalmolog", "eye doctor", "ophthalmology", "eye specialist"], specialty: "Ophthalmology" },
+  { match: ["dentist", "dental", "tooth", "teeth", "oral medicine"], specialty: "Dentistry & Oral Medicine" },
+  { match: ["general physician", "general doctor", "gp", "general medicine", "family doctor"], specialty: "General Medicine" },
+  { match: ["radiolog", "radiology", "scan doctor"], specialty: "Radiology" },
+  { match: ["cardiolog", "heart doctor", "cardiology", "heart specialist"], specialty: "Cardiology" },
+  { match: ["gynaecolog", "gynecolog", "women doctor", "gynaecology", "gynecology"], specialty: "Gynaecology" },
 ];
 
 // Map conditions to valid specialties in the doctor pool
@@ -226,8 +235,62 @@ const CONDITION_SPECIALTY_MAP: Record<string, string> = {
 
 export function detectIntent(message: string) {
   const text = message.toLowerCase();
+
+  // A. Check for specific doctor booking request (e.g., "book Dr. Amara Silva")
+  const matchedDoctor = doctors.find((d) => 
+    text.includes(d.name.toLowerCase()) || 
+    text.includes(d.name.replace("Dr. ", "").toLowerCase()) ||
+    (text.includes("amara") && text.includes("silva"))
+  );
+  if (matchedDoctor || (text.includes("book") && text.includes("doctor") && (text.includes("silva") || text.includes("amara")))) {
+    // Parse date
+    let date = "20th August";
+    const dateMatch = text.match(/\b(\d+(st|nd|rd|th)?\s+(august|september|october|nov|dec|jan|feb|mar|apr|may|jun|jul)|(august|september|october|nov|dec|jan|feb|mar|apr|may|jun|jul)\s+\d+)\b/i);
+    if (dateMatch) {
+      date = dateMatch[0];
+    } else if (text.includes("tomorrow")) {
+      date = "Tomorrow";
+    } else if (text.includes("today")) {
+      date = "Today";
+    }
+    
+    // Parse timeslot
+    let timeslot = "Evening";
+    if (text.includes("morning")) timeslot = "Morning";
+    else if (text.includes("afternoon")) timeslot = "Afternoon";
+    else if (text.includes("evening")) timeslot = "Evening";
+
+    return {
+      type: "book_specific_doctor",
+      doctor: matchedDoctor || doctors[0], // fallback to Dr. Amara Silva
+      doctorName: matchedDoctor ? matchedDoctor.name : "Dr. Amara Silva",
+      specialty: matchedDoctor ? matchedDoctor.specialty : "Dermatology",
+      date,
+      timeslot,
+      condition: matchedDoctor ? matchedDoctor.specialty : "Dermatology"
+    };
+  }
   
-  // 1. Try to find a direct specialty request
+  // B. Check for scan/upload image intent
+  if (/\b(scan|upload|image|photo|analyse skin|analyse eye|picture|check skin|check eye|ophthalmology scan|dermoscopy)\b/i.test(text)) {
+    return {
+      type: "analyze_image_request",
+      specialty: "Ophthalmology",
+      condition: "Image Analysis",
+    };
+  }
+  
+  // B. Check for medical records/prescription/medmind intent
+  if (/\b(prescription|medication|pill|prescribe|e-care|medmind|health record|records|smart health|remind pill)\b/i.test(text)) {
+    return {
+      type: "redirect_request",
+      targetRoute: "/patient/medmind-ecare",
+      specialty: "General Medicine",
+      condition: "Prescriptions & Records",
+    };
+  }
+
+  // C. Try to find a direct specialty request
   const specialtyHit = SPECIALTY_KEYWORDS.find((k) => k.match.some((m) => text.includes(m)));
   if (specialtyHit) {
     return {
@@ -258,6 +321,11 @@ const CLINICAL_DATASET_BENCHMARK = JSON.stringify(aiKnowledge, null, 2);
 
 const SYMPTOM_SYSTEM_PROMPT = `You are an expert clinical AI physician built into MedDoc / Coha Care Connect. You converse with patients using the warm, empathetic, and thorough tone of an experienced attending doctor conducting a real medical consultation.
 
+OXFORD HANDBOOK OF CLINICAL MEDICINE (OHCM) STANDARD CLINICAL RULES:
+- Align all clinical assessments, symptom interpretations, differential diagnostics, and triage recommendations with the evidence-based guidelines in the Oxford Handbook of Clinical Medicine (OHCM).
+- Synthesize clinical inputs with the 'oxfordClinicalHandbookReference' guidelines present in the CLINICAL DISEASE & SYMPTOMS KNOWLEDGE DATASET.
+- Always recommend evidence-based next steps (e.g. peak flow diary for asthma, home/ambulatory blood pressure monitoring for hypertension, HbA1c testing for diabetes, and strict urgent 2-week wait referral criteria for potential malignancies).
+
 CLINICAL DISEASE & SYMPTOMS KNOWLEDGE DATASET (Reference Guidelines):
 ${CLINICAL_DATASET_BENCHMARK}
 
@@ -284,16 +352,27 @@ DYNAMIC CLINICAL INTERVIEW PROTOCOL (Symptom-Aware & Intent-Driven):
 RESPONSE FORMAT:
 Return ONLY a valid JSON object matching this exact structure (no other text, no markdown):
 {
-  "intent": string (e.g. "Renal Symptom Consultation", "Respiratory Symptom Consultation", "Headache Assessment"),
+  "intent": string (e.g. "Renal Symptom Consultation", "Respiratory Symptom Consultation", "Headache Assessment", "Doctor Booking Request", "Image Analysis Request"),
   "possibleConditions": [{ "name": string, "likelihood": number (0-100) }] (Populate when context is sufficient; leave EMPTY [] when gathering missing info),
   "risk": "low" | "moderate" | "elevated",
   "confidence": number (0-100),
   "summary": string (clinical summary of differential analysis or rationale),
-  "reasoning": string (document your NLP symptom extraction, differential diagnostic process, and external search synthesis),
-  "plainLanguageSummary": string (natural doctor-patient dialogue acknowledging their exact symptoms and asking your follow-up question or providing assessment),
+  "reasoning": string (document your NLP symptom extraction, differential diagnostic process, agentic intent analysis, and external search synthesis),
+  "plainLanguageSummary": string (natural doctor-patient dialogue acknowledging their exact symptoms and asking your follow-up question, or providing agentic action confirmation),
   "followUpQuestions": string[] (2-3 quick-reply options if asking follow-up, or general next steps if complete),
   "recommendation": string[] (2-4 clear next steps),
-  "suggestedSpecialty": string (MUST be one of: "General Medicine", "Dermatology", "Oncology", "Ophthalmology", "Dentistry & Oral Medicine", "Radiology", "Cardiology", "Gynaecology")
+  "suggestedSpecialty": string (MUST be one of: "General Medicine", "Dermatology", "Oncology", "Ophthalmology", "Dentistry & Oral Medicine", "Radiology", "Cardiology", "Gynaecology"),
+  "agenticAction": {
+    "type": "redirect" | "book_doctor" | "find_specialist" | "analyze_image" | "book_specific_doctor" | "none",
+    "targetRoute": string (e.g. "/patient/images" for scanning, "/patient/book" for directory, "/patient/medmind-ecare" for prescriptions/records),
+    "specialty": "General Medicine" | "Dermatology" | "Oncology" | "Ophthalmology" | "Dentistry & Oral Medicine" | "Radiology" | "Cardiology" | "Gynaecology" (Populate if user wants to find/book a specific class of specialist),
+    "message": string (A confirmation explaining what agentic widget or action is being triggered for them),
+    "parameters": {
+      "doctorName": string (e.g., "Dr. Amara Silva" - extract if user asks for a specific doctor),
+      "date": string (e.g., "20th august" - extract if user specifies booking date),
+      "timeslot": string (e.g., "evening" - extract if user specifies booking timeslot)
+    }
+  }
 }
 
 SPECIAL CASES:
@@ -373,6 +452,7 @@ export async function analyseSymptoms(conversationHistory: ChatMessage[]): Promi
           suggestedSpecialty: parsed.suggestedSpecialty || "General Medicine",
           disclaimer: AI_DISCLAIMER,
           reasoning: parsed.reasoning || "",
+          agenticAction: parsed.agenticAction || { type: "none" }
         };
       }
     } catch (e) {
@@ -382,7 +462,86 @@ export async function analyseSymptoms(conversationHistory: ChatMessage[]): Promi
 
   // Fallback / Offline Logic — Intent-Driven Symptom-Aware Consultation
   await delay(800);
-  const hit = detectIntent(fullUserSymptomQuery);
+  const hit = detectIntent(latestText);
+
+  if (hit.type === "book_specific_doctor") {
+    const docName = (hit as any).doctorName;
+    const date = (hit as any).date;
+    const timeslot = (hit as any).timeslot;
+    const doc = (hit as any).doctor;
+
+    return {
+      intent: `Book Specific Doctor: ${docName}`,
+      possibleConditions: [],
+      risk: "low",
+      confidence: 100,
+      summary: `Booking request details: ${docName} on ${date} (${timeslot} timeslot).`,
+      plainLanguageSummary: `I have prepared the scheduling details for **${docName}** on **${date}** in the **${timeslot}** timeslot. You can complete the booking directly below.`,
+      followUpQuestions: [],
+      recommendation: [
+        `Click 'Book Appointment' for ${docName} below`,
+        "Review insurance and confirm booking"
+      ],
+      suggestedSpecialty: (hit as any).specialty,
+      disclaimer: AI_DISCLAIMER,
+      agenticAction: {
+        type: "book_specific_doctor",
+        specialty: (hit as any).specialty,
+        message: `Booking ${docName} on ${date} (${timeslot} slot).`,
+        parameters: {
+          doctorName: docName,
+          doctorId: doc ? doc.id : "d1",
+          date,
+          timeslot
+        }
+      }
+    };
+  }
+
+  if (hit.type === "analyze_image_request") {
+    return {
+      intent: "Ophthalmic/Dermatological Scan Redirect",
+      possibleConditions: [],
+      risk: "low",
+      confidence: 100,
+      summary: "Redirecting to scan analysis portal to upload and evaluate clinical images.",
+      plainLanguageSummary: "I can help you analyze medical images. I've activated our Image Analysis module below to take you directly there.",
+      followUpQuestions: [],
+      recommendation: [
+        "Click the Image Analysis redirect button below",
+        "Upload a clear, focused photograph of the affected area"
+      ],
+      suggestedSpecialty: "Ophthalmology",
+      disclaimer: AI_DISCLAIMER,
+      agenticAction: {
+        type: "analyze_image",
+        targetRoute: "/patient/images",
+        message: "Redirecting to the Image Analysis suite..."
+      }
+    };
+  }
+
+  if (hit.type === "redirect_request" && hit.targetRoute) {
+    return {
+      intent: "Medical Records Redirection",
+      possibleConditions: [],
+      risk: "low",
+      confidence: 100,
+      summary: `Redirecting user to MedMind prescriptions and records at ${hit.targetRoute}.`,
+      plainLanguageSummary: "I can open your medical records and prescription list. Use the quick link below to go there.",
+      followUpQuestions: [],
+      recommendation: [
+        "Click the link to open your MedMind E-Care records portal"
+      ],
+      suggestedSpecialty: "General Medicine",
+      disclaimer: AI_DISCLAIMER,
+      agenticAction: {
+        type: "redirect",
+        targetRoute: hit.targetRoute,
+        message: "Opening prescriptions and medical records..."
+      }
+    };
+  }
 
   if (hit.type === "specialty_request") {
     return {
@@ -391,7 +550,7 @@ export async function analyseSymptoms(conversationHistory: ChatMessage[]): Promi
       risk: "low",
       confidence: 100,
       summary: `I can help you find a ${hit.specialty}. Here are top-rated specialists available for booking.`,
-      plainLanguageSummary: `You're looking for a ${hit.specialty} — I've found specialists nearby that you can book an appointment with right away.`,
+      plainLanguageSummary: `You're looking for a ${hit.specialty} — I've loaded our recommended directory below so you can check their ratings and book a slot instantly.`,
       followUpQuestions: [],
       recommendation: [
         `Review the available ${hit.specialty} specialists below`,
@@ -399,18 +558,25 @@ export async function analyseSymptoms(conversationHistory: ChatMessage[]): Promi
       ],
       suggestedSpecialty: hit.specialty as string,
       disclaimer: AI_DISCLAIMER,
+      agenticAction: {
+        type: "find_specialist",
+        specialty: hit.specialty as any,
+        message: `Loaded nearby ${hit.specialty} specialists.`
+      }
     };
   }
 
   const specialty = hit.specialty || CONDITION_SPECIALTY_MAP[hit.condition] || "General Medicine";
   const queryLower = fullUserSymptomQuery.toLowerCase();
-  const hasWeeks = queryLower.includes("week");
-  const hasSevere = /\b(severe|intense|unbearable|extreme|worst|very bad|7|8|9|10)\b/i.test(queryLower);
+  const latestLower = latestText.toLowerCase();
+  const hasWeeks = queryLower.includes("week") || latestLower.includes("week");
+  const hasSevere = /\b(severe|intense|unbearable|extreme|worst|very bad|7|8|9|10)\b/i.test(queryLower) || /\b(severe|intense|unbearable|extreme|worst|very bad|7|8|9|10)\b/i.test(latestLower);
 
   const isKidney = hit.condition === "Kidney / Urinary Condition" || queryLower.includes("urine") || queryLower.includes("urinate") || queryLower.includes("back") || queryLower.includes("flank") || queryLower.includes("kidney");
   const isCough = hit.condition === "Asthma" || queryLower.includes("cough") || queryLower.includes("breath");
   const isHeadache = hit.condition === "Hypertension" || queryLower.includes("headache") || queryLower.includes("dizzy");
   const isSkin = hit.condition === "Skin Condition" || queryLower.includes("rash") || queryLower.includes("skin") || queryLower.includes("mole");
+  const isBreast = hit.condition === "Breast Condition" || queryLower.includes("breast") || queryLower.includes("lump") || queryLower.includes("mammogram");
 
   // Check if patient has already provided comprehensive clinical context (e.g. detailed history + symptoms)
   const hasDetailedInfo = (queryLower.includes("history") || queryLower.includes("father") || queryLower.includes("mother") || queryLower.includes("blood pressure") || queryLower.includes("medication")) && (userTurnCount >= 3 || queryLower.length > 250);
@@ -448,6 +614,13 @@ export async function analyseSymptoms(conversationHistory: ChatMessage[]): Promi
         "Dry scaly spot that doesn't heal",
         "Painful bumps or blisters"
       ];
+    } else if (isBreast) {
+      doctorMessage = "I understand. Experiencing breast pain or changes is something we want to assess carefully. To help guide the next steps, is the discomfort constant or related to your menstrual cycle, and have you noticed any lumps or swelling?";
+      quickReplies = [
+        "Constant pain on one side, no lump",
+        "Cyclic pain (comes and goes with cycle)",
+        "Pain accompanied by a lump or swelling"
+      ];
     } else {
       quickReplies = [
         "Mild to moderate symptoms (1-5/10)",
@@ -468,7 +641,7 @@ export async function analyseSymptoms(conversationHistory: ChatMessage[]): Promi
         "Please select one of the quick-reply options above or describe your symptoms in more detail.",
         "Include any other relevant details about how the symptoms started."
       ],
-      suggestedSpecialty: "General Medicine",
+      suggestedSpecialty: specialty,
       disclaimer: AI_DISCLAIMER,
     };
   }
@@ -499,6 +672,13 @@ export async function analyseSymptoms(conversationHistory: ChatMessage[]): Promi
         "Neck stiffness or dizziness",
         "No accompanying nausea or vision changes"
       ];
+    } else if (isBreast) {
+      doctorMessage = "Thank you for sharing those details. Next, have you noticed any associated skin changes (such as redness, dimpling, or nipple retraction), or is there a family history of breast conditions?";
+      quickReplies = [
+        "No skin changes or family history",
+        "Redness or skin dimpling present",
+        "Family history of breast cancer/cysts"
+      ];
     } else {
       quickReplies = [
         "Worse at night or early morning",
@@ -519,7 +699,7 @@ export async function analyseSymptoms(conversationHistory: ChatMessage[]): Promi
         "Please select an option above to help evaluate potential triggers.",
         "Mention if symptoms change at different times of day."
       ],
-      suggestedSpecialty: "General Medicine",
+      suggestedSpecialty: specialty,
       disclaimer: AI_DISCLAIMER,
     };
   }
@@ -537,6 +717,9 @@ export async function analyseSymptoms(conversationHistory: ChatMessage[]): Promi
   } else if (isHeadache) {
     finalDiagnosis = "Hypertension / Migraine Pattern";
     finalExplanation = `Thank you for sharing your symptom details. Based on your report of persistent headaches, dizziness, and blood pressure history, your symptoms show patterns consistent with Hypertension or Vascular Headache. Having a doctor monitor your blood pressure and cardiovascular health is recommended.`;
+  } else if (isBreast) {
+    finalDiagnosis = "Breast Condition / Mastalgia Pattern";
+    finalExplanation = `Thank you for sharing your symptom details. Based on your report of breast pain or localized discomfort, cyclic changes, or physical variations, your symptoms show patterns consistent with a Breast Condition (such as cyclic/non-cyclic mastalgia or fibroadenoma pattern). We recommend consulting a Gynaecologist or specialist for a physical examination and mammogram/ultrasound imaging.`;
   }
 
   return {

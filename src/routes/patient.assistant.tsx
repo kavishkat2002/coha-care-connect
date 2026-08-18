@@ -1,5 +1,5 @@
-import { createFileRoute } from "@tanstack/react-router";
-import { Bot, Paperclip, Send, Sparkles, User, Mic } from "lucide-react";
+import { createFileRoute, Link } from "@tanstack/react-router";
+import { Bot, Paperclip, Send, Sparkles, User, Mic, Calendar, ArrowRight, ShieldAlert, FileText, Camera } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 
 import { PageHeader } from "@/components/shared/PageHeader";
@@ -16,7 +16,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 
 import { BrainCircuit, RotateCcw } from "lucide-react";
-import { analyseSymptoms, recommendCare, transcribeAudio, type Assessment, type Recommendation, type ChatMessage } from "@/services/ai.service";
+import { analyseSymptoms, recommendCare, transcribeAudio, type Assessment, type Recommendation, type ChatMessage, type AgenticAction } from "@/services/ai.service";
+import { doctors } from "@/data/mock";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/patient/assistant")({
@@ -35,7 +36,7 @@ export const Route = createFileRoute("/patient/assistant")({
   component: AssistantPage,
 });
 
-type Message = { id: string; role: "user" | "assistant"; text: string; attachment?: string; imageBase64?: string; reasoning?: string };
+type Message = { id: string; role: "user" | "assistant"; text: string; attachment?: string; imageBase64?: string; reasoning?: string; agenticAction?: AgenticAction; loadedCare?: Recommendation | null };
 
 const suggestions = [
   "I have a mouth ulcer that has not healed in three weeks.",
@@ -237,6 +238,22 @@ function AssistantPage() {
       setDynamicSuggestions([]);
     }
 
+    // Fetch specialists inline if the agentic action is specialist search/booking
+    let inlineCare = null;
+    if (result.agenticAction && (result.agenticAction.type === "find_specialist" || result.agenticAction.type === "book_doctor")) {
+      inlineCare = await recommendCare(result.agenticAction.specialty || result.suggestedSpecialty || "");
+    } else if (result.agenticAction && result.agenticAction.type === "book_specific_doctor") {
+      const docId = result.agenticAction.parameters?.["doctorId"];
+      const foundDoc = doctors.find((d) => d.id === docId);
+      if (foundDoc) {
+        inlineCare = {
+          topRated: [foundDoc],
+          nearest: [foundDoc],
+          mostAvailable: [foundDoc]
+        };
+      }
+    }
+
     // Show specialists if conditions were identified OR if the interview is complete (no follow-up questions)
     if (result.possibleConditions.length > 0 || (result.followUpQuestions && result.followUpQuestions.length === 0)) {
       setCare(await recommendCare(result.suggestedSpecialty || ""));
@@ -251,6 +268,8 @@ function AssistantPage() {
         role: "assistant",
         text: result.plainLanguageSummary || result.summary,
         ...(result.reasoning ? { reasoning: result.reasoning } : {}),
+        ...(result.agenticAction ? { agenticAction: result.agenticAction } : {}),
+        loadedCare: inlineCare,
       },
     ]);
     setBusy(false);
@@ -316,6 +335,91 @@ function AssistantPage() {
                     </Accordion>
                   )}
                   {m.text && <span className="leading-relaxed whitespace-pre-wrap">{m.text}</span>}
+                  
+                  {/* Dynamic Agentic Actions Widgets */}
+                  {m.agenticAction && m.agenticAction.type !== "none" && (
+                    <div className="mt-2.5 p-3.5 rounded-xl border border-primary/20 bg-background text-foreground space-y-2.5 shadow-sm max-w-full">
+                      <p className="text-xs text-muted-foreground font-medium">
+                        {m.agenticAction.message || "Performing automated task..."}
+                      </p>
+
+                      {/* Case A: Find Specialist Carousel/Grid */}
+                      {(m.agenticAction.type === "find_specialist" || m.agenticAction.type === "book_doctor") && m.loadedCare && (
+                        <div className="space-y-2 pt-1">
+                          <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">Recommended {m.agenticAction.specialty || "Specialist"} Directory</p>
+                          <div className="grid gap-2 max-h-64 overflow-y-auto pr-1">
+                            {m.loadedCare.topRated.slice(0, 3).map((d) => (
+                              <DoctorCard key={d.id} doctor={d} compact />
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Case B: Image Scan upload trigger */}
+                      {m.agenticAction.type === "analyze_image" && (
+                        <div className="flex items-center gap-2 pt-1 justify-between">
+                          <div className="flex items-center gap-2">
+                            <Camera className="size-4 text-primary shrink-0" />
+                            <span className="text-xs font-semibold">Image Analysis Suite</span>
+                          </div>
+                          <Link to="/patient/images">
+                            <Button size="sm" className="h-7 text-xs gap-1.5">
+                              Launch Suite <ArrowRight className="size-3" />
+                            </Button>
+                          </Link>
+                        </div>
+                      )}
+
+                      {/* Case C: Generic / records redirection link */}
+                      {m.agenticAction.type === "redirect" && m.agenticAction.targetRoute && (
+                        <div className="flex items-center gap-2 pt-1 justify-between">
+                          <div className="flex items-center gap-2">
+                            <FileText className="size-4 text-primary shrink-0" />
+                            <span className="text-xs font-semibold">Prescriptions & Records Portal</span>
+                          </div>
+                          <Link to={m.agenticAction.targetRoute as any}>
+                            <Button size="sm" className="h-7 text-xs gap-1.5" variant="outline">
+                              Open Records <ArrowRight className="size-3" />
+                            </Button>
+                          </Link>
+                        </div>
+                      )}
+
+                      {/* Case D: Specific Doctor Booking Card */}
+                      {m.agenticAction.type === "book_specific_doctor" && m.agenticAction.parameters && (
+                        <div className="space-y-3 pt-1">
+                          <div className="flex items-center gap-2 p-2 rounded-lg bg-emerald-50 dark:bg-emerald-950/20 border border-emerald-200 dark:border-emerald-900/40 text-xs">
+                            <Calendar className="size-4 text-emerald-600 shrink-0" />
+                            <div>
+                              <p className="font-semibold text-emerald-800 dark:text-emerald-300">Requested Schedule</p>
+                              <p className="text-[10px] text-emerald-700 dark:text-emerald-400">
+                                {m.agenticAction.parameters["date"]} · {m.agenticAction.parameters["timeslot"]} slot
+                              </p>
+                            </div>
+                          </div>
+                          {m.loadedCare && m.loadedCare.topRated.length > 0 && m.loadedCare.topRated[0] && (
+                            <div className="border border-border/40 rounded-lg overflow-hidden p-1 bg-muted/20">
+                              <DoctorCard doctor={m.loadedCare.topRated[0]!} compact />
+                            </div>
+                          )}
+                          <Link 
+                            to="/patient/book" 
+                            search={{ 
+                              doctorId: m.agenticAction.parameters["doctorId"],
+                              date: m.agenticAction.parameters["date"],
+                              timeslot: m.agenticAction.parameters["timeslot"] 
+                            }} 
+                            className="block w-full"
+                          >
+                            <Button size="sm" className="w-full h-8 text-xs gap-1.5 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold shadow-sm">
+                              Confirm Appointment Slot <ArrowRight className="size-3" />
+                            </Button>
+                          </Link>
+                        </div>
+                      )}
+                    </div>
+                  )}
+
                   {(m.attachment && !m.imageBase64) ? (
                     <span className="mt-1 block text-xs opacity-80">Attached: {m.attachment}</span>
                   ) : null}

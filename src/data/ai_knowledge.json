@@ -6,6 +6,7 @@
     "differentialDiagnosis": ["Chronic Bronchitis", "Post-Infectious Cough", "Gastroesophageal Reflux Disease (GERD)", "Congestive Heart Failure"],
     "emergencyRedFlags": ["severe shortness of breath at rest", "inability to speak full sentences in one breath", "bluish discoloration of lips or fingernails (cyanosis)", "chest retractions"],
     "whenToSeekHelp": "If symptoms worsen, interrupt sleep, or require frequent rescue inhalers, consult a General Practitioner or Pulmonologist promptly.",
+    "oxfordClinicalHandbookReference": "Diagnosis via PEFR variability (>20%), spirometry (FEV1/FVC < 0.7), and FeNO. Manage with step-wise pharmacotherapy: SABA for relief, low-dose ICS for control, and addition of LABA/MART as per stepwise guidelines.",
     "doctors": [
       { "name": "Amanda Williams", "count": 5 },
       { "name": "David Smith", "count": 5 },
@@ -24,6 +25,7 @@
     "differentialDiagnosis": ["Secondary Hypertension (Renal Artery Stenosis)", "Essential Hypertension", "Pheochromocytoma", "White Coat Effect"],
     "emergencyRedFlags": ["systolic BP > 180 mmHg or diastolic BP > 120 mmHg", "sudden severe headache with confusion", "chest pain radiating to left arm/jaw", "sudden weakness or numbness"],
     "whenToSeekHelp": "If blood pressure readings consistently exceed 140/90 mmHg, or if you experience headaches with dizziness, consult a Cardiologist.",
+    "oxfordClinicalHandbookReference": "Diagnosis via ABPM or HBPM. Target BP is < 140/90 mmHg (clinic) or < 135/85 mmHg (home). Pharmacotherapy uses ACD guidelines: A (ACE-i/ARB), C (Calcium Channel Blocker), D (Thiazide-like diuretic) depending on age and ethnicity.",
     "doctors": [
       { "name": "Michael Smith", "count": 7 },
       { "name": "Stephanie Smith", "count": 6 },
@@ -42,6 +44,7 @@
     "differentialDiagnosis": ["Type 2 Diabetes Mellitus", "Type 1 Diabetes Mellitus", "Impaired Fasting Glucose / Prediabetes", "Diabetes Insipidus"],
     "emergencyRedFlags": ["fruity breath odor with confusion (Diabetic Ketoacidosis)", "rapid deep breathing", "extreme drowsiness or loss of consciousness", "blood glucose > 300 mg/dL"],
     "whenToSeekHelp": "If you notice persistent thirst, frequent urination, or unexplained weight loss, get your HbA1c or fasting blood glucose tested.",
+    "oxfordClinicalHandbookReference": "Diagnostic criteria: HbA1c >= 48 mmol/mol (6.5%) or fasting plasma glucose >= 7.0 mmol/L. Management requires Metformin first-line, incorporating SGLT2 inhibitors for cardiovascular protection, and annual screening for retinopathy and neuropathy.",
     "doctors": [
       { "name": "Christopher Brown", "count": 6 },
       { "name": "Michael Smith", "count": 6 },
@@ -60,6 +63,7 @@
     "differentialDiagnosis": ["Melanoma", "Basal Cell Carcinoma (BCC)", "Squamous Cell Carcinoma (SCC)", "Seborrheic Keratosis", "Atopic Dermatitis"],
     "emergencyRedFlags": ["rapidly growing pigmented lesion with central ulceration", "spontaneous bleeding from a mole", "satellitism or regional lymph node swelling"],
     "whenToSeekHelp": "Any new, changing, or non-healing skin spot lasting more than 2-3 weeks should be evaluated by a Dermatologist using dermoscopy.",
+    "oxfordClinicalHandbookReference": "Suspected melanoma requires standard wide excision margin biopsy. Urgently refer (2-week wait) if lesion scores >= 3 on 7-point checklist (major: size change, irregular border, irregular color; minor: diameter >= 6mm, inflammation, oozing/bleeding, sensory change).",
     "doctors": [
       { "name": "John Doe", "count": 8 },
       { "name": "Sarah Jenkins", "count": 7 },
@@ -78,6 +82,7 @@
     "differentialDiagnosis": ["Aphthous Stomatitis", "Oral Squamous Cell Carcinoma", "Oral Candidiasis", "Lichen Planus", "Herpetic Stomatitis"],
     "emergencyRedFlags": ["rapidly expanding painful floor-of-mouth mass", "inability to swallow liquids or saliva", "airway compromise from oral swelling"],
     "whenToSeekHelp": "An oral ulcer or sore that fails to heal after 14 days requires immediate clinical examination by an Oral Medicine Specialist or Dentist.",
+    "oxfordClinicalHandbookReference": "Urgently refer (2-week wait) for unexplained oral ulceration or red/white patches (erythroplakia/leukoplakia) persisting for more than 14 days without resolution, following Oxford oncology and mucosal screening guidelines.",
     "doctors": [
       { "name": "Kavinda Perera", "count": 8 },
       { "name": "Nimali Fernando", "count": 6 },
@@ -95,6 +100,7 @@
     "differentialDiagnosis": ["Polycystic Ovary Syndrome (PCOS)", "Endometriosis", "Uterine Fibroids", "Pelvic Inflammatory Disease (PID)", "Ovarian Cyst"],
     "emergencyRedFlags": ["sudden severe sharp unilateral pelvic pain with vomiting (Ovarian Torsion / Ectopic Pregnancy)", "profuse vaginal hemorrhage", "fever with severe pelvic tenderness"],
     "whenToSeekHelp": "Consult a Gynaecologist if you experience persistent pelvic pain, irregular cycles lasting over 3 months, or heavy painful periods.",
+    "oxfordClinicalHandbookReference": "Investigate pelvic masses with ultrasound and Ca-125 (Risk of Malignancy Index). Urgent 2-week referral for postmenopausal bleeding (PMB) to exclude endometrial carcinoma.",
     "doctors": [
       { "name": "Chamari Wickramasinghe", "count": 9 },
       { "name": "Priyani Silva", "count": 7 }
@@ -111,6 +117,7 @@
     "differentialDiagnosis": ["Acute Angle-Closure Glaucoma", "Cataracts", "Dry Eye Syndrome", "Conjuctivitis", "Age-Related Macular Degeneration"],
     "emergencyRedFlags": ["sudden painless loss of vision in one eye (Retinal Detachment / Central Retinal Artery Occlusion)", "severe eye pain with red eye and nausea (Acute Glaucoma Attack)"],
     "whenToSeekHelp": "If you experience sudden vision changes, severe eye pain, or persistent redness, consult an Ophthalmologist immediately.",
+    "oxfordClinicalHandbookReference": "Acute painful red eye with halos and fixed semi-dilated pupil suggests Acute Angle-Closure Glaucoma (ophthalmic emergency, treat with pilocarpine/acetazolamide). Painless sudden vision loss suggests retinal artery occlusion or detachment.",
     "doctors": [
       { "name": "Rohan De Silva", "count": 8 },
       { "name": "Mahesh Ratnayake", "count": 6 }
@@ -127,6 +134,7 @@
     "differentialDiagnosis": ["Malignancy (Carcinoma, Sarcoma, Lymphoma)", "Benign Neoplasm", "Chronic Granulomatous Disease"],
     "emergencyRedFlags": ["superior vena cava obstruction symptoms (facial swelling, dyspnea)", "spinal cord compression (sudden paralysis/incontinence)", "febrile neutropenia"],
     "whenToSeekHelp": "Persistent unexplained symptoms lasting over 2-3 weeks require comprehensive diagnostic evaluation by an Oncologist.",
+    "oxfordClinicalHandbookReference": "Utilize NICE / Oxford urgent referral pathways (2-week wait) for systemic cancer features: unexplained weight loss (>10%), unremitting night sweats, persistent lymphadenopathy, or localizing oncology warning signs.",
     "doctors": [
       { "name": "Michael Johnson", "count": 6 },
       { "name": "Mark Johnson", "count": 5 },
@@ -142,8 +150,9 @@
     "symptoms": ["excess body fat accumulation (BMI > 30)", "shortness of breath during light exertion", "joint pain in knees and hips", "daytime somnolence and heavy snoring", "fatigue and low stamina", "excessive sweating"],
     "riskFactors": ["sedentary lifestyle and lack of physical activity", "high-calorie refined carbohydrate diet", "genetic predisposition", "certain medications (steroids, antipsychotics)", "endocrine disorders (hypothyroidism, Cushing syndrome)"],
     "differentialDiagnosis": ["Exogenous Obesity", "Hypothyroidism", "Cushing's Syndrome", "Metabolic Syndrome"],
-    "emergencyRedFlags": ["severe chest pain on exertion", "sudden breathlessness while sleeping (Obstructive Sleep Apnea complication)"],
+    "emergencyRedFlags": ["severe chest pain on exertion", "sudden breathlessness while sleeping (Obstructive Sleep Phrasing / Apnea complication)"],
     "whenToSeekHelp": "If excess weight affects daily mobility, joint health, or causes sleep apnea, consult an Endocrinologist or Bariatric Specialist.",
+    "oxfordClinicalHandbookReference": "Classify by BMI (Class I: 30-34.9, II: 35-39.9, III: >= 40). Evaluate for metabolic syndrome, sleep apnea (Epworth Sleepiness Scale), and cardiovascular risk factors. Management utilizes lifestyle, pharmacotherapy (GLP-1 receptor agonists), or bariatric surgery.",
     "doctors": [
       { "name": "Andrew Williams", "count": 7 },
       { "name": "Robert Brown", "count": 5 }
@@ -159,6 +168,7 @@
     "differentialDiagnosis": ["Osteoarthritis", "Rheumatoid Arthritis", "Gouty Arthritis", "Psoriatic Arthritis"],
     "emergencyRedFlags": ["single hot, red, extremely painful swollen joint with high fever (Septic Arthritis emergency)"],
     "whenToSeekHelp": "If joint pain or morning stiffness lasts longer than 2 weeks or limits daily activities, consult a Rheumatologist.",
+    "oxfordClinicalHandbookReference": "Differentiate osteoarthritis (mechanical, worse with use, morning stiffness < 30 mins) from rheumatoid arthritis (inflammatory, symmetric small joint, morning stiffness > 30 mins). Differentiate acute monoarthritis (septic arthritis or gout) as emergencies.",
     "doctors": [
       { "name": "John Smith", "count": 8 },
       { "name": "Daniel Jones", "count": 5 }
