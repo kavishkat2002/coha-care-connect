@@ -519,26 +519,6 @@ function ImagesPage() {
                         </div>
                       )}
                       
-                      {result.eyeCancerClassification.seerPredictions && !result.eyeCancerClassification.isFundusScan && (
-                        <div className="pt-3 border-t border-border">
-                           <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2">Population Reference Data</p>
-                           <div className="grid gap-2">
-                             <div className="flex gap-2 items-start text-sm">
-                                <span className="font-medium">Literature markers:</span>
-                                <span className="text-muted-foreground">{result.eyeCancerClassification.seerPredictions.predictedGeneticMarker}</span>
-                             </div>
-                             <div className="flex gap-2 items-start text-sm">
-                                <span className="font-medium">Recommended next step:</span>
-                                <span className="text-muted-foreground">{result.eyeCancerClassification.seerPredictions.predictedTreatment}</span>
-                             </div>
-                             <div className="flex gap-2 items-start text-sm">
-                                <span className="font-medium">Population survival data:</span>
-                                <span className="text-muted-foreground">{result.eyeCancerClassification.seerPredictions.survivalProbability10Yr}</span>
-                             </div>
-                           </div>
-                           <p className="text-[10px] text-muted-foreground mt-2 italic">These are population-level reference statistics from published literature, not individual predictions. Genetic markers, treatment, and prognosis require clinical/pathological assessment.</p>
-                        </div>
-                      )}
 
                     </div>
                   </div>
