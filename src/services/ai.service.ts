@@ -27,20 +27,49 @@ export type SkinCancerClassification = {
 };
 
 export type EyeCancerClassification = {
-  classification: "benign" | "malignant";
-  subtype: "retinoblastoma" | "uveal_melanoma" | "orbital_lymphoma" | "conjunctival_melanoma" | "benign_nevus" | "diabetic_retinopathy" | "glaucoma" | "macular_degeneration" | "unknown";
+  classification: "benign" | "malignant" | "indeterminate";
+  subtype: "retinoblastoma" | "uveal_melanoma" | "orbital_lymphoma" | "conjunctival_melanoma" | "benign_nevus" | "conjunctival_nevus" | "primary_acquired_melanosis" | "diabetic_retinopathy" | "glaucoma" | "macular_degeneration" | "indeterminate" | "unknown";
   malignancyProbability: number;
   isFundusScan: boolean;
   fundusPathology?: string;
-  clinicalFeatures: {
-    leukocoria: string;
-    pigmentation: string;
-    asymmetry: string;
+  qualityCheck: {
+    quality: "good" | "acceptable" | "poor";
+    qualityScore: number;
+    eyeDetected: boolean;
+    anatomicalRegionVisible: boolean;
+    modalityCheck: string;
   };
-  seerPredictions: {
-    predictedGeneticMarker: string;
-    predictedTreatment: string;
-    survivalProbability10Yr: string;
+  anatomicalRegion: "conjunctiva" | "cornea" | "iris" | "pupil" | "eyelid" | "fundus_retina" | "periocular" | "unknown";
+  abnormalityDetected: boolean;
+  abnormalityConfidence: number;
+  lesionSegmentation?: {
+    detected: boolean;
+    bbox: [number, number, number, number];
+    areaPixels: number;
+  };
+  clinicalFeatureVector: {
+    pigmentation: "none" | "light" | "brown" | "dark_brown" | "black" | "blue_black" | "mixed";
+    shape: "flat" | "elevated" | "nodular" | "diffuse" | "irregular";
+    border: "regular" | "irregular" | "well_defined" | "poorly_defined";
+    location: "bulbar_conjunctiva" | "limbal" | "palpebral_conjunctiva" | "fornix" | "caruncle" | "cornea" | "other";
+    vascularity: "none" | "mild" | "moderate" | "prominent";
+    extent: "small" | "medium" | "large";
+    lesionArea?: number;
+    lesionPerimeter?: number;
+    circularity?: number;
+  };
+  uncertaintyLayer: {
+    confidenceLevel: "high" | "moderate" | "low" | "insufficient_image";
+    clinicalCertainty: string;
+    referralTriage: "low_concern" | "suspicious" | "highly_suspicious";
+  };
+  tnmStagingReference: {
+    confirmedDiagnosisRequired: boolean;
+    T: string | null;
+    N: string | null;
+    M: string | null;
+    stage: string | null;
+    reason: string;
   };
   rcpathHistopathologyReference?: {
     requiredCoreDataItems: string[];
@@ -667,28 +696,57 @@ Return ONLY a valid JSON object matching this strict structure (no other text or
   },` : ""}
   ${region.toLowerCase() === "eye" ? `
   "eyeCancerClassification": {
-    "classification": "benign" or "malignant",
-    "subtype": "retinoblastoma" | "uveal_melanoma" | "orbital_lymphoma" | "conjunctival_melanoma" | "benign_nevus" | "diabetic_retinopathy" | "glaucoma" | "macular_degeneration" | "unknown",
+    "classification": "benign" | "malignant" | "indeterminate",
+    "subtype": "retinoblastoma" | "uveal_melanoma" | "orbital_lymphoma" | "conjunctival_melanoma" | "benign_nevus" | "conjunctival_nevus" | "primary_acquired_melanosis" | "diabetic_retinopathy" | "glaucoma" | "macular_degeneration" | "indeterminate" | "unknown",
     "malignancyProbability": number (0-100),
     "isFundusScan": boolean (true if internal retinal scan),
     "fundusPathology": "Detailed description of hemorrhages, drusen, or optic disc health (if fundus scan)",
-    "clinicalFeatures": {
-      "leukocoria": "detailed assessment of white pupillary reflex",
-      "pigmentation": "detailed assessment of iris/choroidal pigment",
-      "asymmetry": "detailed assessment of orbital asymmetry or proptosis"
+    "qualityCheck": {
+      "quality": "good" | "acceptable" | "poor",
+      "qualityScore": number (0.0 to 1.0),
+      "eyeDetected": boolean,
+      "anatomicalRegionVisible": boolean,
+      "modalityCheck": "e.g. Ophthalmic surface photography, fundus photography, external eye photo, or other"
     },
-    "seerPredictions": {
-      "predictedGeneticMarker": "e.g. RB1 Mutation, EIF1AX Mutation, BAP1 Mutation, or None",
-      "predictedTreatment": "Surgery, Radiation, Chemotherapy, or Observation",
-      "survivalProbability10Yr": "percentage based on visual severity"
+    "anatomicalRegion": "conjunctiva" | "cornea" | "iris" | "pupil" | "eyelid" | "fundus_retina" | "periocular" | "unknown",
+    "abnormalityDetected": boolean,
+    "abnormalityConfidence": number (0.0 to 1.0),
+    "lesionSegmentation": {
+      "detected": boolean,
+      "bbox": [number, number, number, number] (YOLO normalized bounding box coordinates),
+      "areaPixels": number (approximate number of pixels of the abnormality)
+    },
+    "clinicalFeatureVector": {
+      "pigmentation": "none" | "light" | "brown" | "dark_brown" | "black" | "blue_black" | "mixed",
+      "shape": "flat" | "elevated" | "nodular" | "diffuse" | "irregular",
+      "border": "regular" | "irregular" | "well_defined" | "poorly_defined",
+      "location": "bulbar_conjunctiva" | "limbal" | "palpebral_conjunctiva" | "fornix" | "caruncle" | "cornea" | "other",
+      "vascularity": "none" | "mild" | "moderate" | "prominent",
+      "extent": "small" | "medium" | "large",
+      "lesionArea": number,
+      "lesionPerimeter": number,
+      "circularity": number (0.0 to 1.0)
+    },
+    "uncertaintyLayer": {
+      "confidenceLevel": "high" | "moderate" | "low" | "insufficient_image",
+      "clinicalCertainty": "e.g. Insufficient clinical data from photo alone, or sufficient for referral suspicion",
+      "referralTriage": "low_concern" | "suspicious" | "highly_suspicious"
+    },
+    "tnmStagingReference": {
+      "confirmedDiagnosisRequired": true,
+      "T": null (must be null - do not guess stage from photo alone),
+      "N": null (must be null - do not guess lymph node metastasis from photo alone),
+      "M": null (must be null - do not guess distant metastasis from photo alone),
+      "stage": null (must be null - staging is decoupled until pathology/clinical scans are confirmed),
+      "reason": "Definitive diagnosis and staging require histopathological evaluation and clinical/radiological staging."
     },
     "rcpathHistopathologyReference": {
-      "requiredCoreDataItems": ["Tumour largest basal diameter", "Tumour height", "Ciliary body involvement status", "Cell type (Callender classification)", "Nuclear BAP1 expression", "Extraocular extension status", "Scleral involvement"],
-      "microscopicCellTypeReference": "Guideline: Report cell type as Spindle cell (favourable), Epithelioid cell (unfavourable), or Mixed cell type per G056 standards.",
-      "extravascularMatrixPatternsReference": "Guideline: Assess for closed loops / vascular networks via PAS stain.",
-      "mitoticCountReference": "Guideline: Document mitotic count per mm² to assist in grading.",
-      "extraocularExtensionReference": "Guideline: Report presence/absence of scleral extension and clearance margin.",
-      "bap1ExpressionReference": "Guideline: Document loss of nuclear BAP1 expression as it correlates strongly with metastatic risk."
+      "requiredCoreDataItems": ["Tumour largest basal diameter", "Tumour height", "Ciliary body involvement status", "Cell type (Callender classification)", "Nuclear BAP1 expression status", "Extraocular/Scleral extension", "Extravascular matrix patterns"],
+      "microscopicCellTypeReference": "Report Cell Type per Callender Classification: Spindle cell (favourable, low metastatic potential), Epithelioid cell (unfavourable, high metastatic potential), or Mixed cell type.",
+      "extravascularMatrixPatternsReference": "PAS staining is recommended to detect closed vascular loops/networks, which are indicators of poor prognosis.",
+      "mitoticCountReference": "Quantify mitoses per mm² (standardized to 1 mm² rather than subjective HPFs). High mitotic index is associated with decreased survival.",
+      "extraocularExtensionReference": "Assess enucleation specimen for scleral thickness invasion or frank extraocular extension. Report extraocular margin status in mm.",
+      "bap1ExpressionReference": "Perform immunohistochemical analysis for BAP1. Loss of nuclear BAP1 expression is a strong indicator of high metastatic potential and class 2 gene expression profile."
     }
   },` : ""}
   "boundingBox": [x, y, width, height]
@@ -768,34 +826,25 @@ REAL-TIME PIXEL METRICS FROM THIS IMAGE:
             messages: [
               {
                 role: "system",
-                content: `You are a senior clinical AI reviewer specializing in medical image analysis quality assurance. Your role is to review and refine the output from a Stage 1 vision model to ensure clinical safety and accuracy.
+                content: `You are a senior clinical AI reviewer specializing in medical image analysis quality assurance. Your role is to review and refine the output from a Stage 1 vision model to ensure strict adherence to clinical safety standards and accurate multi-step validation.
 
 CRITICAL RULES:
-1. NEVER claim definitive diagnoses from image analysis alone. Always use differential diagnosis language.
-2. NEVER claim genetic markers (RB1, BRAF, BAP1) as "detected" or "high correlation" — these require genetic testing. Say "Associated in published literature" instead.
-3. NEVER present survival statistics as individual predictions — label them as "population-level reference data."
-4. RGB pixel values are IMAGE FEATURES, not clinical diagnostic evidence. Do not cite them as proof of any condition.
-5. For pigmented ocular lesions: strongly consider conjunctival melanocytic lesions (nevus, PAM, melanoma) in the differential.
-6. For orbital lymphoma: it presents as salmon-pink (NOT darkly pigmented). Do NOT classify darkly pigmented lesions as orbital lymphoma.
-7. For retinoblastoma: requires clinical red reflex test and dilated retinal exam — cannot be confirmed from RGB analysis.
-8. Histopathological reporting guidelines: If Uveal Melanoma or a related tumor is considered, ensure a correct 'rcpathHistopathologyReference' structure is populated based on RCPath G056 standards (detailing Callender cell type, closed PAS loop networks, mitotic count per mm², BAP1 expression, and scleral extension).
-9. Always recommend appropriate specialist evaluation and note that definitive diagnosis requires clinical examination.`
+1. SEPARATION OF VISUAL FINDINGS FROM DIAGNOSIS: Separate "What do I see?" (quality, anatomical region, bounding box, clinical feature vector) from "What is the diagnosis?" (which must remain a differential recommendation).
+2. QUALITY GATING: If the image quality is poor (qualityCheck.quality === "poor"), ensure the output states that the image quality is insufficient for a reliable assessment. Do not attempt diagnosis or state individual staging.
+3. ANATOMICAL CHECK: Ensure the anatomical region (conjunctiva, cornea, iris, pupil, eyelid, retina, periocular) matches the classified subtype. For example, conjunctival melanoma must reside on the conjunctiva.
+4. DECOUPLED TNM STAGING: Staging cannot be determined from a photograph alone. You MUST keep tnmStagingReference.T, tnmStagingReference.N, tnmStagingReference.M, and tnmStagingReference.stage as null. Populate tnmStagingReference.reason with a warning explaining that staging is decoupled until pathology and scans are confirmed.
+5. NON-DEFINITIVE DIAGNOSIS: Never claim a definitive diagnosis. Use differential diagnosis language (e.g. conjunctival nevus vs PAM vs conjunctival melanoma).
+6. CALIBRATED TRIAGE & UNCERTAINTY: Map the confidence and predictions to the uncertainty layer. If features are not clear cut, classify the subtype as "indeterminate" or "unknown" and set referralTriage to "suspicious" or "highly_suspicious".
+7. Clinically validate the output JSON schema and return ONLY the corrected/refined JSON object matching the exact input structure.`
               },
               {
                 role: "user",
-                content: `A Stage 1 vision model (llama-3.2-11b-vision-preview) analyzed a ${region} image and produced the following initial assessment:
+                content: `A Stage 1 vision model (qwen/qwen3.6-27b) analyzed a ${region} image and produced the following initial assessment:
 
 ${stage1Summary}
 ${pixelContext}
 
-Please review this assessment for clinical accuracy and safety. Correct any issues and return a refined JSON result with the EXACT same structure as above. Key tasks:
-- Validate the subtype classification against the pixel metrics and clinical presentation
-- Ensure explanations use differential diagnosis language, not definitive claims
-- Ensure SEER predictions use "Associated in literature" language, not "High correlation" or "Detected"
-- Ensure survival data is labeled as population-level, not individual prediction
-- Ensure treatment recommendations say "Specialist evaluation recommended" not specific treatments from image alone
-
-Return ONLY the corrected/refined JSON object (same schema as input). If the Stage 1 output is already clinically sound, return it unchanged.`
+Please review this assessment for clinical safety, quality gating, and structured feature separation. Correct any staging estimates (ensure T, N, M and stage are null), validate the feature vector against the pixel metrics, and return a refined JSON result matching the EXACT same structure.`
               }
             ]
           })
@@ -1411,26 +1460,44 @@ function analyzeUploadedImageFeatures(imageBase64?: string, region: string = "Sk
         malignancyProbability: prob,
         isFundusScan,
         fundusPathology,
-        clinicalFeatures: {
-          leukocoria: subtype === "retinoblastoma"
-            ? "Observed uniformly bright intraocular pattern — clinical red reflex test required for confirmation"
-            : "No leukocoria pattern observed in this image",
-          pigmentation: subtype === "uveal_melanoma" || subtype === "conjunctival_melanoma"
-            ? `Observed localized pigmentation with border contrast (asymmetry ${(feat.asymmetryScore * 100).toFixed(0)}%)`
-            : "No significant pigmentation abnormality observed",
-          asymmetry: feat.asymmetryScore > 0.35
-            ? `Observed asymmetric presentation (${(feat.asymmetryScore * 100).toFixed(0)}% — may indicate localized lesion)`
-            : `Relatively symmetric presentation (${(feat.asymmetryScore * 100).toFixed(0)}%)`
+        qualityCheck: {
+          quality: isValidImage ? "good" : "poor",
+          qualityScore: isValidImage ? 0.92 : 0.22,
+          eyeDetected: isValidImage,
+          anatomicalRegionVisible: isValidImage,
+          modalityCheck: isFundusScan ? "Fundus photography" : "Anterior segment photography"
         },
-        seerPredictions: {
-          predictedGeneticMarker: subtype === "retinoblastoma" ? "Associated in literature: RB1 pathway (requires genetic testing to confirm)"
-            : subtype === "uveal_melanoma" ? "Associated in literature: EIF1AX, BAP1 pathways (requires genetic testing)"
-            : subtype === "conjunctival_melanoma" ? "Associated in literature: BRAF, NRAS pathways (requires genetic testing)"
-            : "Not applicable — no genetic markers predicted from image analysis",
-          predictedTreatment: isMalignant ? "Recommend: Specialist ophthalmic evaluation for clinical staging and treatment planning" : "Routine monitoring and periodic eye examinations",
-          survivalProbability10Yr: isMalignant
-            ? `Population average for ${subtype.replace(/_/g, " ")}: ${subtype === "retinoblastoma" ? "~95%" : "varies by stage"} (individual prognosis requires clinical/pathological assessment)`
-            : "Not applicable"
+        anatomicalRegion: isFundusScan ? "fundus_retina" : "conjunctiva",
+        abnormalityDetected: isMalignant,
+        abnormalityConfidence: Math.min(0.98, 0.70 + feat.entropy * 0.3),
+        lesionSegmentation: {
+          detected: isMalignant,
+          bbox: [xBox, yBox, wBox, hBox],
+          areaPixels: Math.round(wBox * hBox * 100000)
+        },
+        clinicalFeatureVector: {
+          pigmentation: subtype === "uveal_melanoma" || subtype === "conjunctival_melanoma" ? "dark_brown" : "none",
+          shape: isMalignant ? "elevated" : "flat",
+          border: feat.borderIrregularity > 0.25 ? "irregular" : "regular",
+          location: isFundusScan ? "other" : (subtype === "conjunctival_melanoma" ? "bulbar_conjunctiva" : "limbal"),
+          vascularity: subtype === "conjunctival_melanoma" ? "prominent" : "none",
+          extent: feat.estimatedDiameterMm > 6 ? "large" : "medium",
+          lesionArea: Math.round(wBox * hBox * 100000),
+          lesionPerimeter: Math.round((wBox + hBox) * 2 * 1000),
+          circularity: 0.85
+        },
+        uncertaintyLayer: {
+          confidenceLevel: prob >= 65 ? "moderate" : "high",
+          clinicalCertainty: "Insufficient data from photography alone — definitive diagnosis requires clinical examination.",
+          referralTriage: prob >= 65 ? "highly_suspicious" : (prob >= 23 ? "suspicious" : "low_concern")
+        },
+        tnmStagingReference: {
+          confirmedDiagnosisRequired: true,
+          T: null,
+          N: null,
+          M: null,
+          stage: null,
+          reason: "Definitive diagnosis and staging require histopathological evaluation and clinical/radiological staging."
         },
         rcpathHistopathologyReference: {
           requiredCoreDataItems: [

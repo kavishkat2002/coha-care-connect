@@ -490,36 +490,133 @@ function ImagesPage() {
                         {" · "}Screening score: <span className="font-semibold">{result.eyeCancerClassification.malignancyProbability}%</span>
                       </p>
                     </div>
+
                     <div className="p-4 space-y-4">
-                      {result.eyeCancerClassification.isFundusScan ? (
-                        <div>
-                          <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2">Fundus Pathology</p>
-                          <div className="p-3 bg-muted/40 rounded-lg text-sm">
-                            {result.eyeCancerClassification.fundusPathology || "No significant fundus pathology detected."}
+                      {/* Step 1: Quality Check Alert */}
+                      {result.eyeCancerClassification.qualityCheck && (
+                        <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs bg-muted/40 p-2 rounded-lg border border-border/60">
+                          <div>
+                            <span className="text-muted-foreground">Quality:</span>{" "}
+                            <span className={`font-semibold capitalize ${result.eyeCancerClassification.qualityCheck.quality === "poor" ? "text-destructive" : "text-foreground"}`}>
+                              {result.eyeCancerClassification.qualityCheck.quality}
+                            </span>
                           </div>
-                        </div>
-                      ) : (
-                        <div>
-                          <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2">Observed Image Features</p>
-                          <div className="grid gap-2">
-                            {[
-                              { label: "Leukocoria", value: result.eyeCancerClassification.clinicalFeatures.leukocoria },
-                              { label: "Pigmentation", value: result.eyeCancerClassification.clinicalFeatures.pigmentation },
-                              { label: "Asymmetry", value: result.eyeCancerClassification.clinicalFeatures.asymmetry }
-                            ].map((item, i) => (
-                              <div key={i} className="flex gap-3 items-start text-sm">
-                                <span className="flex size-6 items-center justify-center rounded-full bg-primary/10 text-primary font-bold text-xs shrink-0">{i + 1}</span>
-                                <div>
-                                  <span className="font-medium">{item.label}: </span>
-                                  <span className="text-muted-foreground">{item.value}</span>
-                                </div>
-                              </div>
-                            ))}
+                          <div>
+                            <span className="text-muted-foreground">Quality Score:</span>{" "}
+                            <span className="font-medium">{(result.eyeCancerClassification.qualityCheck.qualityScore * 100).toFixed(0)}%</span>
+                          </div>
+                          <div>
+                            <span className="text-muted-foreground">Eye Detected:</span>{" "}
+                            <span className="font-medium">{result.eyeCancerClassification.qualityCheck.eyeDetected ? "Yes" : "No"}</span>
+                          </div>
+                          <div>
+                            <span className="text-muted-foreground">Anatomy Visible:</span>{" "}
+                            <span className="font-medium">{result.eyeCancerClassification.qualityCheck.anatomicalRegionVisible ? "Yes" : "No"}</span>
                           </div>
                         </div>
                       )}
-                      
 
+                      {/* If Quality is Poor, halt assessments */}
+                      {result.eyeCancerClassification.qualityCheck?.quality === "poor" ? (
+                        <div className="bg-destructive/10 border border-destructive/20 rounded-lg p-3 text-xs text-destructive">
+                          <p className="font-semibold">Insufficient Image Quality</p>
+                          <p className="mt-1">Image quality is insufficient for a reliable assessment. Please upload a clearer image. No diagnostic metrics or features will be computed.</p>
+                        </div>
+                      ) : (
+                        <>
+                          {/* Step 2: Anatomical Region */}
+                          <div className="text-xs flex items-center gap-2">
+                            <span className="font-semibold uppercase tracking-wider text-muted-foreground">Anatomical Region:</span>
+                            <span className="bg-primary/10 text-primary px-2 py-0.5 rounded font-semibold capitalize">
+                              {result.eyeCancerClassification.anatomicalRegion?.replace(/_/g, " ") || "Unknown"}
+                            </span>
+                          </div>
+
+                          {/* Fundus vs Surface views */}
+                          {result.eyeCancerClassification.isFundusScan ? (
+                            <div>
+                              <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2">Fundus Pathology</p>
+                              <div className="p-3 bg-muted/40 rounded-lg text-sm">
+                                {result.eyeCancerClassification.fundusPathology || "No significant fundus pathology detected."}
+                              </div>
+                            </div>
+                          ) : (
+                            result.eyeCancerClassification.clinicalFeatureVector && (
+                              <div className="space-y-2">
+                                <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Observed Clinical Visual Features</p>
+                                <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+                                  {[
+                                    { label: "Pigmentation", value: result.eyeCancerClassification.clinicalFeatureVector.pigmentation },
+                                    { label: "Shape Profile", value: result.eyeCancerClassification.clinicalFeatureVector.shape },
+                                    { label: "Border Margin", value: result.eyeCancerClassification.clinicalFeatureVector.border },
+                                    { label: "Location", value: result.eyeCancerClassification.clinicalFeatureVector.location },
+                                    { label: "Vascularity", value: result.eyeCancerClassification.clinicalFeatureVector.vascularity },
+                                    { label: "Estimated Extent", value: result.eyeCancerClassification.clinicalFeatureVector.extent }
+                                  ].map((feat, i) => (
+                                    <div key={i} className="p-2 bg-muted/30 border border-border/40 rounded-lg space-y-0.5">
+                                      <span className="text-[10px] text-muted-foreground uppercase font-medium">{feat.label}</span>
+                                      <p className="text-xs font-semibold capitalize text-foreground">{feat.value?.replace(/_/g, " ")}</p>
+                                    </div>
+                                  ))}
+                                </div>
+                                
+                                {result.eyeCancerClassification.lesionSegmentation?.detected && (
+                                  <div className="text-[11px] text-muted-foreground flex gap-3">
+                                    <span>Lesion Area: <strong className="text-foreground">{result.eyeCancerClassification.lesionSegmentation.areaPixels} px</strong></span>
+                                    <span>Circularity: <strong className="text-foreground">{(result.eyeCancerClassification.clinicalFeatureVector.circularity ?? 0.85).toFixed(2)}</strong></span>
+                                  </div>
+                                )}
+                              </div>
+                            )
+                          )}
+
+                          {/* Step 9: Uncertainty Layer & Triage Referral */}
+                          {result.eyeCancerClassification.uncertaintyLayer && (
+                            <div className="p-3 rounded-lg border text-xs space-y-2" style={{
+                              borderColor: result.eyeCancerClassification.uncertaintyLayer.referralTriage === "highly_suspicious" ? "var(--destructive)" : "var(--border)",
+                              backgroundColor: result.eyeCancerClassification.uncertaintyLayer.referralTriage === "highly_suspicious" ? "hsl(0 72% 51% / 0.03)" : "transparent"
+                            }}>
+                              <div className="flex items-center justify-between">
+                                <span className="font-semibold uppercase tracking-wider text-muted-foreground">Uncertainty & Triage Triage</span>
+                                <Badge variant={result.eyeCancerClassification.uncertaintyLayer.referralTriage === "highly_suspicious" ? "destructive" : "secondary"} className="capitalize">
+                                  {result.eyeCancerClassification.uncertaintyLayer.referralTriage.replace(/_/g, " ")}
+                                </Badge>
+                              </div>
+                              <p className="text-muted-foreground leading-relaxed">
+                                {result.eyeCancerClassification.uncertaintyLayer.clinicalCertainty}
+                              </p>
+                            </div>
+                          )}
+
+                          {/* Steps 12-13: Decoupled TNM Staging */}
+                          {result.eyeCancerClassification.tnmStagingReference && (
+                            <div className="p-3 bg-muted/65 rounded-lg border border-border/80 text-xs space-y-2">
+                              <p className="font-semibold uppercase tracking-wider text-muted-foreground">AJCC Decoupled TNM Staging</p>
+                              <div className="grid grid-cols-4 gap-2 text-center pt-1">
+                                <div className="bg-background rounded p-1.5 border border-border/50">
+                                  <span className="text-[9px] text-muted-foreground block">T (Tumor)</span>
+                                  <span className="font-bold text-[10px] text-destructive">Pathology Req.</span>
+                                </div>
+                                <div className="bg-background rounded p-1.5 border border-border/50">
+                                  <span className="text-[9px] text-muted-foreground block">N (Nodes)</span>
+                                  <span className="font-bold text-[10px] text-destructive">Exam Req.</span>
+                                </div>
+                                <div className="bg-background rounded p-1.5 border border-border/50">
+                                  <span className="text-[9px] text-muted-foreground block">M (Metastasis)</span>
+                                  <span className="font-bold text-[10px] text-destructive">Imaging Req.</span>
+                                </div>
+                                <div className="bg-background rounded p-1.5 border border-border/50">
+                                  <span className="text-[9px] text-muted-foreground block">Stage Group</span>
+                                  <span className="font-bold text-[10px] text-muted-foreground">N/A</span>
+                                </div>
+                              </div>
+                              <p className="text-[10px] text-muted-foreground leading-relaxed italic pt-1 border-t border-border/40 mt-1">
+                                {result.eyeCancerClassification.tnmStagingReference.reason}
+                              </p>
+                            </div>
+                          )}
+                        </>
+                      )}
                     </div>
                   </div>
                 )}
