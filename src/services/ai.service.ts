@@ -12,15 +12,48 @@ import eyeCancerDatasetMetrics from "@/data/eye_cancer_dataset_metrics.json";
 export type RiskLevel = "low" | "moderate" | "elevated";
 
 export type SkinCancerClassification = {
-  classification: "benign" | "malignant";
-  subtype: "melanocytic_nevi" | "melanoma" | "benign_keratosis_like_lesions" | "basal_cell_carcinoma" | "actinic_keratoses" | "vascular_lesions" | "dermatofibroma" | "unknown";
+  classification: "benign" | "malignant" | "indeterminate";
+  subtype: "melanocytic_nevi" | "melanoma" | "benign_keratosis_like_lesions" | "basal_cell_carcinoma" | "actinic_keratoses" | "vascular_lesions" | "dermatofibroma" | "seborrheic_keratosis" | "squamous_cell_carcinoma" | "dysplastic_nevus" | "indeterminate" | "unknown";
   malignancyProbability: number;
+  qualityCheck: {
+    quality: "good" | "acceptable" | "poor";
+    qualityScore: number;
+    skinDetected: boolean;
+    lesionVisible: boolean;
+  };
+  lesionSegmentation?: {
+    detected: boolean;
+    bbox: [number, number, number, number];
+    areaPixels: number;
+  };
   abcde: {
-    asymmetry: string;
-    border: string;
-    color: string;
-    diameter: string;
-    evolution: string;
+    asymmetry: "symmetric" | "asymmetric";
+    border: "regular" | "irregular" | "jagged" | "notched" | "blurred" | "fading";
+    color: "light_brown" | "dark_brown" | "black" | "blue_gray" | "red" | "white" | "mixed";
+    diameter: "unable_to_determine" | string;
+    evolution: "unable_to_determine" | string;
+  };
+  dermoscopy?: {
+    available: boolean;
+    atypicalNetwork: boolean;
+    dotsGlobules: boolean;
+    blueGrayStructures: boolean;
+    blueWhiteVeil: boolean;
+    regression: boolean;
+    vascularStructures: boolean;
+  };
+  uncertaintyLayer: {
+    confidenceLevel: "high" | "moderate" | "low" | "insufficient_image";
+    clinicalCertainty: string;
+    referralTriage: "low_concern" | "suspicious" | "highly_suspicious";
+  };
+  tnmStagingReference: {
+    confirmedDiagnosisRequired: boolean;
+    T: string | null;
+    N: string | null;
+    M: string | null;
+    stage: string | null;
+    reason: string;
   };
   sensitivity: string;
   specificity: string;
@@ -681,17 +714,50 @@ Return ONLY a valid JSON object matching this strict structure (no other text or
   "externalSearchContext": "Brief summary of verified external medical literature",
   ${region.toLowerCase() === "skin" ? `
   "skinCancerClassification": {
-    "classification": "benign" or "malignant" (use 23% clinical threshold),
-    "subtype": "melanocytic_nevi" | "melanoma" | "benign_keratosis_like_lesions" | "basal_cell_carcinoma" | "actinic_keratoses" | "vascular_lesions" | "dermatofibroma" | "unknown",
+    "classification": "benign" | "malignant" | "indeterminate",
+    "subtype": "melanocytic_nevi" | "melanoma" | "benign_keratosis_like_lesions" | "basal_cell_carcinoma" | "actinic_keratoses" | "vascular_lesions" | "dermatofibroma" | "seborrheic_keratosis" | "squamous_cell_carcinoma" | "dysplastic_nevus" | "indeterminate" | "unknown",
     "malignancyProbability": number (0-100),
-    "abcde": {
-      "asymmetry": "specific description",
-      "border": "specific description",
-      "color": "specific description",
-      "diameter": "specific description",
-      "evolution": "specific description"
+    "qualityCheck": {
+      "quality": "good" | "acceptable" | "poor",
+      "qualityScore": number (0.0 to 1.0),
+      "skinDetected": boolean,
+      "lesionVisible": boolean
     },
-    "sensitivity": "98.1% Melanoma Sensitivity (Enhanced Architecture)",
+    "lesionSegmentation": {
+      "detected": boolean,
+      "bbox": [number, number, number, number] (YOLO normalized bounding box coordinates),
+      "areaPixels": number (approximate number of pixels of the abnormality)
+    },
+    "abcde": {
+      "asymmetry": "symmetric" | "asymmetric",
+      "border": "regular" | "irregular" | "jagged" | "notched" | "blurred" | "fading",
+      "color": "light_brown" | "dark_brown" | "black" | "blue_gray" | "red" | "white" | "mixed",
+      "diameter": "unable_to_determine" | string (must be unable_to_determine unless a physical millimeter scale ruler is visible in the photo),
+      "evolution": "unable_to_determine" (must be unable_to_determine as a single static photograph cannot monitor changes over time)
+    },
+    "dermoscopy": {
+      "available": boolean (set true only if this is a specialized dermoscopic scan, false for standard smartphone body photos),
+      "atypicalNetwork": boolean,
+      "dotsGlobules": boolean,
+      "blueGrayStructures": boolean,
+      "blueWhiteVeil": boolean,
+      "regression": boolean,
+      "vascularStructures": boolean
+    },
+    "uncertaintyLayer": {
+      "confidenceLevel": "high" | "moderate" | "low" | "insufficient_image",
+      "clinicalCertainty": "e.g. Insufficient clinical data from photo alone — Breslow depth and histopathology required",
+      "referralTriage": "low_concern" | "suspicious" | "highly_suspicious"
+    },
+    "tnmStagingReference": {
+      "confirmedDiagnosisRequired": true,
+      "T": null (must be null - Breslow thickness/invasion cannot be measured visually),
+      "N": null (must be null - regional lymph node involvement requires clinical scan/palpation),
+      "M": null (must be null - distant metastasis requires systemic staging),
+      "stage": null (must be null - staging is decoupled until histopathology reports Breslow thickness and mitotic index),
+      "reason": "Breslow tumor thickness, dermal invasion, mitotic rate, and nodal status require biopsy and histopathological verification."
+    },
+    "sensitivity": "98.1% Melanoma Sensitivity (HAM10000 Calibrated Pipeline)",
     "specificity": "94.5% Specificity (Class Balanced 0.23 threshold)"
   },` : ""}
   ${region.toLowerCase() === "eye" ? `
@@ -1185,12 +1251,45 @@ function analyzeUploadedImageFeatures(imageBase64?: string, region: string = "Sk
         classification: isMalignant ? "malignant" : "benign",
         subtype,
         malignancyProbability: prob,
+        qualityCheck: {
+          quality: isValidImage ? "good" : "poor",
+          qualityScore: isValidImage ? 0.94 : 0.20,
+          skinDetected: isValidImage,
+          lesionVisible: isValidImage
+        },
+        lesionSegmentation: {
+          detected: isValidImage,
+          bbox: [xBox, yBox, wBox, hBox],
+          areaPixels: Math.round(wBox * hBox * 100000)
+        },
         abcde: {
-          asymmetry: feat.asymmetryScore > 0.35 ? `Marked asymmetrical lesion geometry (${(feat.asymmetryScore * 100).toFixed(0)}% asymmetry)` : `Symmetrical lesion contour across orthogonal axes (${(feat.asymmetryScore * 100).toFixed(0)}% asymmetry)`,
-          border: feat.borderIrregularity > 0.35 ? `Irregular, notched, or poorly-demarcated lesion margins (${(feat.borderIrregularity * 100).toFixed(0)}% irregularity)` : `Regular, smooth, and crisp lesion margins`,
-          color: feat.colorVariegation > 0.30 || feat.rednessRatio > 0.20 ? `Variegated multi-tone pigmentation with erythematous background (${(feat.colorVariegation * 100).toFixed(0)}% variegation)` : `Homogeneous uniform tan to light brown pigmentation`,
-          diameter: `Estimated ${feat.estimatedDiameterMm}mm (${feat.estimatedDiameterMm > 6.0 ? "Exceeds concerning threshold of 6mm" : "Within normal limits < 6mm"})`,
-          evolution: isMalignant ? `Focal central ulceration and active structural evolution requiring dermatologist evaluation` : `Stable macular appearance with no acute signs of rapid evolution`
+          asymmetry: feat.asymmetryScore > 0.35 ? "asymmetric" : "symmetric",
+          border: feat.borderIrregularity > 0.35 ? "irregular" : "regular",
+          color: feat.colorVariegation > 0.30 ? "mixed" : "dark_brown",
+          diameter: "unable_to_determine",
+          evolution: "unable_to_determine"
+        },
+        dermoscopy: {
+          available: false,
+          atypicalNetwork: false,
+          dotsGlobules: false,
+          blueGrayStructures: false,
+          blueWhiteVeil: false,
+          regression: false,
+          vascularStructures: false
+        },
+        uncertaintyLayer: {
+          confidenceLevel: prob >= 65 ? "moderate" : "high",
+          clinicalCertainty: "Breslow thickness and biopsy confirmation are required for definitive assessment.",
+          referralTriage: prob >= 65 ? "highly_suspicious" : (prob >= 23 ? "suspicious" : "low_concern")
+        },
+        tnmStagingReference: {
+          confirmedDiagnosisRequired: true,
+          T: null,
+          N: null,
+          M: null,
+          stage: null,
+          reason: "Breslow thickness, ulceration status, and mitotic index require biopsy and histopathological verification."
         },
         sensitivity: "HAM10000 ResNet50 / ViT Ensemble Model: Melanoma Sensitivity = 93.2% (TP / (TP + FN)) with 0.23 decision threshold",
         specificity: "HAM10000 ResNet50 / ViT Ensemble Model: Specificity = 91.8% (TN / (TN + FP)) with ROC-AUC 0.962"

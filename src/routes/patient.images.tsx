@@ -427,44 +427,154 @@ function ImagesPage() {
                       borderColor: result.skinCancerClassification.classification === "malignant" ? "var(--destructive)" : "var(--success)"
                     }}>
                       <div className="flex items-center justify-between">
-                        <p className="text-sm font-semibold">Skin Cancer Classification</p>
+                        <p className="text-sm font-semibold">Skin Lesion Assessment</p>
                         <Badge variant={result.skinCancerClassification.classification === "malignant" ? "destructive" : "secondary"} className="uppercase tracking-wider text-xs">
                           {result.skinCancerClassification.classification}
                         </Badge>
                       </div>
                       <p className="text-xs text-muted-foreground mt-0.5">
-                        Subtype: <span className="font-medium capitalize">{result.skinCancerClassification.subtype.replace("_", " ")}</span>
-                        {" · "}Malignancy probability: <span className="font-semibold">{result.skinCancerClassification.malignancyProbability}%</span>
+                        Primary consideration: <span className="font-medium capitalize">{result.skinCancerClassification.subtype.replace(/_/g, " ")}</span>
+                        {" · "}Screening score: <span className="font-semibold">{result.skinCancerClassification.malignancyProbability}%</span>
                       </p>
                     </div>
-                    <div className="p-4 space-y-3">
-                      <div>
-                        <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2">ABCDE Criteria Analysis</p>
-                        <div className="grid gap-2">
-                          {[
-                            { letter: "A", label: "Asymmetry", value: result.skinCancerClassification.abcde.asymmetry },
-                            { letter: "B", label: "Border", value: result.skinCancerClassification.abcde.border },
-                            { letter: "C", label: "Color", value: result.skinCancerClassification.abcde.color },
-                            { letter: "D", label: "Diameter", value: result.skinCancerClassification.abcde.diameter },
-                            { letter: "E", label: "Evolution", value: result.skinCancerClassification.abcde.evolution },
-                          ].map((item) => (
-                            <div key={item.letter} className="flex gap-3 items-start text-sm">
-                              <span className="flex size-6 items-center justify-center rounded-full bg-primary/10 text-primary font-bold text-xs shrink-0">{item.letter}</span>
-                              <div>
-                                <span className="font-medium">{item.label}: </span>
-                                <span className="text-muted-foreground">{item.value}</span>
-                              </div>
+                    <div className="p-4 space-y-4">
+                      {/* Step 1: Quality Check Alert */}
+                      {result.skinCancerClassification.qualityCheck && (
+                        <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs bg-muted/40 p-2 rounded-lg border border-border/60">
+                          <div>
+                            <span className="text-muted-foreground">Quality:</span>{" "}
+                            <span className={`font-semibold capitalize ${result.skinCancerClassification.qualityCheck.quality === "poor" ? "text-destructive" : "text-foreground"}`}>
+                              {result.skinCancerClassification.qualityCheck.quality}
+                            </span>
+                          </div>
+                          <div>
+                            <span className="text-muted-foreground">Quality Score:</span>{" "}
+                            <span className="font-medium">{(result.skinCancerClassification.qualityCheck.qualityScore * 100).toFixed(0)}%</span>
+                          </div>
+                          <div>
+                            <span className="text-muted-foreground">Skin Detected:</span>{" "}
+                            <span className="font-medium">{result.skinCancerClassification.qualityCheck.skinDetected ? "Yes" : "No"}</span>
+                          </div>
+                          <div>
+                            <span className="text-muted-foreground">Lesion Visible:</span>{" "}
+                            <span className="font-medium">{result.skinCancerClassification.qualityCheck.lesionVisible ? "Yes" : "No"}</span>
+                          </div>
+                        </div>
+                      )}
+
+                      {/* If Quality is Poor, halt assessments */}
+                      {result.skinCancerClassification.qualityCheck?.quality === "poor" ? (
+                        <div className="bg-destructive/10 border border-destructive/20 rounded-lg p-3 text-xs text-destructive">
+                          <p className="font-semibold">Insufficient Image Quality</p>
+                          <p className="mt-1">Image quality is insufficient for a reliable assessment. Please upload a clearer close-up image. No diagnostic metrics or features will be computed.</p>
+                        </div>
+                      ) : (
+                        <>
+                          {/* Step 3: ABCDE Visual Feature Grid */}
+                          <div className="space-y-2">
+                            <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Observed Clinical Visual Features (ABCDE)</p>
+                            <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+                              {[
+                                { label: "Asymmetry (A)", value: result.skinCancerClassification.abcde.asymmetry },
+                                { label: "Border Margin (B)", value: result.skinCancerClassification.abcde.border },
+                                { label: "Color Variance (C)", value: result.skinCancerClassification.abcde.color },
+                                { label: "Diameter (D)", value: result.skinCancerClassification.abcde.diameter === "unable_to_determine" ? "Unable to determine (no scale)" : result.skinCancerClassification.abcde.diameter },
+                                { label: "Evolution (E)", value: result.skinCancerClassification.abcde.evolution === "unable_to_determine" ? "Unable to determine (single photo)" : result.skinCancerClassification.abcde.evolution }
+                              ].map((feat, i) => (
+                                <div key={i} className="p-2 bg-muted/30 border border-border/40 rounded-lg space-y-0.5">
+                                  <span className="text-[10px] text-muted-foreground uppercase font-medium">{feat.label}</span>
+                                  <p className="text-xs font-semibold capitalize text-foreground">{feat.value?.replace(/_/g, " ")}</p>
+                                </div>
+                              ))}
                             </div>
-                          ))}
-                        </div>
-                      </div>
-                      <div className="pt-2 border-t border-border">
-                        <div className="flex gap-4 text-xs text-muted-foreground">
-                          <span>📊 {result.skinCancerClassification.sensitivity}</span>
-                          <span>📈 {result.skinCancerClassification.specificity}</span>
-                        </div>
-                        <p className="text-xs text-muted-foreground mt-1.5">Clinical threshold: 23% (sensitivity-optimized to minimize false negatives for malignant detection)</p>
-                      </div>
+                          </div>
+
+                          {/* Step 4: Dermoscopy Structure Checklist */}
+                          <div className="p-3 bg-muted/35 rounded-lg border border-border/40 text-xs">
+                            <p className="font-semibold text-muted-foreground uppercase tracking-wider text-[10px] mb-1.5">Dermoscopic Feature Evaluation</p>
+                            {result.skinCancerClassification.dermoscopy?.available ? (
+                              <div className="grid grid-cols-2 gap-2 text-[11px]">
+                                <div className="flex items-center gap-1.5">
+                                  <span className={result.skinCancerClassification.dermoscopy.atypicalNetwork ? "text-destructive font-medium" : "text-muted-foreground"}>
+                                    {result.skinCancerClassification.dermoscopy.atypicalNetwork ? "● Atypical Pigment Network" : "○ Normal/No network"}
+                                  </span>
+                                </div>
+                                <div className="flex items-center gap-1.5">
+                                  <span className={result.skinCancerClassification.dermoscopy.dotsGlobules ? "text-destructive font-medium" : "text-muted-foreground"}>
+                                    {result.skinCancerClassification.dermoscopy.dotsGlobules ? "● Irregular Dots/Globules" : "○ No atypical globules"}
+                                  </span>
+                                </div>
+                                <div className="flex items-center gap-1.5">
+                                  <span className={result.skinCancerClassification.dermoscopy.blueWhiteVeil ? "text-destructive font-medium" : "text-muted-foreground"}>
+                                    {result.skinCancerClassification.dermoscopy.blueWhiteVeil ? "● Blue-White Veil" : "○ No blue-white veil"}
+                                  </span>
+                                </div>
+                                <div className="flex items-center gap-1.5">
+                                  <span className={result.skinCancerClassification.dermoscopy.vascularStructures ? "text-destructive font-medium" : "text-muted-foreground"}>
+                                    {result.skinCancerClassification.dermoscopy.vascularStructures ? "● Irregular Vascular Structures" : "○ No atypical vessels"}
+                                  </span>
+                                </div>
+                              </div>
+                            ) : (
+                              <p className="text-muted-foreground text-[11px]">Dermoscopic features (atypical network, globule/veil structures) are not available from standard smartphone clinical photography.</p>
+                            )}
+                          </div>
+
+                          {/* Step 9: Uncertainty Layer & Triage Referral */}
+                          {result.skinCancerClassification.uncertaintyLayer && (
+                            <div className="p-3 rounded-lg border text-xs space-y-2" style={{
+                              borderColor: result.skinCancerClassification.uncertaintyLayer.referralTriage === "highly_suspicious" ? "var(--destructive)" : "var(--border)",
+                              backgroundColor: result.skinCancerClassification.uncertaintyLayer.referralTriage === "highly_suspicious" ? "hsl(0 72% 51% / 0.03)" : "transparent"
+                            }}>
+                              <div className="flex items-center justify-between">
+                                <span className="font-semibold uppercase tracking-wider text-muted-foreground">Uncertainty & Triage Referral</span>
+                                <Badge variant={result.skinCancerClassification.uncertaintyLayer.referralTriage === "highly_suspicious" ? "destructive" : "secondary"} className="capitalize">
+                                  {result.skinCancerClassification.uncertaintyLayer.referralTriage.replace(/_/g, " ")}
+                                </Badge>
+                              </div>
+                              <p className="text-muted-foreground leading-relaxed">
+                                {result.skinCancerClassification.uncertaintyLayer.clinicalCertainty}
+                              </p>
+                            </div>
+                          )}
+
+                          {/* Steps 11: Decoupled TNM Staging */}
+                          {result.skinCancerClassification.tnmStagingReference && (
+                            <div className="p-3 bg-muted/65 rounded-lg border border-border/80 text-xs space-y-2">
+                              <p className="font-semibold uppercase tracking-wider text-muted-foreground">AJCC Decoupled TNM Staging</p>
+                              <div className="grid grid-cols-4 gap-2 text-center pt-1">
+                                <div className="bg-background rounded p-1.5 border border-border/50">
+                                  <span className="text-[9px] text-muted-foreground block">T (Breslow Depth)</span>
+                                  <span className="font-bold text-[10px] text-destructive">Pathology Req.</span>
+                                </div>
+                                <div className="bg-background rounded p-1.5 border border-border/50">
+                                  <span className="text-[9px] text-muted-foreground block">N (Lymph Nodes)</span>
+                                  <span className="font-bold text-[10px] text-destructive">Exam Req.</span>
+                                </div>
+                                <div className="bg-background rounded p-1.5 border border-border/50">
+                                  <span className="text-[9px] text-muted-foreground block">M (Metastasis)</span>
+                                  <span className="font-bold text-[10px] text-destructive">Imaging Req.</span>
+                                </div>
+                                <div className="bg-background rounded p-1.5 border border-border/50">
+                                  <span className="text-[9px] text-muted-foreground block">Stage Group</span>
+                                  <span className="font-bold text-[10px] text-muted-foreground">N/A</span>
+                                </div>
+                              </div>
+                              <p className="text-[10px] text-muted-foreground leading-relaxed italic pt-1 border-t border-border/40 mt-1">
+                                {result.skinCancerClassification.tnmStagingReference.reason}
+                              </p>
+                            </div>
+                          )}
+                          
+                          <div className="pt-2 border-t border-border">
+                            <div className="flex gap-4 text-xs text-muted-foreground">
+                              <span>📊 {result.skinCancerClassification.sensitivity}</span>
+                              <span>📈 {result.skinCancerClassification.specificity}</span>
+                            </div>
+                            <p className="text-xs text-muted-foreground mt-1.5">Clinical threshold: 23% (sensitivity-optimized to minimize false negatives for malignant detection)</p>
+                          </div>
+                        </>
+                      )}
                     </div>
                   </div>
                 )}
