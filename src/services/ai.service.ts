@@ -6,6 +6,8 @@
 import { AI_DISCLAIMER, doctors, type Doctor } from "@/data/mock";
 import aiKnowledge from "@/data/ai_knowledge.json";
 import skinCancerModelMetrics from "@/data/skin_cancer_model_metrics.json";
+import skinCancerDatasetMetrics from "@/data/skin_cancer_dataset_metrics.json";
+import eyeCancerDatasetMetrics from "@/data/eye_cancer_dataset_metrics.json";
 
 export type RiskLevel = "low" | "moderate" | "elevated";
 
@@ -26,7 +28,7 @@ export type SkinCancerClassification = {
 
 export type EyeCancerClassification = {
   classification: "benign" | "malignant";
-  subtype: "retinoblastoma" | "uveal_melanoma" | "orbital_lymphoma" | "benign_nevus" | "diabetic_retinopathy" | "glaucoma" | "macular_degeneration" | "unknown";
+  subtype: "retinoblastoma" | "uveal_melanoma" | "orbital_lymphoma" | "conjunctival_melanoma" | "benign_nevus" | "diabetic_retinopathy" | "glaucoma" | "macular_degeneration" | "unknown";
   malignancyProbability: number;
   isFundusScan: boolean;
   fundusPathology?: string;
@@ -39,6 +41,14 @@ export type EyeCancerClassification = {
     predictedGeneticMarker: string;
     predictedTreatment: string;
     survivalProbability10Yr: string;
+  };
+  rcpathHistopathologyReference?: {
+    requiredCoreDataItems: string[];
+    microscopicCellTypeReference: string;
+    extravascularMatrixPatternsReference: string;
+    mitoticCountReference: string;
+    extraocularExtensionReference: string;
+    bap1ExpressionReference: string;
   };
 };
 
@@ -58,6 +68,8 @@ export type ImageAnalysis = {
   cancerModelVerified?: boolean;
   cancerModelMetrics?: any;
   skinCancerModelMetrics?: any;
+  skinCancerDatasetMetrics?: any;
+  eyeCancerModelMetrics?: any;
   disclaimer: string;
   predictionScore?: number;
   reasoningSteps?: string[];
@@ -559,14 +571,18 @@ export async function analyseMedicalImage(region: string, imageBase64?: string, 
 
   if (apiKey && imageBase64) {
     try {
-      const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+      // ══════════════════════════════════════════════════════════════
+      // STAGE 1: Vision Analysis — qwen/qwen3.6-27b
+      // Analyses the actual image pixels to extract visual features
+      // ══════════════════════════════════════════════════════════════
+      const visionResponse = await fetch("https://api.groq.com/openai/v1/chat/completions", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
           "Authorization": `Bearer ${apiKey}`
         },
         body: JSON.stringify({
-          model: "llama-3.2-11b-vision-preview",
+          model: "qwen/qwen3.6-27b",
           max_tokens: 4096,
           messages: [
             {
@@ -585,7 +601,24 @@ Performance metrics: 96.8% accuracy, 98.1% melanoma sensitivity, ROC-AUC 0.985. 
 You must use extreme clinical precision to diagnose between the 7 exact HAM10000 classes: Melanocytic nevi (nv), Melanoma (mel), Benign keratosis-like lesions (bkl), Basal cell carcinoma (bcc), Actinic keratoses (akiec), Vascular lesions (vasc), Dermatofibroma (df).`
 : region.toLowerCase() === "eye" ? `SEER EYE CANCER DATASET & FUNDUS CONVNET PIPELINE:
 The underlying architecture is optimized for ophthalmic oncology (SEER dataset) and Deep ConvNets (Adam optimized) for Retinal Fundus images (STARE, DRIVE, Messidor).
-You must use extreme clinical precision to detect leukocoria, choroidal pigmentation, and proptosis.
+
+CRITICAL CLASSIFICATION GUIDANCE:
+- Orbital lymphoma typically presents as a SALMON-PINK (not darkly pigmented) fleshy mass with eyelid swelling or proptosis. It is NOT characterized by dark pigmentation.
+- Darkly pigmented raised lesions on the conjunctival/ocular surface with feeder vessels strongly suggest CONJUNCTIVAL MELANOMA, not orbital lymphoma.
+- White pupillary reflex (leukocoria) suggests RETINOBLASTOMA.
+- Deep choroidal pigmentation with low redness suggests UVEAL MELANOMA.
+- If the image shows a healthy-looking eye without suspicious lesions, classify as BENIGN NEVUS.
+- You MUST analyze the ACTUAL visual content of THIS specific image. Do NOT default to any single diagnosis.
+
+${pixelMetrics ? `REAL-TIME PIXEL ANALYSIS (computed from this specific image):
+- Mean RGB: R=${pixelMetrics.meanR}, G=${pixelMetrics.meanG}, B=${pixelMetrics.meanB}
+- Darkness Score: ${(pixelMetrics.darknessScore * 100).toFixed(1)}%
+- Redness/Erythema: ${(pixelMetrics.erythemaRatio * 100).toFixed(1)}%
+- Asymmetry Score: ${(pixelMetrics.asymmetryScore * 100).toFixed(1)}%
+- Color Variance: ${(pixelMetrics.colorVariance * 100).toFixed(1)}%
+- Border Contrast: ${(pixelMetrics.borderContrast * 100).toFixed(1)}%
+Use these metrics to support your visual interpretation. High darkness + redness = consider conjunctival melanoma. High darkness + low redness = consider uveal melanoma. Low darkness + low redness = consider retinoblastoma or benign. High redness + low darkness + uniform pink = consider orbital lymphoma.` : ""}
+
 IF the image is a Retinal Fundus scan (interior retina view), set "isFundusScan" to true and evaluate for Diabetic Retinopathy (microaneurysms, hemorrhages), Glaucoma (optic disc cupping), and Macular Degeneration (drusen).` : ""}
 
 ANALYSIS STAGES TO EXECUTE:
@@ -606,7 +639,7 @@ Return ONLY a valid JSON object matching this strict structure (no other text or
   "risk": "low" | "moderate" | "elevated",
   "confidence": number (0-100),
   "predictionScore": number (0-100, exact probability percentage of malignancy or lesion severity),
-  "explanation": "A detailed clinical explanation describing visual patterns, margins, color distribution, and differential diagnoses (or explaining why the image is invalid)",
+  "explanation": "A detailed clinical explanation describing visual patterns, margins, color distribution, and differential diagnoses. If a suspicious pigmented ocular surface lesion is present, output EXACTLY: 'A suspicious pigmented ocular surface lesion is present. Differential diagnoses include conjunctival melanoma and other pigmented conjunctival lesions. Specialist ophthalmologic/ocular-oncology evaluation is recommended. Image-based assessment alone cannot establish a definitive diagnosis.'",
   "plainLanguageExplanation": "An empathetic summary written for the patient explaining what this image shows and recommended next steps (or stating the image is invalid)",
   "recommendation": ["action 1", "action 2", "action 3"],
   "suggestedSpecialty": "The appropriate medical specialty (e.g. Dermatologist, Ophthalmologist, Dentist)",
@@ -635,7 +668,7 @@ Return ONLY a valid JSON object matching this strict structure (no other text or
   ${region.toLowerCase() === "eye" ? `
   "eyeCancerClassification": {
     "classification": "benign" or "malignant",
-    "subtype": "retinoblastoma" | "uveal_melanoma" | "orbital_lymphoma" | "benign_nevus" | "diabetic_retinopathy" | "glaucoma" | "macular_degeneration" | "unknown",
+    "subtype": "retinoblastoma" | "uveal_melanoma" | "orbital_lymphoma" | "conjunctival_melanoma" | "benign_nevus" | "diabetic_retinopathy" | "glaucoma" | "macular_degeneration" | "unknown",
     "malignancyProbability": number (0-100),
     "isFundusScan": boolean (true if internal retinal scan),
     "fundusPathology": "Detailed description of hemorrhages, drusen, or optic disc health (if fundus scan)",
@@ -648,6 +681,14 @@ Return ONLY a valid JSON object matching this strict structure (no other text or
       "predictedGeneticMarker": "e.g. RB1 Mutation, EIF1AX Mutation, BAP1 Mutation, or None",
       "predictedTreatment": "Surgery, Radiation, Chemotherapy, or Observation",
       "survivalProbability10Yr": "percentage based on visual severity"
+    },
+    "rcpathHistopathologyReference": {
+      "requiredCoreDataItems": ["Tumour largest basal diameter", "Tumour height", "Ciliary body involvement status", "Cell type (Callender classification)", "Nuclear BAP1 expression", "Extraocular extension status", "Scleral involvement"],
+      "microscopicCellTypeReference": "Guideline: Report cell type as Spindle cell (favourable), Epithelioid cell (unfavourable), or Mixed cell type per G056 standards.",
+      "extravascularMatrixPatternsReference": "Guideline: Assess for closed loops / vascular networks via PAS stain.",
+      "mitoticCountReference": "Guideline: Document mitotic count per mm² to assist in grading.",
+      "extraocularExtensionReference": "Guideline: Report presence/absence of scleral extension and clearance margin.",
+      "bap1ExpressionReference": "Guideline: Document loss of nuclear BAP1 expression as it correlates strongly with metastatic risk."
     }
   },` : ""}
   "boundingBox": [x, y, width, height]
@@ -665,13 +706,13 @@ Return ONLY a valid JSON object matching this strict structure (no other text or
         })
       });
 
-      if (!response.ok) {
-        const errText = await response.text();
-        throw new Error(`API Error ${response.status}: ${errText}`);
+      if (!visionResponse.ok) {
+        const errText = await visionResponse.text();
+        throw new Error(`Vision API Error ${visionResponse.status}: ${errText}`);
       }
 
-      const data = await response.json();
-      let content = data.choices[0].message.content.trim();
+      const visionData = await visionResponse.json();
+      let content = visionData.choices[0].message.content.trim();
       
       content = content.replace(/<think>[\s\S]*?<\/think>/g, '').trim();
       if (content.includes('<think>')) {
@@ -690,14 +731,128 @@ Return ONLY a valid JSON object matching this strict structure (no other text or
       }
       
       content = repairTruncatedJson(content);
-      const parsed = JSON.parse(content);
-      
+      const visionParsed = JSON.parse(content);
+
+      // ══════════════════════════════════════════════════════════════
+      // STAGE 2: Deep Reasoning — openai/gpt-oss-120b
+      // Takes the vision model's findings + pixel metrics and applies
+      // 120B-parameter reasoning to refine/validate the diagnosis.
+      // This model cannot see images, but excels at clinical reasoning.
+      // ══════════════════════════════════════════════════════════════
+      let finalResult = visionParsed;
+      let usedDeepReasoning = false;
+
+      try {
+        const stage1Summary = JSON.stringify(visionParsed, null, 2);
+        const pixelContext = pixelMetrics ? `
+REAL-TIME PIXEL METRICS FROM THIS IMAGE:
+- Mean RGB: R=${pixelMetrics.meanR}, G=${pixelMetrics.meanG}, B=${pixelMetrics.meanB}
+- Darkness Score: ${(pixelMetrics.darknessScore * 100).toFixed(1)}%
+- Redness/Erythema: ${(pixelMetrics.erythemaRatio * 100).toFixed(1)}%
+- Asymmetry Score: ${(pixelMetrics.asymmetryScore * 100).toFixed(1)}%
+- Color Variance: ${(pixelMetrics.colorVariance * 100).toFixed(1)}%
+- Border Contrast: ${(pixelMetrics.borderContrast * 100).toFixed(1)}%` : "";
+
+        const reasoningResponse = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${apiKey}`
+          },
+          body: JSON.stringify({
+            model: "openai/gpt-oss-120b",
+            temperature: 1,
+            max_completion_tokens: 2048,
+            top_p: 1,
+            reasoning_effort: "medium",
+            messages: [
+              {
+                role: "system",
+                content: `You are a senior clinical AI reviewer specializing in medical image analysis quality assurance. Your role is to review and refine the output from a Stage 1 vision model to ensure clinical safety and accuracy.
+
+CRITICAL RULES:
+1. NEVER claim definitive diagnoses from image analysis alone. Always use differential diagnosis language.
+2. NEVER claim genetic markers (RB1, BRAF, BAP1) as "detected" or "high correlation" — these require genetic testing. Say "Associated in published literature" instead.
+3. NEVER present survival statistics as individual predictions — label them as "population-level reference data."
+4. RGB pixel values are IMAGE FEATURES, not clinical diagnostic evidence. Do not cite them as proof of any condition.
+5. For pigmented ocular lesions: strongly consider conjunctival melanocytic lesions (nevus, PAM, melanoma) in the differential.
+6. For orbital lymphoma: it presents as salmon-pink (NOT darkly pigmented). Do NOT classify darkly pigmented lesions as orbital lymphoma.
+7. For retinoblastoma: requires clinical red reflex test and dilated retinal exam — cannot be confirmed from RGB analysis.
+8. Histopathological reporting guidelines: If Uveal Melanoma or a related tumor is considered, ensure a correct 'rcpathHistopathologyReference' structure is populated based on RCPath G056 standards (detailing Callender cell type, closed PAS loop networks, mitotic count per mm², BAP1 expression, and scleral extension).
+9. Always recommend appropriate specialist evaluation and note that definitive diagnosis requires clinical examination.`
+              },
+              {
+                role: "user",
+                content: `A Stage 1 vision model (llama-3.2-11b-vision-preview) analyzed a ${region} image and produced the following initial assessment:
+
+${stage1Summary}
+${pixelContext}
+
+Please review this assessment for clinical accuracy and safety. Correct any issues and return a refined JSON result with the EXACT same structure as above. Key tasks:
+- Validate the subtype classification against the pixel metrics and clinical presentation
+- Ensure explanations use differential diagnosis language, not definitive claims
+- Ensure SEER predictions use "Associated in literature" language, not "High correlation" or "Detected"
+- Ensure survival data is labeled as population-level, not individual prediction
+- Ensure treatment recommendations say "Specialist evaluation recommended" not specific treatments from image alone
+
+Return ONLY the corrected/refined JSON object (same schema as input). If the Stage 1 output is already clinically sound, return it unchanged.`
+              }
+            ]
+          })
+        });
+
+        if (reasoningResponse.ok) {
+          const reasoningData = await reasoningResponse.json();
+          let reasoningContent = reasoningData.choices[0].message.content?.trim() || "";
+
+          // Strip thinking tags
+          reasoningContent = reasoningContent.replace(/<think>[\s\S]*?<\/think>/g, '').trim();
+          if (reasoningContent.includes('<think>')) {
+            reasoningContent = reasoningContent.replace(/<think>[\s\S]*/g, '').trim();
+          }
+
+          // Strip markdown code fences
+          if (reasoningContent.startsWith("```json")) {
+            reasoningContent = reasoningContent.replace(/^```json/, "").replace(/```$/, "").trim();
+          } else if (reasoningContent.startsWith("```")) {
+            reasoningContent = reasoningContent.replace(/^```/, "").replace(/```$/, "").trim();
+          }
+
+          const reasoningJsonMatch = reasoningContent.match(/\{[\s\S]*\}/);
+          if (reasoningJsonMatch) {
+            reasoningContent = reasoningJsonMatch[0];
+          }
+
+          reasoningContent = repairTruncatedJson(reasoningContent);
+          const reasoningParsed = JSON.parse(reasoningContent);
+          finalResult = reasoningParsed;
+          usedDeepReasoning = true;
+          console.log("✅ Stage 2 Deep Reasoning (gpt-oss-120b) applied successfully");
+        } else {
+          console.warn("⚠️ Stage 2 reasoning model unavailable, using Stage 1 vision output directly");
+        }
+      } catch (reasoningErr) {
+        console.warn("⚠️ Stage 2 Deep Reasoning failed, using Stage 1 vision output:", reasoningErr);
+      }
+
+      // Merge reasoning steps to reflect the pipeline
+      const pipelineSteps = [
+        ...(finalResult.reasoningSteps || []),
+        usedDeepReasoning
+          ? "5. Deep Reasoning Refinement: openai/gpt-oss-120b validated and refined clinical output for safety"
+          : "5. Deep Reasoning: Skipped (Stage 1 vision output used directly)"
+      ];
+
       return {
-        ...parsed,
-        predictionScore: parsed.predictionScore ?? parsed.skinCancerClassification?.malignancyProbability ?? parsed.confidence,
-        externalSearchContext: parsed.externalSearchContext || externalSearchSnippet,
+        ...finalResult,
+        predictionScore: finalResult.predictionScore ?? finalResult.skinCancerClassification?.malignancyProbability ?? finalResult.confidence,
+        externalSearchContext: finalResult.externalSearchContext || externalSearchSnippet,
         cancerModelVerified: true,
         skinCancerModelMetrics,
+        skinCancerDatasetMetrics: skinCancerDatasetMetrics,
+        eyeCancerModelMetrics: eyeCancerDatasetMetrics,
+        reasoningSteps: pipelineSteps,
+        deepReasoningApplied: usedDeepReasoning,
         disclaimer: AI_DISCLAIMER
       };
     } catch (e: any) {
@@ -994,6 +1149,7 @@ function analyzeUploadedImageFeatures(imageBase64?: string, region: string = "Sk
       boundingBox: [xBox, yBox, wBox, hBox],
       cancerModelVerified: true,
       skinCancerModelMetrics,
+      skinCancerDatasetMetrics: skinCancerDatasetMetrics,
       disclaimer: AI_DISCLAIMER
     };
   } else if (region.toLowerCase() === "eye") {
@@ -1023,12 +1179,13 @@ function analyzeUploadedImageFeatures(imageBase64?: string, region: string = "Sk
     let isFundusScan = false;
     let fundusPathology = "Normal macula and optic disc";
 
-    // Detect if this is a Fundus Image (Highly red/orange background, low variegation)
-    if (feat.rednessRatio > 0.60 && feat.colorVariegation < 0.30) {
+    // ──────────── Fundus Image Gate ────────────
+    // Fundus scans are very distinct (highly red/orange, uniform background)
+    if (feat.rednessRatio > 0.55 && feat.colorVariegation < 0.30) {
       isFundusScan = true;
-      if (feat.darkPixelRatio > 0.35) { // Dark spots on red background = hemorrhages
+      if (feat.darkPixelRatio > 0.35) {
         subtype = "diabetic_retinopathy";
-        isMalignant = true; // Flagged as abnormal/severe
+        isMalignant = true;
         prob = 70 + Math.round(feat.darkPixelRatio * 25);
         fundusPathology = "Detected multiple microaneurysms and dot-blot hemorrhages consistent with Diabetic Retinopathy.";
       } else if (feat.asymmetryScore > 0.35) {
@@ -1036,34 +1193,119 @@ function analyzeUploadedImageFeatures(imageBase64?: string, region: string = "Sk
         isMalignant = true;
         prob = 65 + Math.round(feat.asymmetryScore * 20);
         fundusPathology = "Suspicious optic disc cupping and asymmetric vessel presentation.";
-      } else if (feat.entropy > 0.45) { // Bright spots / high texture entropy = Drusen
+      } else if (feat.entropy > 0.45) {
         subtype = "macular_degeneration";
         isMalignant = true;
         prob = 60 + Math.round(feat.entropy * 10);
         fundusPathology = "Detected bright subretinal deposits (drusen) in the macular region.";
       } else {
-        subtype = "benign_nevus"; // Healthy retina
+        subtype = "benign_nevus";
       }
-    } 
-    // Standard External Eye Logic
-    // Leukocoria (White Pupil) -> Retinoblastoma
-    // High brightness in the center (low darkness, low color var) + eye context
-    else if (feat.darkPixelRatio < 0.25 && feat.rednessRatio < 0.30 && feat.entropy < 0.40) {
-      subtype = "retinoblastoma";
-      isMalignant = true;
-      prob = 85 + Math.round(feat.asymmetryScore * 10);
-    } 
-    // Pigmentation -> Uveal Melanoma
-    else if (feat.darkPixelRatio > 0.40 && feat.asymmetryScore > 0.30) {
-      subtype = "uveal_melanoma";
-      isMalignant = true;
-      prob = 75 + Math.round(feat.darkPixelRatio * 20);
     }
-    // Asymmetry / Redness -> Orbital Lymphoma
-    else if (feat.rednessRatio > 0.40 && feat.asymmetryScore > 0.40) {
-      subtype = "orbital_lymphoma";
-      isMalignant = true;
-      prob = 65 + Math.round(feat.rednessRatio * 30);
+    // ──────────── External Eye — Corrected Weighted Scoring System ────────────
+    // KEY ARCHITECTURAL FIX: Border contrast (b) distinguishes LOCAL dark lesions
+    // on a bright background from UNIFORM brightness patterns.
+    // - High border contrast + high asymmetry = localized pigmented lesion → melanoma differential
+    // - Low border contrast + low darkness = uniformly bright → possible retinoblastoma
+    // - Low border contrast + moderate features = benign / normal variation
+    else {
+      const d = feat.darkPixelRatio;      // 0..1  (global darkness)
+      const r = feat.rednessRatio;        // 0..1  (redness / erythema)
+      const a = feat.asymmetryScore;      // 0..1  (asymmetry)
+      const e = feat.entropy;             // 0..1  (color variance)
+      const b = feat.borderIrregularity;  // 0..1  (border contrast — center vs edge difference)
+      const c = feat.colorVariegation;    // 0..1  (color variegation)
+
+      // Mean RGB from pixel metrics (if available) add granularity
+      const mR = pixelMetrics?.meanR ?? 150;
+      const mG = pixelMetrics?.meanG ?? 130;
+      const mB = pixelMetrics?.meanB ?? 120;
+
+      // Detect presence of a distinct localized lesion:
+      // If border contrast is high AND asymmetry is high → there is a localized mass/lesion
+      const hasLocalizedLesion = b > 0.15 && a > 0.30;
+      // Detect pigmentation: if darkness is moderate+ OR color variance is high
+      const hasPigmentation = d > 0.15 || c > 0.25;
+
+      // Score each candidate (higher = stronger match)
+      const scores: { subtype: EyeCancerClassification["subtype"]; score: number; malignant: boolean }[] = [
+        {
+          // Conjunctival Melanoma: pigmented surface lesion with feeder vessels
+          // PRIMARY SIGNAL: localized dark lesion on bright background (high contrast + asymmetry)
+          subtype: "conjunctival_melanoma",
+          malignant: true,
+          score:
+            (hasLocalizedLesion ? 4.0 : 0) +     // strong signal: localized lesion detected
+            (hasPigmentation ? 2.5 : 0) +         // pigmentation present
+            b * 3.0 +                              // high contrast = distinct lesion edge
+            a * 2.0 +                              // asymmetry from mass
+            r * 1.0 +                              // feeder vessels contribute redness
+            c * 1.0                                // color variegation from pigment
+        },
+        {
+          // Uveal Melanoma: deep pigmentation, asymmetric, LESS surface redness
+          subtype: "uveal_melanoma",
+          malignant: true,
+          score:
+            d * 3.5 +                              // high GLOBAL darkness (deep choroidal pigment)
+            (1 - r) * 1.5 +                        // less surface redness than conjunctival
+            a * 2.0 +                              // significant asymmetry
+            (d > 0.40 ? 2.0 : 0) +                 // bonus for very dark overall
+            (r < 0.20 ? 1.5 : 0)                   // notably low redness
+        },
+        {
+          // Retinoblastoma: white pupillary reflex = uniformly bright, LOW contrast, LOW asymmetry
+          // CRITICAL: Must require LOW border contrast — a dark lesion on light background is NOT retinoblastoma
+          subtype: "retinoblastoma",
+          malignant: true,
+          score:
+            (1 - b) * 2.5 +                        // LOW border contrast (uniform, no distinct lesion)
+            (1 - a) * 2.5 +                        // LOW asymmetry (uniform brightness)
+            (1 - d) * 1.5 +                        // bright overall
+            (1 - r) * 1.0 +                        // not inflamed
+            (hasLocalizedLesion ? -5.0 : 0) +       // PENALTY: localized lesion present → NOT retinoblastoma
+            (hasPigmentation ? -3.0 : 0) +           // PENALTY: pigmentation present → NOT retinoblastoma
+            (a < 0.20 && b < 0.15 ? 2.0 : 0)        // bonus only for truly uniform bright images
+        },
+        {
+          // Orbital Lymphoma: salmon-pink mass, NOT pigmented, fleshy
+          subtype: "orbital_lymphoma",
+          malignant: true,
+          score:
+            r * 2.0 +                              // salmon-pink / reddish
+            (1 - d) * 1.5 +                        // NOT deeply pigmented
+            (1 - c) * 1.5 +                        // relatively uniform pink color
+            (mR > 155 && d < 0.15 ? 2.5 : 0) +     // distinctly pink/salmon AND not dark
+            (hasPigmentation ? -2.0 : 0)             // PENALTY: pigmentation → not lymphoma
+        },
+        {
+          // Benign Nevus: mild pigmentation, symmetric, low contrast, benign appearance
+          subtype: "benign_nevus",
+          malignant: false,
+          score:
+            (1 - a) * 2.5 +                        // symmetric
+            (1 - b) * 2.0 +                        // low border contrast
+            (1 - c) * 1.5 +                        // uniform color
+            (d > 0.05 && d < 0.25 ? 1.5 : 0) +     // mild pigmentation only
+            (r < 0.25 ? 1.0 : 0) +                  // not inflamed
+            (a < 0.30 ? 1.5 : 0)                    // truly symmetric
+        }
+      ];
+
+      // Sort by descending score → pick best match
+      scores.sort((x, y) => y.score - x.score);
+      const best = scores[0]!;
+      const secondBest = scores[1]!;
+
+      subtype = best.subtype;
+      isMalignant = best.malignant;
+
+      // Calculate probability based on the separation between top two scores
+      const gap = best.score - secondBest.score;
+      const baseProb = isMalignant ? 50 : 8;
+      const gapBonus = Math.min(30, Math.round(gap * 6));
+      const featureVariance = Math.round((d * 7 + r * 5 + a * 3 + e * 4 + b * 6) % 15);
+      prob = Math.min(90, Math.max(isMalignant ? 25 : 3, baseProb + gapBonus + featureVariance));
     }
 
     const riskLevel: RiskLevel = prob >= 65 ? "elevated" : prob >= 23 ? "moderate" : "low";
@@ -1073,6 +1315,77 @@ function analyzeUploadedImageFeatures(imageBase64?: string, region: string = "Sk
       pixelMetrics.asymmetryScore > 0.02
     ) : true;
 
+    // ──────────── Per-subtype clinical explanation ────────────
+    // IMPORTANT: All explanations use DIFFERENTIAL DIAGNOSIS language.
+    // No RGB values or pixel metrics are cited as "diagnostic evidence."
+    // The system presents image observations and possible differentials, NOT definitive diagnoses.
+
+    const subtypeExplanations: Record<string, { explanation: string; plain: string; recs: string[] }> = {
+      conjunctival_melanoma: {
+        explanation: "A suspicious pigmented ocular surface lesion is visible near the limbus. The image does not provide sufficient evidence for a definitive diagnosis. Differential considerations include conjunctival melanocytic lesions (nevus, primary acquired melanosis, or melanoma). Comprehensive ophthalmologic examination by a specialist experienced in ocular tumors is recommended. Definitive diagnosis cannot be made from this image alone.",
+        plain: "The scan detected a dark, pigmented area on the eye surface. This could be a benign growth or something more serious — only an eye specialist with proper examination tools (slit-lamp, biopsy) can determine what it is. Please schedule an appointment with an ophthalmologist.",
+        recs: [
+          "Seek comprehensive ophthalmologic examination by an ocular oncologist",
+          "Slit-lamp biomicroscopy and anterior segment photography recommended",
+          "Biopsy and histopathology may be needed for definitive diagnosis",
+          "Definitive diagnosis cannot be established from image analysis alone"
+        ]
+      },
+      uveal_melanoma: {
+        explanation: "Image analysis observed features suggestive of deep intraocular pigmentation with asymmetric distribution. Differential considerations include uveal melanoma, choroidal nevus, or other pigmented intraocular lesions. This image-based observation cannot confirm a specific diagnosis. Specialist ophthalmologic evaluation is recommended.",
+        plain: "The scan observed deep pigmentation patterns inside the eye that warrant specialist evaluation. An ophthalmologist can use proper imaging (ultrasound, OCT) to determine the nature of these features.",
+        recs: [
+          "Consult an ophthalmologist for dilated fundus examination",
+          "Ocular ultrasonography (B-scan) may be indicated for characterisation",
+          "Specialist ocular-oncology referral recommended for further assessment"
+        ]
+      },
+      retinoblastoma: {
+        explanation: "Image analysis observed a uniformly bright intraocular appearance with minimal localized lesion features. While this could be suggestive of an abnormal pupillary reflex, confirmation of leukocoria requires a proper red reflex test and dilated retinal examination — it cannot be established from image RGB analysis. Differential considerations include normal anatomical variation, media opacity, or retinal pathology. Clinical evaluation is recommended.",
+        plain: "The scan observed some unusual brightness patterns in the eye. This needs clinical confirmation with a proper red reflex test by an eye doctor — image analysis alone cannot diagnose this reliably.",
+        recs: [
+          "Clinical red reflex test and dilated retinal examination recommended",
+          "Ocular ultrasound and/or MRI may be appropriate per clinical judgment",
+          "Image-based assessment alone cannot establish this diagnosis"
+        ]
+      },
+      orbital_lymphoma: {
+        explanation: "Image analysis observed non-pigmented, fleshy tissue features with a pinkish presentation. Differential considerations include orbital lymphoma (which typically presents as a salmon-pink mass), conjunctival inflammation, or other orbital lesions. Specialist evaluation and possible biopsy are recommended for characterisation.",
+        plain: "The scan detected pinkish tissue patterns around the eye that warrant specialist evaluation. An ophthalmologist can examine this properly and determine if further testing is needed.",
+        recs: [
+          "Consult an ophthalmologist for orbital examination",
+          "CT/MRI orbital imaging may be indicated for characterisation",
+          "Incisional biopsy may be necessary for histopathological diagnosis"
+        ]
+      },
+      benign_nevus: {
+        explanation: "Image analysis shows a relatively symmetric ocular presentation without prominent localized lesions or significant pigmentation abnormalities. Appearance is consistent with normal ocular anatomy or a benign ocular nevus. Routine monitoring is recommended.",
+        plain: "The eye appears normal based on this scan. If you have any concerns, routine eye check-ups are always good practice.",
+        recs: [
+          "Continue routine annual eye examinations",
+          "Photograph any spots of concern periodically to track changes",
+          "Consult an ophthalmologist if you notice growth, color change, or irritation"
+        ]
+      },
+      diabetic_retinopathy: {
+        explanation: "Fundus analysis detected features suggestive of vascular changes consistent with diabetic retinopathy. Clinical confirmation requires dilated fundoscopy.",
+        plain: "The retinal scan shows features that may indicate diabetic retinopathy. Follow-up with your eye doctor is important.",
+        recs: ["Consult an ophthalmologist for comprehensive dilated eye exam", "Monitor blood sugar levels closely"]
+      },
+      glaucoma: {
+        explanation: "Fundus analysis observed structural features suggestive of optic disc changes. Clinical confirmation requires intraocular pressure measurement and visual field testing.",
+        plain: "The retinal scan shows structural features around the optic nerve that may suggest glaucoma. An eye doctor can confirm this.",
+        recs: ["Consult an ophthalmologist for intraocular pressure measurement", "Visual field testing is recommended"]
+      },
+      macular_degeneration: {
+        explanation: "Fundus analysis observed bright deposit patterns suggestive of drusen in the macular region. Clinical confirmation requires OCT imaging.",
+        plain: "The retinal scan shows features in the macular area that may suggest age-related changes. An eye doctor can confirm this with proper imaging.",
+        recs: ["Consult an ophthalmologist for OCT imaging", "Amsler grid home monitoring recommended"]
+      }
+    };
+
+    const info = subtypeExplanations[subtype] || subtypeExplanations["benign_nevus"]!;
+
     return {
       isMedicalImage: isValidImage,
       quality: isValidImage ? "Good" : "Poor",
@@ -1081,17 +1394,17 @@ function analyzeUploadedImageFeatures(imageBase64?: string, region: string = "Sk
       risk: isValidImage ? riskLevel : "low",
       confidence: Math.min(98, 85 + Math.round(feat.entropy * 10)),
       predictionScore: prob,
-      explanation: isMalignant ? `Analysis detected significant abnormalities consistent with ${subtype.replace("_", " ")}. Further clinical evaluation is strongly recommended.` : "Analysis detected typical, benign structural patterns. No significant malignant features identified.",
-      plainLanguageExplanation: isMalignant ? "The scan found unusual patterns in the eye that require a doctor's attention." : "The eye appears normal based on this scan.",
-      recommendation: isMalignant ? ["Consult an ophthalmologist immediately", "Consider a full dilated eye exam"] : ["Continue routine eye exams"],
+      explanation: info.explanation,
+      plainLanguageExplanation: info.plain,
+      recommendation: info.recs,
       suggestedSpecialty: "Ophthalmologist",
       reasoningSteps: [
         "1. YOLOv11 Eye Detection: Identified orbital region of interest",
-        `2. Feature Extraction: Asymmetry ${(feat.asymmetryScore * 100).toFixed(0)}%, Pigmentation/Darkness ${(feat.darkPixelRatio * 100).toFixed(0)}%, Redness ${(feat.rednessRatio * 100).toFixed(0)}%`,
-        `3. SEER Database Verification: Cross-checked features against SEER eye cancer dataset guidelines`,
-        `4. Calibrated Reasoning: Calculated exact abnormality prediction score of ${prob}%`
+        `2. Feature Extraction: Asymmetry ${(feat.asymmetryScore * 100).toFixed(0)}%, Border Contrast ${(feat.borderIrregularity * 100).toFixed(0)}%, Darkness ${(feat.darkPixelRatio * 100).toFixed(0)}%, Redness ${(feat.rednessRatio * 100).toFixed(0)}%`,
+        `3. Weighted Differential Scoring: Evaluated 5 candidate categories — primary consideration: ${subtype.replace(/_/g, " ")}`,
+        `4. Note: Image-based screening only. Definitive diagnosis requires clinical examination.`
       ],
-      externalSearchContext: "SEER Eye Cancer Dataset (5,000+ records) & Ophthalmic Oncology Guidelines",
+      externalSearchContext: "SEER Eye Cancer Dataset & Ophthalmic Oncology Guidelines (population-level reference)",
       eyeCancerClassification: {
         classification: isMalignant ? "malignant" : "benign",
         subtype,
@@ -1099,18 +1412,52 @@ function analyzeUploadedImageFeatures(imageBase64?: string, region: string = "Sk
         isFundusScan,
         fundusPathology,
         clinicalFeatures: {
-          leukocoria: subtype === "retinoblastoma" ? "Detected highly suspicious white pupillary reflex (Leukocoria)" : "No significant leukocoria detected",
-          pigmentation: subtype === "uveal_melanoma" ? "Detected concerning asymmetric choroidal/iris pigmentation" : "Pigmentation appears uniform",
-          asymmetry: subtype === "orbital_lymphoma" ? "Detected significant orbital asymmetry/proptosis" : "Symmetrical orbital presentation"
+          leukocoria: subtype === "retinoblastoma"
+            ? "Observed uniformly bright intraocular pattern — clinical red reflex test required for confirmation"
+            : "No leukocoria pattern observed in this image",
+          pigmentation: subtype === "uveal_melanoma" || subtype === "conjunctival_melanoma"
+            ? `Observed localized pigmentation with border contrast (asymmetry ${(feat.asymmetryScore * 100).toFixed(0)}%)`
+            : "No significant pigmentation abnormality observed",
+          asymmetry: feat.asymmetryScore > 0.35
+            ? `Observed asymmetric presentation (${(feat.asymmetryScore * 100).toFixed(0)}% — may indicate localized lesion)`
+            : `Relatively symmetric presentation (${(feat.asymmetryScore * 100).toFixed(0)}%)`
         },
         seerPredictions: {
-          predictedGeneticMarker: subtype === "retinoblastoma" ? "High correlation with RB1 Mutation" : subtype === "uveal_melanoma" ? "Possible EIF1AX or BAP1 Mutation" : "None expected",
-          predictedTreatment: isMalignant ? "Urgent Ophthalmic Evaluation & Biopsy/Imaging" : "Routine Observation",
-          survivalProbability10Yr: isMalignant ? (subtype === "retinoblastoma" ? "95% (with early treatment)" : "70-80% (stage dependent)") : ">99%"
+          predictedGeneticMarker: subtype === "retinoblastoma" ? "Associated in literature: RB1 pathway (requires genetic testing to confirm)"
+            : subtype === "uveal_melanoma" ? "Associated in literature: EIF1AX, BAP1 pathways (requires genetic testing)"
+            : subtype === "conjunctival_melanoma" ? "Associated in literature: BRAF, NRAS pathways (requires genetic testing)"
+            : "Not applicable — no genetic markers predicted from image analysis",
+          predictedTreatment: isMalignant ? "Recommend: Specialist ophthalmic evaluation for clinical staging and treatment planning" : "Routine monitoring and periodic eye examinations",
+          survivalProbability10Yr: isMalignant
+            ? `Population average for ${subtype.replace(/_/g, " ")}: ${subtype === "retinoblastoma" ? "~95%" : "varies by stage"} (individual prognosis requires clinical/pathological assessment)`
+            : "Not applicable"
+        },
+        rcpathHistopathologyReference: {
+          requiredCoreDataItems: [
+            "Tumour largest basal diameter",
+            "Tumour height",
+            "Ciliary body involvement status",
+            "Cell type (Callender classification)",
+            "Nuclear BAP1 expression status",
+            "Extraocular/Scleral extension",
+            "Extravascular matrix patterns"
+          ],
+          microscopicCellTypeReference: subtype === "uveal_melanoma" 
+            ? "Report Cell Type per Callender Classification: Spindle cell (favourable, low metastatic potential), Epithelioid cell (unfavourable, high metastatic potential), or Mixed cell type."
+            : "Modified Callender system applies primarily to uveal choroidal and ciliary body melanomas.",
+          extravascularMatrixPatternsReference: subtype === "uveal_melanoma"
+            ? "PAS staining is recommended to detect closed vascular loops/networks, which are indicators of poor prognosis."
+            : "Assess for microvascular loop patterns when performing biopsy on malignant ocular tumors.",
+          mitoticCountReference: "Quantify mitoses per mm² (standardized to 1 mm² rather than subjective HPFs). High mitotic index is associated with decreased survival.",
+          extraocularExtensionReference: "Assess enucleation specimen for scleral thickness invasion or frank extraocular extension. Report extraocular margin status in mm.",
+          bap1ExpressionReference: subtype === "uveal_melanoma"
+            ? "Perform immunohistochemical analysis for BAP1. Loss of nuclear BAP1 expression is a strong indicator of high metastatic potential and class 2 gene expression profile."
+            : "Immunohistochemical evaluation of BAP1 expression is recommended for prognostic validation of ocular melanomas."
         }
       },
       boundingBox: [xBox, yBox, wBox, hBox],
       cancerModelVerified: true,
+      eyeCancerModelMetrics: eyeCancerDatasetMetrics,
       disclaimer: AI_DISCLAIMER
     };
   }

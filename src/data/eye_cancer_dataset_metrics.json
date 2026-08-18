@@ -1,0 +1,128 @@
+{
+  "retinoblastoma": {
+    "totalPatients": 1672,
+    "averageAge": 45.166866028708135,
+    "medianAge": 44.0,
+    "stageDistribution": {
+      "Stage III": 0.2679425837320574,
+      "Stage II": 0.25299043062200954,
+      "Stage I": 0.23983253588516745,
+      "Stage IV": 0.23923444976076555
+    },
+    "treatmentDistribution": {
+      "Chemotherapy": 0.34688995215311,
+      "Radiation": 0.33133971291866027,
+      "Surgery": 0.32177033492822965
+    },
+    "outcomeDistribution": {
+      "Deceased": 0.3355263157894737,
+      "In Remission": 0.3349282296650718,
+      "Active": 0.32954545454545453
+    },
+    "medianSurvivalMonths": 61.0,
+    "medianSurvivalMonthsDeceased": 65.0,
+    "survivalProbabilityByStage": {
+      "Stage I": 0.6334164588528678,
+      "Stage II": 0.6784869976359338,
+      "Stage III": 0.6785714285714286,
+      "Stage IV": 0.665
+    },
+    "geneticMarkersDistribution": {
+      "BRAF Mutation": 0.507177033492823,
+      "None": 0.49282296650717705
+    },
+    "lateralityDistribution": {
+      "Left": 0.34748803827751196,
+      "Bilateral": 0.33911483253588515,
+      "Right": 0.3133971291866029
+    },
+    "familyHistoryDistribution": {
+      "True": 0.5083732057416268,
+      "False": 0.4916267942583732
+    }
+  },
+  "melanoma": {
+    "totalPatients": 1691,
+    "averageAge": 44.89000591366056,
+    "medianAge": 44.0,
+    "stageDistribution": {
+      "Stage II": 0.26020106445890007,
+      "Stage IV": 0.25783560023654645,
+      "Stage III": 0.25487876995860437,
+      "Stage I": 0.22708456534594915
+    },
+    "treatmentDistribution": {
+      "Surgery": 0.33944411590774687,
+      "Radiation": 0.33471318746303963,
+      "Chemotherapy": 0.3258426966292135
+    },
+    "outcomeDistribution": {
+      "Deceased": 0.35008870490833827,
+      "In Remission": 0.3335304553518628,
+      "Active": 0.3163808397397989
+    },
+    "medianSurvivalMonths": 61.0,
+    "medianSurvivalMonthsDeceased": 63.0,
+    "survivalProbabilityByStage": {
+      "Stage I": 0.6328125,
+      "Stage II": 0.6613636363636364,
+      "Stage III": 0.665893271461717,
+      "Stage IV": 0.6376146788990825
+    },
+    "geneticMarkersDistribution": {
+      "None": 0.5002956830277943,
+      "BRAF Mutation": 0.4997043169722058
+    },
+    "lateralityDistribution": {
+      "Left": 0.33589591957421644,
+      "Bilateral": 0.332347723240686,
+      "Right": 0.33175635718509755
+    },
+    "familyHistoryDistribution": {
+      "False": 0.5162625665286813,
+      "True": 0.48373743347131876
+    }
+  },
+  "lymphoma": {
+    "totalPatients": 1637,
+    "averageAge": 44.96762370189371,
+    "medianAge": 44.0,
+    "stageDistribution": {
+      "Stage II": 0.259010384850336,
+      "Stage IV": 0.2480146609651802,
+      "Stage I": 0.24740378741600488,
+      "Stage III": 0.24557116676847893
+    },
+    "treatmentDistribution": {
+      "Surgery": 0.3463653023824068,
+      "Radiation": 0.3274282223579719,
+      "Chemotherapy": 0.32620647525962126
+    },
+    "outcomeDistribution": {
+      "Deceased": 0.34025656689065364,
+      "In Remission": 0.33659132559560173,
+      "Active": 0.3231521075137447
+    },
+    "medianSurvivalMonths": 58.0,
+    "medianSurvivalMonthsDeceased": 56.0,
+    "survivalProbabilityByStage": {
+      "Stage I": 0.6444444444444445,
+      "Stage II": 0.6674528301886793,
+      "Stage III": 0.681592039800995,
+      "Stage IV": 0.645320197044335
+    },
+    "geneticMarkersDistribution": {
+      "None": 0.5051924251679902,
+      "BRAF Mutation": 0.49480757483200977
+    },
+    "lateralityDistribution": {
+      "Bilateral": 0.34575442883323154,
+      "Left": 0.3280390959071472,
+      "Right": 0.32620647525962126
+    },
+    "familyHistoryDistribution": {
+      "False": 0.5149664019547954,
+      "True": 0.48503359804520463
+    }
+  }
+}

@@ -1,0 +1,104 @@
+{
+  "benign": {
+    "totalPatients": 2568,
+    "averageAge": 53.12071651090343,
+    "medianAge": 53.0,
+    "genderDistribution": {
+      "Female": 0.5046728971962616,
+      "Male": 0.4953271028037383
+    },
+    "averageDiameterMm": 4.981795171339564,
+    "averageMoleCount": 14.96690031152648,
+    "uvExposureDistribution": {
+      "Moderate": 0.41861370716510904,
+      "Low": 0.3088006230529595,
+      "High": 0.27258566978193144
+    },
+    "skinTypeDistribution": {
+      "II": 0.18457943925233644,
+      "V": 0.169392523364486,
+      "VI": 0.1662772585669782,
+      "IV": 0.16121495327102803,
+      "I": 0.16043613707165108,
+      "III": 0.15809968847352024
+    },
+    "familyHistoryRate": 0.309190031152648,
+    "averageSunburns": 2.0373831775700935,
+    "locationDistribution": {
+      "Back": 0.17172897196261683,
+      "Scalp": 0.17017133956386293,
+      "Arms": 0.1690031152647975,
+      "Legs": 0.1662772585669782,
+      "Chest": 0.16394080996884736,
+      "Face": 0.1588785046728972
+    },
+    "symptoms": {
+      "itching": 0.1514797507788162,
+      "bleeding": 0.09228971962616822,
+      "pain": 0.10007788161993769,
+      "scaliness": 0.20482866043613707,
+      "oozing": 0.049454828660436136
+    },
+    "abcdFeatures": {
+      "asymmetry": 0.20132398753894082,
+      "borderIrregularity": 0.19898753894080998,
+      "colorVariation": 0.257398753894081,
+      "evolving": 0.14719626168224298
+    },
+    "immuneStatusDistribution": {
+      "Normal": 0.844626168224299,
+      "Suppressed": 0.15537383177570094
+    }
+  },
+  "malignant": {
+    "totalPatients": 432,
+    "averageAge": 51.52546296296296,
+    "medianAge": 50.0,
+    "genderDistribution": {
+      "Male": 0.5185185185185185,
+      "Female": 0.48148148148148145
+    },
+    "averageDiameterMm": 5.048703703703704,
+    "averageMoleCount": 15.06712962962963,
+    "uvExposureDistribution": {
+      "Moderate": 0.40046296296296297,
+      "Low": 0.3055555555555556,
+      "High": 0.29398148148148145
+    },
+    "skinTypeDistribution": {
+      "I": 0.18518518518518517,
+      "V": 0.18287037037037038,
+      "II": 0.17592592592592593,
+      "III": 0.16666666666666666,
+      "IV": 0.14814814814814814,
+      "VI": 0.1412037037037037
+    },
+    "familyHistoryRate": 0.3148148148148148,
+    "averageSunburns": 2.076388888888889,
+    "locationDistribution": {
+      "Back": 0.20833333333333334,
+      "Scalp": 0.18055555555555555,
+      "Face": 0.16435185185185186,
+      "Arms": 0.1597222222222222,
+      "Legs": 0.1550925925925926,
+      "Chest": 0.13194444444444445
+    },
+    "symptoms": {
+      "itching": 0.1412037037037037,
+      "bleeding": 0.10416666666666667,
+      "pain": 0.08333333333333333,
+      "scaliness": 0.21296296296296297,
+      "oozing": 0.03935185185185185
+    },
+    "abcdFeatures": {
+      "asymmetry": 0.1712962962962963,
+      "borderIrregularity": 0.2222222222222222,
+      "colorVariation": 0.24768518518518517,
+      "evolving": 0.13657407407407407
+    },
+    "immuneStatusDistribution": {
+      "Normal": 0.8495370370370371,
+      "Suppressed": 0.15046296296296297
+    }
+  }
+}

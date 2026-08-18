@@ -72,6 +72,10 @@ function ImagesPage() {
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
+      // Clear previous analysis so the user never sees a stale result
+      setResult(null);
+      setRecommendedDoctors([]);
+      setStageProgress(0);
       const reader = new FileReader();
       reader.onloadend = () => {
         const img = new Image();
@@ -378,6 +382,11 @@ function ImagesPage() {
                   <RiskBadge level={result.risk} />
                   <Badge variant="secondary">Confidence {result.confidence}%</Badge>
                   <Badge variant="outline">{result.lesionsDetected} region highlighted</Badge>
+                  {(result as any).deepReasoningApplied && (
+                    <Badge variant="secondary" className="bg-purple-500/10 text-purple-700 dark:text-purple-300 border-purple-300">
+                      🧠 Deep Reasoning Applied
+                    </Badge>
+                  )}
                 </div>
                 <Progress value={result.confidence} className="h-1.5" />
 
@@ -460,6 +469,7 @@ function ImagesPage() {
                   </div>
                 )}
                 
+                
                 {/* Eye Cancer Classification & SEER Metrics Grid */}
                 {result.eyeCancerClassification && result.isMedicalImage !== false && (
                   <div className="rounded-2xl border-2 overflow-hidden" style={{ borderColor: result.eyeCancerClassification.classification === "malignant" ? "var(--destructive)" : "var(--success)" }}>
@@ -469,15 +479,15 @@ function ImagesPage() {
                     }}>
                       <div className="flex items-center justify-between">
                         <p className="text-sm font-semibold">
-                          {result.eyeCancerClassification.isFundusScan ? "Fundus ConvNet Analysis" : "Eye Cancer Classification"}
+                          {result.eyeCancerClassification.isFundusScan ? "Fundus ConvNet Analysis" : "Eye Lesion Assessment"}
                         </p>
                         <Badge variant={result.eyeCancerClassification.classification === "malignant" ? "destructive" : "secondary"} className="uppercase tracking-wider text-xs">
                           {result.eyeCancerClassification.classification}
                         </Badge>
                       </div>
                       <p className="text-xs text-muted-foreground mt-0.5">
-                        Subtype: <span className="font-medium capitalize">{result.eyeCancerClassification.subtype.replace("_", " ")}</span>
-                        {" · "}Abnormality probability: <span className="font-semibold">{result.eyeCancerClassification.malignancyProbability}%</span>
+                        Primary consideration: <span className="font-medium capitalize">{result.eyeCancerClassification.subtype.replace(/_/g, " ")}</span>
+                        {" · "}Screening score: <span className="font-semibold">{result.eyeCancerClassification.malignancyProbability}%</span>
                       </p>
                     </div>
                     <div className="p-4 space-y-4">
@@ -490,7 +500,7 @@ function ImagesPage() {
                         </div>
                       ) : (
                         <div>
-                          <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2">Clinical Features</p>
+                          <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2">Observed Image Features</p>
                           <div className="grid gap-2">
                             {[
                               { label: "Leukocoria", value: result.eyeCancerClassification.clinicalFeatures.leukocoria },
@@ -511,26 +521,29 @@ function ImagesPage() {
                       
                       {result.eyeCancerClassification.seerPredictions && !result.eyeCancerClassification.isFundusScan && (
                         <div className="pt-3 border-t border-border">
-                           <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2">SEER Database Predictions</p>
+                           <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2">Population Reference Data</p>
                            <div className="grid gap-2">
                              <div className="flex gap-2 items-start text-sm">
-                                <span className="font-medium">Marker:</span>
+                                <span className="font-medium">Literature markers:</span>
                                 <span className="text-muted-foreground">{result.eyeCancerClassification.seerPredictions.predictedGeneticMarker}</span>
                              </div>
                              <div className="flex gap-2 items-start text-sm">
-                                <span className="font-medium">Treatment:</span>
+                                <span className="font-medium">Recommended next step:</span>
                                 <span className="text-muted-foreground">{result.eyeCancerClassification.seerPredictions.predictedTreatment}</span>
                              </div>
                              <div className="flex gap-2 items-start text-sm">
-                                <span className="font-medium">10Yr Survival:</span>
+                                <span className="font-medium">Population survival data:</span>
                                 <span className="text-muted-foreground">{result.eyeCancerClassification.seerPredictions.survivalProbability10Yr}</span>
                              </div>
                            </div>
+                           <p className="text-[10px] text-muted-foreground mt-2 italic">These are population-level reference statistics from published literature, not individual predictions. Genetic markers, treatment, and prognosis require clinical/pathological assessment.</p>
                         </div>
                       )}
+
                     </div>
                   </div>
                 )}
+                                
                 
                 {/* Doctor Recommendation */}
                 {recommendedDoctors.slice(0, 1).map(doctor => (
