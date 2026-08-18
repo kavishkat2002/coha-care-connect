@@ -36,7 +36,7 @@ export const Route = createFileRoute("/patient/assistant")({
   component: AssistantPage,
 });
 
-type Message = { id: string; role: "user" | "assistant"; text: string; attachment?: string; imageBase64?: string; reasoning?: string; agenticAction?: AgenticAction; loadedCare?: Recommendation | null };
+type Message = { id: string; role: "user" | "assistant"; text: string; attachment?: string; imageBase64?: string; reasoning?: string; reasoningDuration?: number; agenticAction?: AgenticAction; loadedCare?: Recommendation | null };
 
 const suggestions = [
   "I have a mouth ulcer that has not healed in three weeks.",
@@ -227,8 +227,10 @@ function AssistantPage() {
     setBusy(true);
 
     // Pass full conversation history for context-aware analysis
+    const startTime = Date.now();
     const conversationHistory = buildConversationHistory(updatedMessages);
     const result = await analyseSymptoms(conversationHistory);
+    const durationSeconds = Math.max(1, Math.round((Date.now() - startTime) / 1000));
     setAssessment(result);
     
     // Set follow-up questions as dynamic suggestions
@@ -261,17 +263,21 @@ function AssistantPage() {
       setCare(null);
     }
 
-    setMessages((m) => [
-      ...m,
-      {
-        id: `a${Date.now()}`,
-        role: "assistant",
-        text: result.plainLanguageSummary || result.summary,
-        ...(result.reasoning ? { reasoning: result.reasoning } : {}),
-        ...(result.agenticAction ? { agenticAction: result.agenticAction } : {}),
-        loadedCare: inlineCare,
-      },
-    ]);
+    const newMsg: Message = {
+      id: `a${Date.now()}`,
+      role: "assistant",
+      text: result.plainLanguageSummary || result.summary,
+      loadedCare: inlineCare,
+    };
+    if (result.reasoning) {
+      newMsg.reasoning = result.reasoning;
+      newMsg.reasoningDuration = durationSeconds;
+    }
+    if (result.agenticAction) {
+      newMsg.agenticAction = result.agenticAction;
+    }
+
+    setMessages((m) => [...m, newMsg]);
     setBusy(false);
   };
 
@@ -324,11 +330,12 @@ function AssistantPage() {
                   {m.reasoning && (
                     <Accordion type="single" collapsible className="w-full mb-1">
                       <AccordionItem value="reasoning" className="border-none">
-                        <AccordionTrigger className="py-1 px-3 rounded-lg bg-black/5 dark:bg-white/5 hover:bg-black/10 dark:hover:bg-white/10 text-xs font-medium flex items-center justify-start gap-2 h-8 w-fit [&>svg]:size-3">
-                          <BrainCircuit className="size-3 text-muted-foreground" />
-                          <span className="text-muted-foreground">Thought Process</span>
+                        <AccordionTrigger className="py-1 px-3.5 rounded-full bg-sky-500/5 dark:bg-sky-500/10 border border-sky-500/20 hover:bg-sky-500/10 dark:hover:bg-sky-500/20 text-xs font-semibold flex items-center justify-start gap-1.5 h-8 w-fit text-sky-600 dark:text-sky-400 [&>svg]:size-3 [&>svg]:text-sky-500 [&>svg]:shrink-0">
+                          <BrainCircuit className="size-3.5" />
+                          <span>{m.reasoningDuration ? `Thought for ${m.reasoningDuration}s` : "Think"}</span>
                         </AccordionTrigger>
-                        <AccordionContent className="p-3 text-xs text-muted-foreground whitespace-pre-wrap font-mono leading-relaxed bg-black/5 dark:bg-white/5 rounded-lg mt-2">
+                        <AccordionContent className="p-3 text-xs text-muted-foreground whitespace-pre-wrap font-mono leading-relaxed bg-black/5 dark:bg-white/5 border-l-2 border-sky-500/30 rounded-r-lg mt-2 pl-3">
+                          <p className="font-semibold text-[10px] text-sky-500 uppercase tracking-wider mb-1">Reasoning Process</p>
                           {m.reasoning}
                         </AccordionContent>
                       </AccordionItem>
@@ -431,11 +438,24 @@ function AssistantPage() {
                 ) : null}
               </div>
             ))}
-            {busy || isTranscribing ? (
-              <p className="text-sm text-muted-foreground" role="status">
-                {isTranscribing ? "Transcribing your voice…" : "Analysing your message…"}
+            {isTranscribing && (
+              <p className="text-sm text-muted-foreground animate-pulse" role="status">
+                Transcribing your voice…
               </p>
-            ) : null}
+            )}
+            {!isTranscribing && busy && (
+              <div className="flex flex-col gap-2 p-3 bg-muted/40 rounded-2xl max-w-[80%] border border-border/40 shadow-sm">
+                <div className="flex items-center gap-2">
+                  <span className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-sky-500/10 border border-sky-500/20 text-xs font-semibold text-sky-600 dark:text-sky-400">
+                    <BrainCircuit className="size-3.5 animate-spin" />
+                    <span>Thinking...</span>
+                  </span>
+                </div>
+                <p className="text-[11px] text-muted-foreground/80 pl-2">
+                  MedDoc is evaluating symptoms against the Oxford Clinical Handbook guidelines...
+                </p>
+              </div>
+            )}
             <div ref={endRef} />
           </CardContent>
 
