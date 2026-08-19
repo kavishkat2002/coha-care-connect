@@ -1848,9 +1848,30 @@ function analyzeUploadedImageFeatures(imageBase64?: string, region: string = "Sk
 
 export type ReportAnalysis = {
   fileName: string;
-  abnormal: { label: string; value: string; range: string }[];
+  documentType: string;
+  confidence: number;
+  results: {
+    testName: string;
+    loincCode?: string;
+    value: number | string;
+    unit: string;
+    referenceRange: {
+      low?: number | string;
+      high?: number | string;
+      rawRange: string;
+    };
+    flag: "normal" | "low" | "high" | "critical" | "unknown";
+    normalized?: {
+      value: number | string;
+      unit: string;
+    };
+  }[];
+  patterns: string[];
+  criticalFlags: string[];
   plainLanguage: string;
+  overallInterpretation: string;
   suggestedSpecialty: string;
+  recommendations: string[];
   disclaimer: string;
 };
 
@@ -1875,22 +1896,43 @@ export async function analyseMedicalReport(fileName: string, base64Data?: string
               content: [
                 {
                   type: "text",
-                  text: `You are an expert medical AI assistant. Analyze this image of a medical laboratory or clinical report.
-Extract any abnormal values that fall outside the standard reference range.
-Provide a plain language summary of what these abnormal values might indicate.
-Suggest the best medical specialty to consult for these specific results.
+                  text: `You are an expert medical AI assistant specialized in laboratory and clinical report analysis. Analyze this image of a medical report.
+Follow these structured stages:
+1. Document Type Classification: Classify the document (e.g. CBC, Liver Function Test, Kidney Function Test, Lipid Profile, HbA1c, Thyroid Panel, Urinalysis, Electrolytes, Hormones, Pathology, Radiology report, Discharge summary, Prescription, etc.).
+2. Structured Data Extraction: Extract all test names, values, units, reference ranges, and flags. Map observations where possible.
+3. Reference-Range Normalization: Keep original reference ranges and convert or normalize units if necessary.
+4. Abnormality Detection: Detect abnormal values (low, high, critical).
+5. Pattern Recognition: Differentiate individual abnormal readings from general clinical patterns (e.g., microcytic anemia, metabolic syndrome, hepatic injury).
+6. Evidence & Safety Check: Formulate plain language summaries without offering definitive diagnostic absolute certainties. Suggest the best medical specialty.
 
-Return ONLY a valid JSON object matching this strict structure (and absolutely no other text or markdown tags):
+Return ONLY a valid JSON object matching this exact structure (and absolutely no other text, thinking blocks, or markdown tags):
 {
-  "abnormal": [
+  "documentType": "CBC",
+  "confidence": 0.98,
+  "results": [
     {
-      "label": "Test Name (e.g. Haemoglobin)",
-      "value": "The recorded value (e.g. 10.8 g/dL)",
-      "range": "The reference range (e.g. 12.0 - 15.5)"
+      "testName": "Hemoglobin",
+      "loincCode": "718-7",
+      "value": 11.2,
+      "unit": "g/dL",
+      "referenceRange": {
+        "low": 13.0,
+        "high": 17.0,
+        "rawRange": "13.0 - 17.0"
+      },
+      "flag": "low",
+      "normalized": {
+        "value": 112,
+        "unit": "g/L"
+      }
     }
   ],
-  "plainLanguage": "A simple, easy-to-understand explanation written for someone with no medical background explaining what the abnormal results might mean. Avoid jargon.",
-  "suggestedSpecialty": "The best medical specialty (e.g. Hematology, Endocrinology, General Medicine)"
+  "patterns": ["Microcytic / hypochromic anemia pattern"],
+  "criticalFlags": [],
+  "plainLanguage": "A simple, non-jargon explanation of what these findings might mean, advising a clinical consultation.",
+  "overallInterpretation": "Empathetic and precise clinical overview of findings and differentials.",
+  "suggestedSpecialty": "Hematology / General Medicine",
+  "recommendations": ["Discuss these results with a doctor", "Repeat test if indicated"]
 }`
                 },
                 {
@@ -1909,20 +1951,17 @@ Return ONLY a valid JSON object matching this strict structure (and absolutely n
         const data = await response.json();
         let content = data.choices[0].message.content.trim();
         
-        // Handle reasoning model think tags
         content = content.replace(/<think>[\s\S]*?<\/think>/g, '').trim();
         if (content.includes('<think>')) {
           content = content.replace(/<think>[\s\S]*/g, '').trim();
         }
         
-        // Strip markdown backticks if they exist
         if (content.startsWith("```json")) {
           content = content.replace(/^```json/, "").replace(/```$/, "").trim();
         } else if (content.startsWith("```")) {
           content = content.replace(/^```/, "").replace(/```$/, "").trim();
         }
 
-        // Extract the JSON object from any surrounding text
         const jsonMatch = content.match(/\{[\s\S]*\}/);
         if (jsonMatch) {
           content = jsonMatch[0];
@@ -1931,9 +1970,15 @@ Return ONLY a valid JSON object matching this strict structure (and absolutely n
         const parsed = JSON.parse(content);
         return {
           fileName,
-          abnormal: parsed.abnormal || [],
+          documentType: parsed.documentType || "Unknown Report",
+          confidence: parsed.confidence || 0.9,
+          results: parsed.results || [],
+          patterns: parsed.patterns || [],
+          criticalFlags: parsed.criticalFlags || [],
           plainLanguage: parsed.plainLanguage || "No clear plain language summary could be generated.",
+          overallInterpretation: parsed.overallInterpretation || "Awaiting clinical review.",
           suggestedSpecialty: parsed.suggestedSpecialty || "General Medicine",
+          recommendations: parsed.recommendations || ["Consult a general practitioner for evaluation."],
           disclaimer: AI_DISCLAIMER
         };
       }
@@ -1942,17 +1987,65 @@ Return ONLY a valid JSON object matching this strict structure (and absolutely n
     }
   }
 
-  // Fallback to local logic
+  // Fallback to local logic with full structure
   await delay(1200);
   return {
     fileName,
-    abnormal: [
-      { label: "Haemoglobin", value: "10.8 g/dL", range: "12.0 – 15.5" },
-      { label: "Serum ferritin", value: "9 ng/mL", range: "15 – 150" },
+    documentType: "CBC (Complete Blood Count)",
+    confidence: 0.99,
+    results: [
+      { 
+        testName: "Hemoglobin", 
+        loincCode: "718-7",
+        value: 11.2, 
+        unit: "g/dL", 
+        referenceRange: { low: 13.0, high: 17.0, rawRange: "13.0 – 17.0" },
+        flag: "low",
+        normalized: { value: 112, unit: "g/L" }
+      },
+      { 
+        testName: "MCV (Mean Corpuscular Volume)", 
+        loincCode: "19123-9",
+        value: 74, 
+        unit: "fL", 
+        referenceRange: { low: 80, high: 100, rawRange: "80 – 100" },
+        flag: "low"
+      },
+      { 
+        testName: "Serum Ferritin", 
+        loincCode: "2276-4",
+        value: 9, 
+        unit: "ng/mL", 
+        referenceRange: { low: 15, high: 150, rawRange: "15 – 150" },
+        flag: "low"
+      },
+      { 
+        testName: "White Blood Cells (WBC)", 
+        loincCode: "26464-8",
+        value: 6.5, 
+        unit: "10^3/uL", 
+        referenceRange: { low: 4.0, high: 11.0, rawRange: "4.0 – 11.0" },
+        flag: "normal"
+      },
+      { 
+        testName: "Platelets", 
+        loincCode: "26515-7",
+        value: 250, 
+        unit: "10^3/uL", 
+        referenceRange: { low: 150, high: 450, rawRange: "150 – 450" },
+        flag: "normal"
+      }
     ],
-    plainLanguage:
-      "Two values relating to iron levels are lower than the usual range. This pattern is often linked to iron deficiency and is commonly managed with diet changes and supplements.",
-    suggestedSpecialty: "General Medicine",
+    patterns: ["Microcytic / hypochromic red-cell pattern"],
+    criticalFlags: [],
+    plainLanguage: "The report contains low hemoglobin and MCV readings, which suggest a microcytic red-cell pattern. This pattern is commonly observed in cases of iron deficiency. We advise reviewing these findings with your clinician.",
+    overallInterpretation: "The values suggest a mild microcytic red-cell pattern. While compatible with iron deficiency, diagnosis requires direct correlation with iron studies, symptoms, and dietary factors.",
+    suggestedSpecialty: "Hematology / General Medicine",
+    recommendations: [
+      "Consult a General Physician or Hematologist for evaluation",
+      "Discuss checking serum iron studies (ferritin, transferrin saturation)",
+      "Log daily energy levels, diet, and history of blood loss"
+    ],
     disclaimer: AI_DISCLAIMER,
   };
 }
