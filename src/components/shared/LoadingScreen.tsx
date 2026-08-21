@@ -34,24 +34,27 @@ export function LoadingScreen({
   const loaderContent = (
     <div className="flex flex-col items-center justify-center text-center p-6 max-w-sm mx-auto">
       {/* Glow Backdrop Effect */}
-      <div className="flex flex-col items-center justify-center text-center p-6">
-      {/* Centered GIF loading animation without any container effects, ring, or glows */}
-      <div className="relative w-16 h-16 flex items-center justify-center">
-        <img
-          src="/downloaded-file.gif"
-          alt="Loading..."
-          className="w-full h-full object-contain"
-          onError={(e) => {
-            e.currentTarget.style.display = "none";
-            const fallback = e.currentTarget.parentElement?.querySelector(".fallback-spinner");
-            if (fallback) fallback.classList.remove("hidden");
-          }}
-        />
-        {/* Simple neutral gray spinner fallback */}
-        <div className="fallback-spinner hidden absolute inset-0 flex items-center justify-center">
-          <div className="w-6 h-6 border-2 border-slate-300 dark:border-slate-700 border-t-slate-600 dark:border-t-slate-400 rounded-full animate-spin" />
+      <div className="relative group">
+        <div className="absolute -inset-1 rounded-full bg-gradient-to-r from-teal-500 to-blue-600 opacity-20 blur-xl group-hover:opacity-30 transition duration-1000 group-hover:duration-200 animate-pulse" />
+
+        {/* GIF container with smooth shadow and ring */}
+        <div className="relative size-32 md:size-36 rounded-full overflow-hidden border-4 border-white dark:border-slate-800 bg-white dark:bg-slate-900 shadow-2xl flex items-center justify-center">
+          <img
+            src="/downloaded-file.gif"
+            alt="Loading animation"
+            className="size-full object-cover scale-110"
+            onError={(e) => {
+              // Fallback to text spinner if GIF fails to load
+              e.currentTarget.style.display = "none";
+              const fallback = e.currentTarget.parentElement?.querySelector(".fallback-spinner");
+              if (fallback) fallback.classList.remove("hidden");
+            }}
+          />
+          {/* Fallback spinner if GIF fails or doesn't exist */}
+          <div className="fallback-spinner hidden absolute inset-0 flex items-center justify-center">
+            <div className="w-12 h-12 border-4 border-[#15A6A6] border-t-transparent rounded-full animate-spin" />
+          </div>
         </div>
-      </div>
       </div>
 
       {/* Main loading message */}

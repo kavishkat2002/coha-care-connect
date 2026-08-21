@@ -599,9 +599,13 @@ function BookPage() {
             </div>
           ) : !query.trim() && !hospital.trim() && specialty === "all" ? (
             <Card className="shadow-soft border-dashed">
-              <CardContent className="p-12 text-center text-sm text-muted-foreground flex flex-col items-center justify-center gap-3">
-                <Search className="size-8 text-muted-foreground/50" />
-                <p>Please enter a doctor name, select a specialization, or search for a hospital to see available specialists.</p>
+              <CardContent className="p-8 text-center text-sm text-muted-foreground flex flex-col items-center justify-center gap-4">
+                <img
+                  src="/illustrater doctor.jpg"
+                  alt="Search doctors"
+                  className="w-48 h-48 sm:w-56 sm:h-56 object-contain rounded-2xl opacity-95 dark:opacity-80 mix-blend-multiply dark:mix-blend-normal"
+                />
+                <p className="max-w-md">Please enter a doctor name, select a specialization, or search for a hospital to see available specialists.</p>
               </CardContent>
             </Card>
           ) : (
