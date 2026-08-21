@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useState, useEffect } from "react";
 
 import { PageHeader } from "@/components/shared/PageHeader";
+import { LoadingScreen } from "@/components/shared/LoadingScreen";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -122,7 +123,7 @@ function ProfilePage() {
   };
 
   if (!p) {
-    return <div className="p-8 text-center text-muted-foreground">Loading profile...</div>;
+    return <LoadingScreen message="Loading profile..." fullscreen={false} />;
   }
 
   return (

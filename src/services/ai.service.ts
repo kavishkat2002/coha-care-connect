@@ -237,8 +237,8 @@ export function detectIntent(message: string) {
   const text = message.toLowerCase();
 
   // A. Check for specific doctor booking request (e.g., "book Dr. Amara Silva")
-  const matchedDoctor = doctors.find((d) => 
-    text.includes(d.name.toLowerCase()) || 
+  const matchedDoctor = doctors.find((d) =>
+    text.includes(d.name.toLowerCase()) ||
     text.includes(d.name.replace("Dr. ", "").toLowerCase()) ||
     (text.includes("amara") && text.includes("silva"))
   );
@@ -253,7 +253,7 @@ export function detectIntent(message: string) {
     } else if (text.includes("today")) {
       date = "Today";
     }
-    
+
     // Parse timeslot
     let timeslot = "Evening";
     if (text.includes("morning")) timeslot = "Morning";
@@ -270,7 +270,7 @@ export function detectIntent(message: string) {
       condition: matchedDoctor ? matchedDoctor.specialty : "Dermatology"
     };
   }
-  
+
   // B. Check for scan/upload image intent
   if (/\b(scan|upload|image|photo|analyse skin|analyse eye|picture|check skin|check eye|ophthalmology scan|dermoscopy)\b/i.test(text)) {
     return {
@@ -279,7 +279,7 @@ export function detectIntent(message: string) {
       condition: "Image Analysis",
     };
   }
-  
+
   // B. Check for medical records/prescription/medmind intent
   if (/\b(prescription|medication|pill|prescribe|e-care|medmind|health record|records|smart health|remind pill)\b/i.test(text)) {
     return {
@@ -302,7 +302,7 @@ export function detectIntent(message: string) {
 
   // 2. Fallback to symptom matching — check all keywords and pick the best match
   const hit = KEYWORDS.find((k) => k.match.some((m) => text.includes(m)));
-  
+
   const condition = hit ? hit.condition : "Unknown";
   const specialty = hit ? hit.specialty : "General Medicine";
   const knowledge = condition !== "Unknown" ? aiKnowledge[condition as keyof typeof aiKnowledge] : null;
@@ -432,13 +432,13 @@ export async function analyseSymptoms(conversationHistory: ChatMessage[]): Promi
       if (response.ok) {
         const data = await response.json();
         let content = data.choices[0].message.content.trim();
-        
+
         // Extract the JSON object from any surrounding text
         const jsonMatch = content.match(/\{[\s\S]*\}/);
         if (jsonMatch) {
           content = jsonMatch[0];
         }
-        
+
         const parsed = JSON.parse(content);
         return {
           intent: parsed.intent || "Symptom Assessment",
@@ -813,8 +813,8 @@ export async function analyseMedicalImage(region: string, imageBase64?: string, 
     const searchQuery = region.toLowerCase() === "skin"
       ? `HAM10000 skin cancer dermoscopy ${pixelMetrics?.erythemaRatio > 0.15 ? "erythema ulcerated basal cell melanoma" : "lesion ABCDE classification"} diagnosis`
       : region.toLowerCase() === "eye"
-      ? `SEER eye cancer ophthalmology retinoblastoma uveal melanoma orbital lymphoma diagnosis survival rates AND Deep ConvNets Retinal Fundus image classification Diabetic Retinopathy Glaucoma STARE DRIVE datasets`
-      : `Medical image diagnostic assessment guidelines ${region} pathology`;
+        ? `SEER eye cancer ophthalmology retinoblastoma uveal melanoma orbital lymphoma diagnosis survival rates AND Deep ConvNets Retinal Fundus image classification Diabetic Retinopathy Glaucoma STARE DRIVE datasets`
+        : `Medical image diagnostic assessment guidelines ${region} pathology`;
     externalSearchSnippet = await searchMedicalInformation(searchQuery);
   } catch (err) {
     console.warn("External medical search failed, continuing with vision reasoning...", err);
@@ -851,7 +851,7 @@ ${region.toLowerCase() === "skin" ? `ENHANCED DEEP LEARNING MODEL ARCHITECTURE (
 The underlying MobileNet architecture has been specifically optimized for rare skin diseases with rigorous class balancing weights and 40 unfrozen diagnostic layers.
 Performance metrics: 96.8% accuracy, 98.1% melanoma sensitivity, ROC-AUC 0.985. Clinical decision threshold = 0.23 (23%).
 You must use extreme clinical precision to diagnose between the 7 exact HAM10000 classes: Melanocytic nevi (nv), Melanoma (mel), Benign keratosis-like lesions (bkl), Basal cell carcinoma (bcc), Actinic keratoses (akiec), Vascular lesions (vasc), Dermatofibroma (df).`
-: region.toLowerCase() === "eye" ? `SEER EYE CANCER DATASET & FUNDUS CONVNET PIPELINE:
+                      : region.toLowerCase() === "eye" ? `SEER EYE CANCER DATASET & FUNDUS CONVNET PIPELINE:
 The underlying architecture is optimized for ophthalmic oncology (SEER dataset) and Deep ConvNets (Adam optimized) for Retinal Fundus images (STARE, DRIVE, Messidor).
 
 CRITICAL CLASSIFICATION GUIDANCE:
@@ -1027,12 +1027,12 @@ Return ONLY a valid JSON object matching this strict structure (no other text or
 
       const visionData = await visionResponse.json();
       let content = visionData.choices[0].message.content.trim();
-      
+
       content = content.replace(/<think>[\s\S]*?<\/think>/g, '').trim();
       if (content.includes('<think>')) {
         content = content.replace(/<think>[\s\S]*/g, '').trim();
       }
-      
+
       if (content.startsWith("```json")) {
         content = content.replace(/^```json/, "").replace(/```$/, "").trim();
       } else if (content.startsWith("```")) {
@@ -1043,7 +1043,7 @@ Return ONLY a valid JSON object matching this strict structure (no other text or
       if (jsonMatch) {
         content = jsonMatch[0];
       }
-      
+
       content = repairTruncatedJson(content);
       const visionParsed = JSON.parse(content);
 
@@ -1200,7 +1200,7 @@ function extractImageFeaturesFromBase64(imageBase64?: string): ExtractedFeatures
 
   const rawData = imageBase64.replace(/^data:image\/\w+;base64,/, '');
   const len = rawData.length;
-  
+
   const step = Math.max(1, Math.floor(len / 3000));
   const charFreq: Record<number, number> = {};
   let totalChars = 0;
@@ -1269,10 +1269,10 @@ function extractImageFeaturesFromBase64(imageBase64?: string): ExtractedFeatures
 
 function analyzeUploadedImageFeatures(imageBase64?: string, region: string = "Skin", pixelMetrics?: any): ImageAnalysis {
   const isSkin = region.toLowerCase() === "skin";
-  
+
   if (isSkin) {
     let feat = extractImageFeaturesFromBase64(imageBase64);
-    
+
     // If real canvas RGBA pixel metrics are available, use true image pixel features!
     if (pixelMetrics) {
       feat = {
@@ -1290,7 +1290,7 @@ function analyzeUploadedImageFeatures(imageBase64?: string, region: string = "Sk
 
     // ISIC Pre-Trained Machine Learning Model Feature Weights:
     // Asymmetry (0.885), Border (0.842), Color (0.815), Diameter (0.760), Evolution/Pigment (0.780)
-    const rawMalignancyScore = 
+    const rawMalignancyScore =
       feat.asymmetryScore * 0.885 +
       feat.borderIrregularity * 0.842 +
       feat.colorVariegation * 0.815 +
@@ -1302,16 +1302,16 @@ function analyzeUploadedImageFeatures(imageBase64?: string, region: string = "Sk
     const prob = Math.min(96, Math.max(4, Math.round((rawMalignancyScore / 3.4) * 100)));
     const isMalignant = prob >= 23; // Sensitivity-optimized 23% clinical threshold
     const riskLevel: RiskLevel = prob >= 65 ? "elevated" : prob >= 23 ? "moderate" : "low";
-    
+
     // Heuristic: reject images with extreme color variance, perfect symmetry, or unnaturally stark background contrast.
     // Also rigorously verify that at least 30% of the image pixels match human skin tone color space (Kovac et al. Rules)
     const isValidImage = pixelMetrics ? (
       pixelMetrics.skinTonePercentage > 0.30 &&
-      pixelMetrics.colorVariance < 0.9 && 
-      pixelMetrics.asymmetryScore > 0.05 && 
+      pixelMetrics.colorVariance < 0.9 &&
+      pixelMetrics.asymmetryScore > 0.05 &&
       pixelMetrics.borderContrast < 0.90
     ) : true;
-    
+
     let subtype: SkinCancerClassification["subtype"] = "melanocytic_nevi";
     let clinicalExplanation = "";
     let plainLanguageExplanation = "";
@@ -1649,7 +1649,7 @@ function analyzeUploadedImageFeatures(imageBase64?: string, region: string = "Sk
     const riskLevel: RiskLevel = prob >= 65 ? "elevated" : prob >= 23 ? "moderate" : "low";
 
     const isValidImage = pixelMetrics ? (
-      pixelMetrics.colorVariance < 0.95 && 
+      pixelMetrics.colorVariance < 0.95 &&
       pixelMetrics.asymmetryScore > 0.02
     ) : true;
 
@@ -1798,7 +1798,7 @@ function analyzeUploadedImageFeatures(imageBase64?: string, region: string = "Sk
             "Extraocular/Scleral extension",
             "Extravascular matrix patterns"
           ],
-          microscopicCellTypeReference: subtype === "uveal_melanoma" 
+          microscopicCellTypeReference: subtype === "uveal_melanoma"
             ? "Report Cell Type per Callender Classification: Spindle cell (favourable, low metastatic potential), Epithelioid cell (unfavourable, high metastatic potential), or Mixed cell type."
             : "Modified Callender system applies primarily to uveal choroidal and ciliary body melanomas.",
           extravascularMatrixPatternsReference: subtype === "uveal_melanoma"
@@ -1831,7 +1831,7 @@ function analyzeUploadedImageFeatures(imageBase64?: string, region: string = "Sk
     lesionsDetected: isValidImage ? 1 : 0,
     risk: isValidImage ? (feat.asymmetryScore > 0.4 ? "moderate" : "low") : "low",
     confidence: isValidImage ? probVal : 0,
-    explanation: !isValidImage ? "Image does not appear to contain valid medical data for analysis." : isBreast 
+    explanation: !isValidImage ? "Image does not appear to contain valid medical data for analysis." : isBreast
       ? `Breast image feature analysis evaluated against Wisconsin Breast Cancer Diagnostic ML dataset (96.49% accuracy, 92.16% sensitivity, ROC-AUC 0.9944). Primary feature vectors (mean radius: ${(12 + feat.estimatedDiameterMm).toFixed(1)}mm, concavity: ${(feat.colorVariegation * 0.2).toFixed(3)}, texture) demonstrate regular tissue density.`
       : `Analysis of the ${region.toLowerCase()} image highlighted a localized area. Tissue architecture evaluated with domain-specific pre-processing (entropy index: ${feat.entropy.toFixed(2)}).`,
     plainLanguageExplanation: !isValidImage ? "This doesn't look like a valid medical photograph." : isBreast
@@ -1950,12 +1950,12 @@ Return ONLY a valid JSON object matching this exact structure (and absolutely no
       if (response.ok) {
         const data = await response.json();
         let content = data.choices[0].message.content.trim();
-        
+
         content = content.replace(/<think>[\s\S]*?<\/think>/g, '').trim();
         if (content.includes('<think>')) {
           content = content.replace(/<think>[\s\S]*/g, '').trim();
         }
-        
+
         if (content.startsWith("```json")) {
           content = content.replace(/^```json/, "").replace(/```$/, "").trim();
         } else if (content.startsWith("```")) {
@@ -1966,7 +1966,7 @@ Return ONLY a valid JSON object matching this exact structure (and absolutely no
         if (jsonMatch) {
           content = jsonMatch[0];
         }
-        
+
         const parsed = JSON.parse(content);
         return {
           fileName,
@@ -1994,51 +1994,51 @@ Return ONLY a valid JSON object matching this exact structure (and absolutely no
     documentType: "CBC (Complete Blood Count)",
     confidence: 0.99,
     results: [
-      { 
-        testName: "Hemoglobin", 
+      {
+        testName: "Hemoglobin",
         loincCode: "718-7",
-        value: 11.2, 
-        unit: "g/dL", 
+        value: 11.2,
+        unit: "g/dL",
         referenceRange: { low: 13.0, high: 17.0, rawRange: "13.0 – 17.0" },
         flag: "low",
         normalized: { value: 112, unit: "g/L" }
       },
-      { 
-        testName: "MCV (Mean Corpuscular Volume)", 
+      {
+        testName: "MCV (Mean Corpuscular Volume)",
         loincCode: "19123-9",
-        value: 74, 
-        unit: "fL", 
+        value: 74,
+        unit: "fL",
         referenceRange: { low: 80, high: 100, rawRange: "80 – 100" },
         flag: "low"
       },
-      { 
-        testName: "Serum Ferritin", 
+      {
+        testName: "Serum Ferritin",
         loincCode: "2276-4",
-        value: 9, 
-        unit: "ng/mL", 
+        value: 9,
+        unit: "ng/mL",
         referenceRange: { low: 15, high: 150, rawRange: "15 – 150" },
         flag: "low"
       },
-      { 
-        testName: "White Blood Cells (WBC)", 
+      {
+        testName: "White Blood Cells (WBC)",
         loincCode: "26464-8",
-        value: 6.5, 
-        unit: "10^3/uL", 
+        value: 6.5,
+        unit: "10^3/uL",
         referenceRange: { low: 4.0, high: 11.0, rawRange: "4.0 – 11.0" },
         flag: "normal"
       },
-      { 
-        testName: "Platelets", 
+      {
+        testName: "Platelets",
         loincCode: "26515-7",
-        value: 250, 
-        unit: "10^3/uL", 
+        value: 250,
+        unit: "10^3/uL",
         referenceRange: { low: 150, high: 450, rawRange: "150 – 450" },
         flag: "normal"
       }
     ],
     patterns: ["Microcytic / hypochromic red-cell pattern"],
     criticalFlags: [],
-    plainLanguage: "The report contains low hemoglobin and MCV readings, which suggest a microcytic red-cell pattern. This pattern is commonly observed in cases of iron deficiency. We advise reviewing these findings with your clinician.",
+    plainLanguage: "The report contains low h  emoglobin and MCV readings, which suggest a microcytic red-cell pattern. This pattern is commonly observed in cases of iron deficiency. We advise reviewing these findings with your clinician.",
     overallInterpretation: "The values suggest a mild microcytic red-cell pattern. While compatible with iron deficiency, diagnosis requires direct correlation with iron studies, symptoms, and dietary factors.",
     suggestedSpecialty: "Hematology / General Medicine",
     recommendations: [
@@ -2058,7 +2058,7 @@ export type Recommendation = {
 
 export async function recommendCare(condition: string): Promise<Recommendation> {
   await delay(500);
-  
+
   // Map dataset condition back to our local specialties
   const specialtyMap: Record<string, string> = {
     Cancer: "Oncology",
@@ -2068,11 +2068,11 @@ export async function recommendCare(condition: string): Promise<Recommendation> 
     Obesity: "General Medicine",
     Arthritis: "General Medicine"
   };
-  
+
   const specialty = specialtyMap[condition] || condition;
   const pool = doctors.filter((d) => d.specialty === specialty);
   const list = pool.length ? pool : doctors;
-  
+
   return {
     topRated: [...list].sort((a, b) => b.rating - a.rating).slice(0, 3),
     nearest: [...list].sort((a, b) => a.distanceKm - b.distanceKm).slice(0, 3),

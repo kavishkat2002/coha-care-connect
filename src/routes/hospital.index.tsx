@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 
 import { PageHeader } from "@/components/shared/PageHeader";
 import { StatCard } from "@/components/shared/StatCard";
+import { LoadingScreen } from "@/components/shared/LoadingScreen";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { type Hospital } from "@/data/mock";
@@ -44,7 +45,7 @@ function HospitalDashboard() {
   }, []);
 
   if (!h) {
-    return <div className="p-8 text-center text-muted-foreground">Loading dashboard...</div>;
+    return <LoadingScreen message="Loading dashboard..." fullscreen={false} />;
   }
   
   return (

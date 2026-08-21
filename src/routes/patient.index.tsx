@@ -13,6 +13,7 @@ import {
 import { PageHeader } from "@/components/shared/PageHeader";
 import { StatCard } from "@/components/shared/StatCard";
 import { AiDisclaimer } from "@/components/shared/AiDisclaimer";
+import { LoadingScreen } from "@/components/shared/LoadingScreen";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -220,7 +221,7 @@ function PatientOverview() {
   const nextVisitHint = upcoming[0]?.date ? `Next: ${upcoming[0].date}` : "No upcoming visits";
 
   if (!patientProfile) {
-    return <div className="p-8 text-center text-muted-foreground">Loading dashboard...</div>;
+    return <LoadingScreen message="Loading dashboard..." fullscreen={false} />;
   }
 
   return (

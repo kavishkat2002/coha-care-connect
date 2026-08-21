@@ -9,6 +9,7 @@ import { consultPsychologist, transcribeAudio, type ChatMessage } from "@/servic
 import { doctorService } from "@/services/doctor.service";
 import { type Doctor } from "@/data/mock";
 import { supabase } from "@/lib/supabase";
+import { LoadingScreen } from "@/components/shared/LoadingScreen";
 
 export const Route = createFileRoute("/patient/medmind-ecare")({
   head: () => ({
@@ -473,12 +474,7 @@ function MedMindECare() {
   };
 
   if (isAuthenticated === false) {
-    return (
-      <div className="flex flex-col items-center justify-center min-h-[60vh] gap-3 text-center">
-        <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin" />
-        <p className="text-sm font-medium text-slate-500">Redirecting to Sign in / Register...</p>
-      </div>
-    );
+    return <LoadingScreen message="Redirecting to Sign in / Register..." fullscreen={false} />;
   }
 
   if (!selectedDoctor) {
