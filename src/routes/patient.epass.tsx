@@ -20,7 +20,6 @@ import {
   Zap,
   CheckCircle2,
   QrCode,
-  Sparkles,
   CreditCard,
   Building2,
   Users,
@@ -721,7 +720,7 @@ function EPassPage() {
                   label: localStorage.getItem("meddoc_ai_credits") 
                     ? `${parseInt(localStorage.getItem("meddoc_ai_credits") || "0").toLocaleString()} AI Credits Remaining` 
                     : "Limited AI Health Assistant Access", 
-                  icon: Sparkles 
+                  icon: Activity 
                 },
                 { label: "Digital Health Records Storage", icon: FileText },
                 { label: "Exclusive Health Offers & Discounts", icon: Percent },
@@ -818,7 +817,7 @@ function EPassPage() {
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         {[
           { icon: Building2, title: "Priority Queue", desc: "Fast-track OPD check-in" },
-          { icon: Sparkles, title: "Lab Discounts", desc: "Up to 30% off diagnostics" },
+          { icon: Percent, title: "Lab Discounts", desc: "Up to 30% off diagnostics" },
           { icon: PhoneCall, title: "24/7 Telehealth", desc: "Instant GP video consults" },
           { icon: Users, title: "Family Coverage", desc: "Add parents & children" },
         ].map((b, idx) => (

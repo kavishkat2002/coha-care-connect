@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { BrainCircuit, CheckCircle2, ExternalLink, Eye, HeartPulse, MapPin, ScanLine, Search, Sparkles, Star, Stethoscope, Target, Upload, UserPlus } from "lucide-react";
+import { BrainCircuit, CheckCircle2, ExternalLink, Eye, HeartPulse, MapPin, ScanLine, Search, Star, Stethoscope, Target, Upload, UserPlus, Smile, RefreshCw } from "lucide-react";
 import { useState, useEffect } from "react";
 
 import { PageHeader } from "@/components/shared/PageHeader";
@@ -33,7 +33,7 @@ export const Route = createFileRoute("/patient/images")({
 });
 
 const regions = [
-  { label: "Oral", icon: Sparkles },
+  { label: "Oral", icon: Smile },
   { label: "Skin", icon: ScanLine },
   { label: "Breast", icon: HeartPulse },
   { label: "Eye", icon: Eye },
@@ -561,7 +561,7 @@ function ImagesPage() {
             <Button className="w-full gap-2" onClick={() => void run()} disabled={busy}>
               {busy ? (
                 <>
-                  <Sparkles className="size-4 animate-spin" />
+                  <RefreshCw className="size-4 animate-spin" />
                   Analyzing photo with Vision AI & GPT reasoning…
                 </>
               ) : (

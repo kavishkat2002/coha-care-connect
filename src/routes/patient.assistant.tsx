@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { Bot, Paperclip, Send, Sparkles, User, Mic, Calendar, ArrowRight, ShieldAlert, FileText, Camera, X } from "lucide-react";
+import { Bot, Paperclip, Send, User, Mic, Calendar, ArrowRight, ShieldAlert, FileText, Camera, X, Activity } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 
 import { PageHeader } from "@/components/shared/PageHeader";
@@ -626,7 +626,7 @@ function AssistantPage() {
           <Card className="shadow-soft">
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-base">
-                <Sparkles className="size-4 text-primary" aria-hidden="true" /> Assessment
+                <Activity className="size-4 text-primary" aria-hidden="true" /> Assessment
               </CardTitle>
               <CardDescription>
                 {assessment ? assessment.intent : "Send a message to generate an assessment"}

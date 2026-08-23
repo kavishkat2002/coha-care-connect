@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState, useRef, useEffect } from "react";
-import { Mic, MicOff, Send, ArrowLeft, Volume2, VolumeX, PhoneCall, PhoneOff, Sparkles, MessageSquare, Stethoscope, Star, Calendar, UserCheck, Lock, ShieldCheck, UserPlus, LogIn } from "lucide-react";
+import { Mic, MicOff, Send, ArrowLeft, Volume2, VolumeX, PhoneCall, PhoneOff, MessageSquare, Stethoscope, Star, Calendar, UserCheck, Lock, ShieldCheck, UserPlus, LogIn, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
@@ -699,7 +699,7 @@ function MedMindECare() {
               </div>
             ) : isBusy || isTranscribing ? (
               <div className="flex items-center gap-2 bg-amber-500/10 border border-amber-500/30 px-5 py-1.5 rounded-full text-amber-400 font-semibold text-xs md:text-sm animate-pulse">
-                <Sparkles className="size-4 animate-spin" /> Processing your voice...
+                <RefreshCw className="size-4 animate-spin" /> Processing your voice...
               </div>
             ) : (
               <div className="text-slate-400 text-xs md:text-sm">Tap the microphone to speak</div>

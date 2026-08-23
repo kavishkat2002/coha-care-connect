@@ -1,7 +1,7 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import {
   CalendarCheck, CheckCircle2, CreditCard, QrCode, Search,
-  Car, FileText, Leaf, Award, Building2, Home, Pill, Activity, Plane, Smile, Sparkles, Flower2, Info, Brain,
+  Car, FileText, Leaf, Award, Building2, Home, Pill, Activity, Plane, Smile, Flower2, Info, Brain,
   Phone, Star, MapPin
 } from "lucide-react";
 import { useMemo, useState, useEffect } from "react";

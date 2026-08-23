@@ -17,7 +17,6 @@ import {
   Phone,
   ScanLine,
   ShieldCheck,
-  Sparkles,
   Star,
   Stethoscope,
   Video,
@@ -78,7 +77,7 @@ export function Hero() {
       <div className="mx-auto grid max-w-6xl items-center gap-12 px-4 py-16 sm:px-6 lg:grid-cols-2 lg:py-24">
         <Reveal>
           <Badge variant="outline" className="rounded-full border-border bg-accent/60 px-3 py-1">
-            <Sparkles className="mr-1.5 size-3.5" aria-hidden="true" />
+            <Activity className="mr-1.5 size-3.5" aria-hidden="true" />
             AI-assisted early screening
           </Badge>
           <h1 className="mt-6 text-4xl font-semibold leading-[1.1] sm:text-5xl lg:text-6xl">
@@ -294,7 +293,7 @@ export function AiFeatures() {
 
 const screening = [
   { icon: MessageSquare, title: "Oral", body: "Persistent ulcers, white or red patches, mucosal changes." },
-  { icon: Sparkles, title: "Skin", body: "Moles, pigmented lesions, non-healing sores." },
+  { icon: ScanLine, title: "Skin", body: "Moles, pigmented lesions, non-healing sores." },
   { icon: HeartPulse, title: "Breast", body: "Lumps, pain, skin or nipple changes." },
   { icon: Eye, title: "Eye", body: "Lesions, persistent redness, vision changes." },
 ];

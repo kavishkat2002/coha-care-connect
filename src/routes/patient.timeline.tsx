@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { Activity, CalendarCheck, FileText, Image as ImageIcon, Pill, Sparkles } from "lucide-react";
+import { Activity, CalendarCheck, FileText, Image as ImageIcon, Pill } from "lucide-react";
 import { useState, useEffect } from "react";
 
 import { PageHeader } from "@/components/shared/PageHeader";
@@ -28,7 +28,7 @@ const icons = {
   appointment: CalendarCheck,
   report: FileText,
   image: ImageIcon,
-  insight: Sparkles,
+  insight: Activity,
   prescription: Pill,
 } as const;
 

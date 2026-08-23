@@ -10,7 +10,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { 
   Building2, Search, MapPin, Phone, ShieldCheck, Check, Clock, Upload, 
-  ChevronRight, ChevronLeft, Calendar, User, FileText, ClipboardCheck, Sparkles, HeartPulse, ScanLine 
+  ChevronRight, ChevronLeft, Calendar, User, FileText, ClipboardCheck, HeartPulse, ScanLine 
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -723,7 +723,7 @@ function ElabPage() {
           <DialogFooter className="pt-2">
             <Button variant="ghost" onClick={() => setIsPrescDialogOpen(false)}>Cancel</Button>
             <Button className="gap-1.5" onClick={handlePrescriptionSubmit}>
-              <Sparkles className="size-4" />
+              <Upload className="size-4" />
               Upload & Request Quote
             </Button>
           </DialogFooter>
