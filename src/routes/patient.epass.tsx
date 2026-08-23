@@ -1,7 +1,8 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState, useEffect } from "react";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
+import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
@@ -189,6 +190,17 @@ function EPassPage() {
   const [selectedPlanModal, setSelectedPlanModal] = useState<EPassPlan | null>(null);
   const [paymentMethod, setPaymentMethod] = useState<"card" | "ezcash" | "bank">("card");
   const [isProcessing, setIsProcessing] = useState(false);
+  const [aiCredits, setAiCredits] = useState<number>(0);
+
+  useEffect(() => {
+    const saved = localStorage.getItem("meddoc_ai_credits");
+    if (saved) {
+      setAiCredits(parseInt(saved, 10));
+    } else if (activePlan) {
+      const planCredits = activePlan === "platinum" ? 100000 : activePlan === "gold" ? 10000 : 1000;
+      setAiCredits(planCredits);
+    }
+  }, [activePlan]);
 
   // Profile Linkage State
   const [profileMode, setProfileMode] = useState<"existing" | "login" | "signup">("existing");
@@ -286,6 +298,10 @@ function EPassPage() {
     await patientService.updatePatientProfile(updatedProfile);
     setProfile(updatedProfile);
 
+    let planCredits = 1000;
+    if (selectedPlanModal.id === "platinum") planCredits = 100000;
+    else if (selectedPlanModal.id === "gold") planCredits = 10000;
+
     // Instantly sync active membership & profile details to Supabase
     await patientService.syncEPassMembershipToSupabase({
       patient_id: updatedProfile.id || "p1",
@@ -295,9 +311,11 @@ function EPassPage() {
       plan_id: selectedPlanModal.id,
       plan_name: selectedPlanModal.name,
       status: "Active",
+      ai_credits: planCredits,
     });
 
     localStorage.setItem("meddoc_active_epass", selectedPlanModal.id);
+    localStorage.setItem("meddoc_ai_credits", planCredits.toString());
     localStorage.setItem("meddoc_user_signed_out", "false");
     localStorage.setItem("meddoc_epass_activation_date", new Date().toISOString());
     setIsSignedOut(false);
@@ -404,8 +422,8 @@ function EPassPage() {
             <div className="p-3.5 sm:p-5 rounded-2xl bg-white/[0.04] backdrop-blur-md border border-white/10 shadow-inner grid grid-cols-2 md:grid-cols-5 gap-2.5 sm:gap-4 relative z-10 my-4 sm:my-6">
               {[
                 {
-                  title: "100K AI Credits",
-                  desc: "100K AI Credits for AI assistance",
+                  title: `${localStorage.getItem("meddoc_ai_credits") ? parseInt(localStorage.getItem("meddoc_ai_credits") || "0").toLocaleString() : "100K"} AI Credits`,
+                  desc: "AI Credits for AI assistant evaluations",
                   icon: Bot,
                 },
                 {
@@ -532,8 +550,8 @@ function EPassPage() {
             <div className="p-3.5 sm:p-5 rounded-2xl bg-white/70 dark:bg-[#241E18]/80 border border-[#E8DFC8]/80 dark:border-[#3D3428] shadow-xs grid grid-cols-2 md:grid-cols-5 gap-2.5 sm:gap-4 relative z-10 my-4 sm:my-6">
               {[
                 {
-                  title: "10K AI Credits",
-                  desc: "10K AI Credits for AI assistance",
+                  title: `${localStorage.getItem("meddoc_ai_credits") ? parseInt(localStorage.getItem("meddoc_ai_credits") || "0").toLocaleString() : "10K"} AI Credits`,
+                  desc: "AI Credits for AI assistant evaluations",
                   icon: Bot,
                 },
                 {
@@ -679,7 +697,12 @@ function EPassPage() {
             <div className="grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-4 gap-2.5 sm:gap-3 my-4 sm:my-6 relative z-10">
               {[
                 { label: "Priority Appointment Booking", icon: CalendarCheck },
-                { label: "Limited AI Health Assistant Access", icon: Sparkles },
+                { 
+                  label: localStorage.getItem("meddoc_ai_credits") 
+                    ? `${parseInt(localStorage.getItem("meddoc_ai_credits") || "0").toLocaleString()} AI Credits Remaining` 
+                    : "Limited AI Health Assistant Access", 
+                  icon: Sparkles 
+                },
                 { label: "Digital Health Records Storage", icon: FileText },
                 { label: "Exclusive Health Offers & Discounts", icon: Percent },
               ].map((item, idx) => (
@@ -721,6 +744,53 @@ function EPassPage() {
             </div>
           </div>
         )}
+
+        {/* AI Credits Section */}
+        <div className="mt-6 max-w-xl mx-auto w-full">
+          <Card className="shadow-soft border-primary/20 bg-gradient-to-br from-primary/5 via-background to-background">
+            <CardHeader className="pb-3">
+              <CardTitle className="flex items-center justify-between text-sm font-bold">
+                <span className="flex items-center gap-1.5 text-primary">
+                  <Bot className="size-4" />
+                  MedMind AI Assistant Credits
+                </span>
+                <Badge>
+                  {activePlan ? `${activePlan.toUpperCase()} Tier` : "Free Tier"}
+                </Badge>
+              </CardTitle>
+              <CardDescription>
+                Remaining tokens for diagnostic screening & clinical evaluations
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="flex items-baseline gap-2">
+                <span className="text-3xl font-extrabold text-foreground tracking-tight">
+                  {aiCredits.toLocaleString()}
+                </span>
+                <span className="text-xs text-muted-foreground font-semibold uppercase tracking-wider">
+                  Credits Remaining
+                </span>
+              </div>
+              
+              {/* Progress bar */}
+              <div className="mt-3">
+                <Progress 
+                  value={
+                    activePlan === "platinum" ? (aiCredits / 100000) * 100 
+                    : activePlan === "gold" ? (aiCredits / 10000) * 100 
+                    : activePlan === "silver" ? (aiCredits / 1000) * 100 
+                    : 100
+                  } 
+                  className="h-2" 
+                />
+              </div>
+              
+              <p className="text-[11px] text-muted-foreground mt-3">
+                Your ePass health membership is active. Credits reset in 30 days.
+              </p>
+            </CardContent>
+          </Card>
+        </div>
       </div>
       )}
 

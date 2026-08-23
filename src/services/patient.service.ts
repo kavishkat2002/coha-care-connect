@@ -306,6 +306,7 @@ export const patientService = {
     plan_id: string;
     plan_name: string;
     status: string;
+    ai_credits?: number;
   }) {
     // 1. Save to Supabase patient_memberships table
     try {
@@ -319,6 +320,7 @@ export const patientService = {
           plan_id: membership.plan_id,
           plan_name: membership.plan_name,
           status: membership.status,
+          ai_credits: membership.ai_credits,
           updated_at: new Date().toISOString(),
         })
         .select();
@@ -335,6 +337,23 @@ export const patientService = {
         body: JSON.stringify(membership),
       });
     } catch (e) {}
+  },
+
+  /**
+   * Instantly sync remaining AI credits count to Supabase
+   */
+  async updateAICredits(patientId: string, credits: number) {
+    try {
+      await supabase
+        .from("patient_memberships")
+        .update({
+          ai_credits: credits,
+          updated_at: new Date().toISOString(),
+        })
+        .eq("id", patientId);
+    } catch (e) {
+      console.warn("Supabase credit sync notice:", e);
+    }
   },
 
   /**

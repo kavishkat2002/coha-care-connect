@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { BrainCircuit, CheckCircle2, ExternalLink, Eye, HeartPulse, MapPin, ScanLine, Search, Sparkles, Star, Stethoscope, Target, Upload, UserPlus } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 import { PageHeader } from "@/components/shared/PageHeader";
 import { AiDisclaimer } from "@/components/shared/AiDisclaimer";
@@ -11,8 +11,10 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Progress } from "@/components/ui/progress";
 import { analyseMedicalImage, type ImageAnalysis } from "@/services/ai.service";
 import { doctorService } from "@/services/doctor.service";
+import { patientService } from "@/services/patient.service";
 import { type Doctor } from "@/data/mock";
 import { cn } from "@/lib/utils";
+import { toast } from "sonner";
 
 export const Route = createFileRoute("/patient/images")({
   head: () => ({
@@ -68,6 +70,21 @@ function ImagesPage() {
   const [imageBase64, setImageBase64] = useState<string | null>(null);
   const [pixelMetrics, setPixelMetrics] = useState<RealPixelMetrics | null>(null);
   const [recommendedDoctors, setRecommendedDoctors] = useState<Doctor[]>([]);
+
+  const [aiCredits, setAiCredits] = useState<number>(() => {
+    if (typeof window !== "undefined") {
+      const saved = localStorage.getItem("meddoc_ai_credits");
+      if (saved) return parseInt(saved, 10);
+    }
+    return 50;
+  });
+  const [patientId, setPatientId] = useState<string>("p1");
+
+  useEffect(() => {
+    patientService.getPatientProfile().then((p) => {
+      if (p?.id) setPatientId(p.id);
+    });
+  }, []);
 
   // MedDoc Skin-Cancer Multimodal Metadata Toggles
   const [fitzpatrickGroup, setFitzpatrickGroup] = useState<"I-II" | "III-IV" | "V-VI">("III-IV");
@@ -242,10 +259,22 @@ function ImagesPage() {
   };
 
   const run = async () => {
+    if (aiCredits < 100) {
+      toast.error("Insufficient credits. Medical image analysis costs 100 credits. Please purchase or upgrade your MedDoc ePass plan to continue.", {
+        description: `Your balance: ${aiCredits} credits. Cost: 100 credits.`
+      });
+      return;
+    }
+
     setBusy(true);
     setResult(null);
     setRecommendedDoctors([]);
     setStageProgress(1);
+
+    const nextCredits = Math.max(0, aiCredits - 100);
+    setAiCredits(nextCredits);
+    localStorage.setItem("meddoc_ai_credits", nextCredits.toString());
+    void patientService.updateAICredits(patientId, nextCredits);
 
     const timer1 = setTimeout(() => setStageProgress(2), 600);
     const timer2 = setTimeout(() => setStageProgress(3), 1200);
@@ -870,10 +899,6 @@ function ImagesPage() {
                         <p className="font-semibold">{doctor.name}</p>
                         <p className="text-xs text-muted-foreground font-medium">{doctor.specialty} · {doctor.branch || "Lifora Medical Center"}</p>
                         <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground mt-1">
-                          <span className="flex items-center gap-0.5 text-amber-500 font-semibold">
-                            <Star className="size-3 fill-amber-500 text-amber-500" />
-                            {(doctor.rating || 4.9).toFixed(1)}
-                          </span>
                           <span className="flex items-center gap-1">
                             <MapPin className="size-3" />
                             {doctor.distanceKm} km away
@@ -892,7 +917,7 @@ function ImagesPage() {
                         </Link>
                         <Link to="/patient/telemedicine" className="flex-1 sm:flex-none">
                           <Button size="sm" variant="outline" className="gap-1.5 w-full">
-                            <Stethoscope className="size-3 text-primary animate-pulse" />
+                            <Stethoscope className="size-3 text-primary" />
                             Telemedicine
                           </Button>
                         </Link>

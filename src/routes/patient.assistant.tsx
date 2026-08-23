@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { Bot, Paperclip, Send, Sparkles, User, Mic, Calendar, ArrowRight, ShieldAlert, FileText, Camera } from "lucide-react";
+import { Bot, Paperclip, Send, Sparkles, User, Mic, Calendar, ArrowRight, ShieldAlert, FileText, Camera, X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 
 import { PageHeader } from "@/components/shared/PageHeader";
@@ -18,7 +18,9 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/
 import { BrainCircuit, RotateCcw } from "lucide-react";
 import { analyseSymptoms, recommendCare, transcribeAudio, type Assessment, type Recommendation, type ChatMessage, type AgenticAction } from "@/services/ai.service";
 import { doctors } from "@/data/mock";
+import { patientService } from "@/services/patient.service";
 import { cn } from "@/lib/utils";
+import { toast } from "sonner";
 
 export const Route = createFileRoute("/patient/assistant")({
   head: () => ({
@@ -73,6 +75,27 @@ function AssistantPage() {
     const saved = localStorage.getItem("meddoc_dynamicSuggestions");
     return saved ? JSON.parse(saved) : [];
   });
+  const [showSuggestions, setShowSuggestions] = useState(true);
+  const [activePlanId, setActivePlanId] = useState<string | null>(() => {
+    return localStorage.getItem("meddoc_active_epass");
+  });
+  const [aiCredits, setAiCredits] = useState<number>(() => {
+    const saved = localStorage.getItem("meddoc_ai_credits");
+    if (saved) return parseInt(saved, 10);
+    const activePlan = localStorage.getItem("meddoc_active_epass");
+    if (activePlan === "platinum") return 100000;
+    if (activePlan === "gold") return 10000;
+    if (activePlan === "silver") return 1000;
+    return 50;
+  });
+  const [patientId, setPatientId] = useState<string>("p1");
+
+  useEffect(() => {
+    patientService.getPatientProfile().then(p => {
+      if (p?.id) setPatientId(p.id);
+    });
+  }, []);
+
   const [isListening, setIsListening] = useState(false);
   const [isTranscribing, setIsTranscribing] = useState(false);
   const endRef = useRef<HTMLDivElement>(null);
@@ -209,6 +232,20 @@ function AssistantPage() {
     if (!text.trim() && !imageBase64) return;
     if (busy) return;
     
+    if (aiCredits < 50) {
+      toast.error("Insufficient credits. Each assistant evaluation query costs 50 credits. Please purchase or upgrade your MedDoc ePass plan to continue.", {
+        description: `Your balance: ${aiCredits} credits. Cost: 50 credits.`
+      });
+      return;
+    }
+    
+    setAiCredits((prev) => {
+      const next = Math.max(0, prev - 50);
+      localStorage.setItem("meddoc_ai_credits", next.toString());
+      void patientService.updateAICredits(patientId, next);
+      return next;
+    });
+    
     const userMsg: Message = {
       id: `u${Date.now()}`,
       role: "user",
@@ -239,6 +276,7 @@ function AssistantPage() {
     } else {
       setDynamicSuggestions([]);
     }
+    setShowSuggestions(true);
 
     // Fetch specialists inline if the agentic action is specialist search/booking
     let inlineCare = null;
@@ -460,23 +498,35 @@ function AssistantPage() {
           </CardContent>
 
           <div className="border-t border-border p-4">
-            <div className="mb-3 flex flex-wrap gap-2">
-              {activeSuggestions.map((s) => (
+            {showSuggestions && activeSuggestions.length > 0 && (
+              <div className="mb-3 flex items-start justify-between gap-3 bg-muted/30 border border-border/40 p-2.5 rounded-2xl animate-in fade-in slide-in-from-bottom-2 duration-200">
+                <div className="flex flex-wrap gap-2 flex-1">
+                  {activeSuggestions.map((s) => (
+                    <button
+                      key={s}
+                      type="button"
+                      onClick={() => send(s)}
+                      className={cn(
+                        "rounded-full border px-3 py-1.5 text-xs transition-colors text-left",
+                        dynamicSuggestions.length > 0
+                          ? "border-primary/30 bg-primary/5 text-primary hover:bg-primary/10 font-medium"
+                          : "border-border text-muted-foreground hover:bg-muted hover:text-foreground"
+                      )}
+                    >
+                      {dynamicSuggestions.length > 0 ? "→ " : ""}{s}
+                    </button>
+                  ))}
+                </div>
                 <button
-                  key={s}
                   type="button"
-                  onClick={() => send(s)}
-                  className={cn(
-                    "rounded-full border px-3 py-1.5 text-xs transition-colors",
-                    dynamicSuggestions.length > 0
-                      ? "border-primary/30 bg-primary/5 text-primary hover:bg-primary/10 font-medium"
-                      : "border-border text-muted-foreground hover:bg-muted hover:text-foreground"
-                  )}
+                  onClick={() => setShowSuggestions(false)}
+                  className="p-1 rounded-full text-muted-foreground hover:text-foreground hover:bg-muted shrink-0 transition-colors"
+                  title="Hide suggestions"
                 >
-                  {dynamicSuggestions.length > 0 ? "→ " : ""}{s}
+                  <X className="size-3.5" />
                 </button>
-              ))}
-            </div>
+              </div>
+            )}
             
             {/* Attachment Preview Area */}
             {(attachment || imageBase64) && (
