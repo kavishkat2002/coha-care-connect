@@ -859,33 +859,7 @@ function ImagesPage() {
                             </div>
                           )}
 
-                          {/* Steps 12-13: Decoupled TNM Staging */}
-                          {result.eyeCancerClassification.tnmStagingReference && (
-                            <div className="p-3 bg-muted/65 rounded-lg border border-border/80 text-xs space-y-2">
-                              <p className="font-semibold uppercase tracking-wider text-muted-foreground">AJCC Decoupled TNM Staging</p>
-                              <div className="grid grid-cols-4 gap-2 text-center pt-1">
-                                <div className="bg-background rounded p-1.5 border border-border/50">
-                                  <span className="text-[9px] text-muted-foreground block">T (Tumor)</span>
-                                  <span className="font-bold text-[10px] text-destructive">Pathology Req.</span>
-                                </div>
-                                <div className="bg-background rounded p-1.5 border border-border/50">
-                                  <span className="text-[9px] text-muted-foreground block">N (Nodes)</span>
-                                  <span className="font-bold text-[10px] text-destructive">Exam Req.</span>
-                                </div>
-                                <div className="bg-background rounded p-1.5 border border-border/50">
-                                  <span className="text-[9px] text-muted-foreground block">M (Metastasis)</span>
-                                  <span className="font-bold text-[10px] text-destructive">Imaging Req.</span>
-                                </div>
-                                <div className="bg-background rounded p-1.5 border border-border/50">
-                                  <span className="text-[9px] text-muted-foreground block">Stage Group</span>
-                                  <span className="font-bold text-[10px] text-muted-foreground">N/A</span>
-                                </div>
-                              </div>
-                              <p className="text-[10px] text-muted-foreground leading-relaxed italic pt-1 border-t border-border/40 mt-1">
-                                {result.eyeCancerClassification.tnmStagingReference.reason}
-                              </p>
-                            </div>
-                          )}
+                          {/* Steps 12-13: Decoupled TNM Staging (Removed) */}
                         </>
                       )}
                     </div>
