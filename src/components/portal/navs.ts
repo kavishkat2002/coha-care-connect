@@ -20,6 +20,7 @@ export const patientNav: NavItem[] = [
   { label: "Appointments", to: "/patient/appointments", icon: ClipboardList },
   { label: "Medical Images", to: "/patient/images", icon: Image },
   { label: "Reports", to: "/patient/reports", icon: FileText },
+  { label: "eLAB Services", to: "/patient/elab", icon: Building2 },
   { label: "Health Timeline", to: "/patient/timeline", icon: Activity },
   { label: "Profile", to: "/patient/profile", icon: UserRound },
 ];
