@@ -310,6 +310,20 @@ function ImagesPage() {
         const doctors = await doctorService.getDoctorsBySpecialty(res.suggestedSpecialty);
         setRecommendedDoctors(doctors);
       }
+
+      const formattedDate = new Date().toLocaleDateString("en-GB", {
+        day: "2-digit",
+        month: "short",
+        year: "numeric"
+      });
+
+      await patientService.addTimelineItem({
+        id: `tl${Date.now()}`,
+        title: `${region} Image Scan Completed`,
+        date: formattedDate,
+        detail: res.explanation || `AI analysis completed for ${region} image. Suggested specialty: ${res.suggestedSpecialty}.`,
+        kind: "image"
+      });
     } catch (e) {
       console.error(e);
     } finally {

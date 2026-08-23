@@ -169,7 +169,45 @@ export const patientService = {
       if (!error && data && data.length > 0) return data;
     } catch (e) {}
     
+    try {
+      const saved = localStorage.getItem("mock_reports");
+      if (saved) return JSON.parse(saved);
+    } catch (e) {}
+
     return mockReports;
+  },
+
+  /**
+   * Save a newly analyzed report to Supabase and fallback storage
+   */
+  async addReport(report: ReportItem): Promise<ReportItem> {
+    try {
+      const { data, error } = await supabase
+        .from("reports")
+        .insert({
+          id: report.id,
+          title: report.title,
+          type: report.type,
+          date: report.date,
+          status: report.status,
+          summary: report.summary,
+        })
+        .select()
+        .single();
+      
+      if (!error && data) return data;
+    } catch (e) {
+      console.warn("Supabase addReport notice:", e);
+    }
+    
+    try {
+      const saved = localStorage.getItem("mock_reports");
+      const localReports = saved ? JSON.parse(saved) : [...mockReports];
+      localReports.unshift(report);
+      localStorage.setItem("mock_reports", JSON.stringify(localReports));
+    } catch (e) {}
+
+    return report;
   },
 
   /**
@@ -185,7 +223,44 @@ export const patientService = {
       if (!error && data && data.length > 0) return data;
     } catch (e) {}
     
+    try {
+      const saved = localStorage.getItem("mock_timeline");
+      if (saved) return JSON.parse(saved);
+    } catch (e) {}
+
     return mockTimeline;
+  },
+
+  /**
+   * Add a new item to the patient's timeline in Supabase and fallback storage
+   */
+  async addTimelineItem(item: TimelineItem): Promise<TimelineItem> {
+    try {
+      const { data, error } = await supabase
+        .from("timeline")
+        .insert({
+          id: item.id,
+          title: item.title,
+          date: item.date,
+          detail: item.detail,
+          kind: item.kind,
+        })
+        .select()
+        .single();
+      
+      if (!error && data) return data;
+    } catch (e) {
+      console.warn("Supabase addTimelineItem notice:", e);
+    }
+
+    try {
+      const saved = localStorage.getItem("mock_timeline");
+      const localTimeline = saved ? JSON.parse(saved) : [...mockTimeline];
+      localTimeline.unshift(item);
+      localStorage.setItem("mock_timeline", JSON.stringify(localTimeline));
+    } catch (e) {}
+
+    return item;
   },
 
   /**

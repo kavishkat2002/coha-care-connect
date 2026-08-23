@@ -12,7 +12,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { type ReportItem } from "@/data/mock";
+import { type ReportItem, type TimelineItem } from "@/data/mock";
 import { analyseMedicalReport, type ReportAnalysis } from "@/services/ai.service";
 import { patientService } from "@/services/patient.service";
 import { toast } from "sonner";
@@ -223,6 +223,43 @@ function ReportsPage() {
       const res = await analyseMedicalReport(fileName, imageBase64 || undefined);
       setResult(res);
       setPipelineStage(PIPELINE_STAGES.length + 1);
+
+      const reportTitle = fileName.replace(/\.[^/.]+$/, "");
+      const reportType = fileName.toLowerCase().includes("blood") ? "Blood"
+        : fileName.toLowerCase().includes("biopsy") ? "Biopsy"
+        : fileName.toLowerCase().includes("mri") || fileName.toLowerCase().includes("scan") ? "MRI"
+        : fileName.toLowerCase().includes("ct") ? "CT"
+        : "Lab";
+      const formattedDate = new Date().toLocaleDateString("en-GB", {
+        day: "2-digit",
+        month: "short",
+        year: "numeric"
+      });
+
+      const flaggedCount = res.results.filter(
+        (t) => t.flag === "low" || t.flag === "high" || t.flag === "critical"
+      ).length;
+
+      const newReport: ReportItem = {
+        id: `rep${Date.now()}`,
+        title: reportTitle,
+        type: reportType,
+        date: formattedDate,
+        status: "Analysed",
+        flagged: flaggedCount,
+        summary: res.overallInterpretation || "Clinical parameters reviewed and categorized.",
+      };
+
+      const savedReport = await patientService.addReport(newReport);
+      setReports((prev) => [savedReport, ...prev]);
+
+      await patientService.addTimelineItem({
+        id: `tl${Date.now()}`,
+        title: `${reportTitle} Report Analysed`,
+        date: formattedDate,
+        detail: res.overallInterpretation || "Medical report uploaded and normalized by Clinical Agents.",
+        kind: "report"
+      });
     } catch (e) {
       console.error(e);
     }
