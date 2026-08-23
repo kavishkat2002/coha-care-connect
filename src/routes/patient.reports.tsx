@@ -15,6 +15,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { type ReportItem } from "@/data/mock";
 import { analyseMedicalReport, type ReportAnalysis } from "@/services/ai.service";
 import { patientService } from "@/services/patient.service";
+import { toast } from "sonner";
 
 export const Route = createFileRoute("/patient/reports")({
   head: () => ({
@@ -87,10 +88,28 @@ function ReportsPage() {
   const [fileName, setFileName] = useState<string>("Uploaded Report");
   const [selectedTrendMetric, setSelectedTrendMetric] = useState<string>("Hemoglobin");
 
+  const [aiCredits, setAiCredits] = useState<number>(() => {
+    if (typeof window !== "undefined") {
+      const saved = localStorage.getItem("meddoc_ai_credits");
+      if (saved) return parseInt(saved, 10);
+    }
+    return 50;
+  });
+  const [patientId, setPatientId] = useState<string>("p1");
+
   useEffect(() => {
     async function load() {
       const data = await patientService.getReports();
       setReports(data);
+      const p = await patientService.getPatientProfile();
+      if (p?.id) {
+        setPatientId(p.id);
+        const m = await patientService.getEPassMembership(p.id);
+        if (m && typeof m.ai_credits === "number") {
+          setAiCredits(m.ai_credits);
+          localStorage.setItem("meddoc_ai_credits", m.ai_credits.toString());
+        }
+      }
     }
     load();
   }, []);
@@ -178,9 +197,21 @@ function ReportsPage() {
 
   const run = async () => {
     if (!imageBase64 && !result) return;
+    if (aiCredits < 100) {
+      toast.error("Insufficient credits. Medical report analysis costs 100 credits. Please purchase or upgrade your MedDoc ePass plan to continue.", {
+        description: `Your balance: ${aiCredits} credits. Cost: 100 credits.`
+      });
+      return;
+    }
+
     setBusy(true);
     setResult(null);
     setPipelineStage(1);
+
+    const nextCredits = Math.max(0, aiCredits - 100);
+    setAiCredits(nextCredits);
+    localStorage.setItem("meddoc_ai_credits", nextCredits.toString());
+    void patientService.updateAICredits(patientId, nextCredits);
 
     // Simulate multi-stage pipeline stepper
     for (let i = 1; i <= PIPELINE_STAGES.length; i++) {

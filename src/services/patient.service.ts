@@ -357,6 +357,23 @@ export const patientService = {
   },
 
   /**
+   * Fetch active MedDoc ePass membership & credits from Supabase
+   */
+  async getEPassMembership(patientId: string) {
+    try {
+      const { data, error } = await supabase
+        .from("patient_memberships")
+        .select("*")
+        .eq("id", patientId)
+        .maybeSingle();
+      if (!error && data) return data;
+    } catch (e) {
+      console.warn("Supabase getMembership notice:", e);
+    }
+    return null;
+  },
+
+  /**
    * Fetch doctor reviews
    */
   async getDoctorReviews(doctorId: string) {

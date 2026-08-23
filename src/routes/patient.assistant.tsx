@@ -92,7 +92,15 @@ function AssistantPage() {
 
   useEffect(() => {
     patientService.getPatientProfile().then(p => {
-      if (p?.id) setPatientId(p.id);
+      if (p?.id) {
+        setPatientId(p.id);
+        patientService.getEPassMembership(p.id).then(m => {
+          if (m && typeof m.ai_credits === "number") {
+            setAiCredits(m.ai_credits);
+            localStorage.setItem("meddoc_ai_credits", m.ai_credits.toString());
+          }
+        });
+      }
     });
   }, []);
 

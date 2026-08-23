@@ -219,9 +219,29 @@ function EPassPage() {
       }
       const p = await patientService.getPatientProfile();
       setProfile(p);
-      const savedPass = localStorage.getItem("meddoc_active_epass");
-      if (savedPass) {
-        setActivePlan(savedPass);
+      // Sync ePass membership from Supabase
+      if (p?.id) {
+        const membership = await patientService.getEPassMembership(p.id);
+        if (membership) {
+          if (membership.plan_id) {
+            setActivePlan(membership.plan_id);
+            localStorage.setItem("meddoc_active_epass", membership.plan_id);
+          }
+          if (typeof membership.ai_credits === "number") {
+            setAiCredits(membership.ai_credits);
+            localStorage.setItem("meddoc_ai_credits", membership.ai_credits.toString());
+          }
+        } else {
+          const savedPass = localStorage.getItem("meddoc_active_epass");
+          if (savedPass) {
+            setActivePlan(savedPass);
+          }
+        }
+      } else {
+        const savedPass = localStorage.getItem("meddoc_active_epass");
+        if (savedPass) {
+          setActivePlan(savedPass);
+        }
       }
 
       // Check if user came back from authentication after selecting a membership plan
