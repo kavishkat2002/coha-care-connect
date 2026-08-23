@@ -887,7 +887,24 @@ ${metadata ? `PATIENT CLINICAL CONTEXT & HISTORY (Multimodal Integration):
 ${region.toLowerCase() === "skin" ? `ENHANCED DEEP LEARNING MODEL ARCHITECTURE (HAM10000 Dataset - 10,015 Dermoscopic Images):
 The underlying MobileNet architecture has been specifically optimized for rare skin diseases with rigorous class balancing weights and 40 unfrozen diagnostic layers.
 Performance metrics: 96.8% accuracy, 98.1% melanoma sensitivity, ROC-AUC 0.985. Clinical decision threshold = 0.23 (23%).
-You must use extreme clinical precision to diagnose between the 7 exact HAM10000 classes and other dermatological conditions: Melanocytic nevi (nv), Melanoma (mel), Benign keratosis-like lesions (bkl), Basal cell carcinoma (bcc), Actinic keratoses (akiec), Vascular lesions (vasc), Dermatofibroma (df), Squamous cell carcinoma (scc), Seborrheic Keratosis, or Inflammatory/Infectious conditions.`
+You must use extreme clinical precision to diagnose between the 7 exact HAM10000 classes and other dermatological conditions: Melanocytic nevi (nv), Melanoma (mel), Benign keratosis-like lesions (bkl), Basal cell carcinoma (bcc), Actinic keratoses (akiec), Vascular lesions (vasc), Dermatofibroma (df), Squamous cell carcinoma (scc), Seborrheic Keratosis, or Inflammatory/Infectious conditions.
+
+CLINICAL RISK ASSESSMENT RULES (Glasgow 7-Point Checklist):
+To determine the calibrated risk level and malignancy score, perform an explicit Glasgow 7-Point Checklist assessment:
+- Major features (2 points each):
+  1. Change in size/shape of lesion (metadata.hasChanged or metadata.sizeChanged is True, or visual expansion is noted)
+  2. Irregular pigmentation/color variegation (color variance > 30% or visible dark multi-tone shading)
+  3. Irregular border/margin (poorly defined border contrast or jagged edges)
+- Minor features (1 point each):
+  4. Largest diameter >= 7mm (estimated from visual appearance or pixel diameter)
+  5. Inflammation/erythema (redness ratio > 15% or visible pink/red halo)
+  6. Itching or altered sensation (metadata.itching or metadata.pain is True)
+  7. Oozing, crusting, or bleeding (metadata.bleeding is True or visual central ulceration noted)
+
+SCORING CRITERIA:
+- Score >= 3 points indicates a suspicious lesion (Malignancy score >= 23%).
+- Score >= 5 points or Score >= 3 with a personal/family history of skin cancer indicates a highly suspicious lesion (Elevated risk, Malignancy score >= 65%).
+- Report your Glasgow Checklist score, individual parameters detected, and the calibrated probability score inside your explanation.`
                       : region.toLowerCase() === "eye" ? `SEER EYE CANCER DATASET & FUNDUS CONVNET PIPELINE:
 The underlying architecture is optimized for ophthalmic oncology (SEER dataset) and Deep ConvNets (Adam optimized) for Retinal Fundus images (STARE, DRIVE, Messidor).
 
@@ -1435,31 +1452,65 @@ function analyzeUploadedImageFeatures(
       };
     }
 
-    // ISIC Pre-Trained Machine Learning Model Feature Weights:
-    // Asymmetry (0.885), Border (0.842), Color (0.815), Diameter (0.760), Evolution/Pigment (0.780)
-    let rawMalignancyScore =
-      feat.asymmetryScore * 0.885 +
-      feat.borderIrregularity * 0.842 +
-      feat.colorVariegation * 0.815 +
-      (feat.estimatedDiameterMm > 6.0 ? 0.760 : 0.220) +
-      feat.darkPixelRatio * 0.780 +
-      feat.rednessRatio * 0.730;
+    // ══════════════════════════════════════════════════════════════
+    // GLASGOW 7-POINT CHECKLIST CLINICAL CALCULATION
+    // ══════════════════════════════════════════════════════════════
+    let glasgowScore = 0;
+    const checklistIndicators: string[] = [];
 
-    // Calculate malignancy probability (0-100%)
-    let prob = Math.min(96, Math.max(4, Math.round((rawMalignancyScore / 3.4) * 100)));
-    
-    // Multimodal Clinical Integration (Symptoms + History)
-    if (metadata) {
-      if (metadata.hasChanged) prob += 15;
-      if (metadata.bleeding) prob += 20;
-      if (metadata.itching) prob += 5;
-      if (metadata.pain) prob += 5;
-      if (metadata.sizeChanged) prob += 10;
-      if (metadata.prevCancer) prob += 15;
-      if (metadata.familyHistory) prob += 10;
+    // Major features (2 points each)
+    if (metadata?.hasChanged || metadata?.sizeChanged) {
+      glasgowScore += 2;
+      checklistIndicators.push("Change in Size/Shape (+2)");
+    } else if (feat.asymmetryScore > 0.40) {
+      glasgowScore += 2;
+      checklistIndicators.push("Asymmetrical growth pattern (+2)");
     }
     
-    prob = Math.min(98, Math.max(2, prob));
+    if (feat.colorVariegation > 0.35 || feat.hasBlueWhiteVeil) {
+      glasgowScore += 2;
+      checklistIndicators.push("Irregular coloration (+2)");
+    }
+    
+    if (feat.borderIrregularity > 0.38) {
+      glasgowScore += 2;
+      checklistIndicators.push("Irregular/notched border (+2)");
+    }
+
+    // Minor features (1 point each)
+    if (feat.estimatedDiameterMm >= 7.0) {
+      glasgowScore += 1;
+      checklistIndicators.push("Diameter >= 7mm (+1)");
+    }
+    if (feat.rednessRatio > 0.18) {
+      glasgowScore += 1;
+      checklistIndicators.push("Local inflammation/erythema (+1)");
+    }
+    if (metadata?.itching || metadata?.pain) {
+      glasgowScore += 1;
+      checklistIndicators.push("Sensory change (itch/pain) (+1)");
+    }
+    if (metadata?.bleeding || feat.hasUlceration) {
+      glasgowScore += 1;
+      checklistIndicators.push("Lesion oozing/bleeding (+1)");
+    }
+
+    // Calibrate malignancy probability based on Glasgow Score & Patient History
+    let prob = 8; // baseline
+    if (glasgowScore === 1) prob = 12;
+    else if (glasgowScore === 2) prob = 18;
+    else if (glasgowScore === 3) prob = 38; // Suspicious threshold (23% cut-off)
+    else if (glasgowScore === 4) prob = 55;
+    else if (glasgowScore === 5) prob = 72; // Highly Suspicious (65% cut-off)
+    else if (glasgowScore >= 6) prob = 88;
+
+    // Apply personal and family history modifiers
+    if (metadata) {
+      if (metadata.prevCancer) prob += 12;
+      if (metadata.familyHistory) prob += 8;
+    }
+    
+    prob = Math.min(98, Math.max(4, prob));
     const isMalignant = prob >= 23; // Sensitivity-optimized 23% clinical threshold
     const riskLevel: RiskLevel = prob >= 65 ? "elevated" : prob >= 23 ? "moderate" : "low";
 
