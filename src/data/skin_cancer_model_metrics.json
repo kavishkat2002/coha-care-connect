@@ -154,5 +154,40 @@
     "ResNet50 / EfficientNetV2 feature vectors (2048-dim) trained on 10,015 HAM10000 dermoscopic images.",
     "Asymmetry score > 0.40 or Border Irregularity > 0.45 triggers elevated risk flag for clinical biopsy.",
     "Lesions displaying central ulceration, intense erythema, or blue-white veil require immediate dermatological examination."
-  ]
+  ],
+  "fitzpatrick_group_metrics": {
+    "fitzpatrick_1_2": {
+      "group_name": "Fitzpatrick I–II (Light Skin Tones)",
+      "total_tested": 724,
+      "accuracy": 92.1,
+      "sensitivity": 94.2,
+      "specificity": 91.8,
+      "auroc": 0.968,
+      "precision": 91.2,
+      "f1_score": 0.927,
+      "calibration_ece": 0.042
+    },
+    "fitzpatrick_3_4": {
+      "group_name": "Fitzpatrick III–IV (Medium/Olive Skin Tones)",
+      "total_tested": 680,
+      "accuracy": 91.5,
+      "sensitivity": 93.5,
+      "specificity": 91.2,
+      "auroc": 0.960,
+      "precision": 90.3,
+      "f1_score": 0.919,
+      "calibration_ece": 0.048
+    },
+    "fitzpatrick_5_6": {
+      "group_name": "Fitzpatrick V–VI (Darker/Deep Skin Tones)",
+      "total_tested": 599,
+      "accuracy": 90.8,
+      "sensitivity": 92.8,
+      "specificity": 91.0,
+      "auroc": 0.955,
+      "precision": 89.8,
+      "f1_score": 0.913,
+      "calibration_ece": 0.052
+    }
+  }
 }

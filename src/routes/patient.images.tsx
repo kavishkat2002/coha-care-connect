@@ -69,6 +69,20 @@ function ImagesPage() {
   const [pixelMetrics, setPixelMetrics] = useState<RealPixelMetrics | null>(null);
   const [recommendedDoctors, setRecommendedDoctors] = useState<Doctor[]>([]);
 
+  // MedDoc Skin-Cancer Multimodal Metadata Toggles
+  const [fitzpatrickGroup, setFitzpatrickGroup] = useState<"I-II" | "III-IV" | "V-VI">("III-IV");
+  const [imageMode, setImageMode] = useState<"smartphone" | "dermoscopy">("smartphone");
+  const [anatomicalLocation, setAnatomicalLocation] = useState("Arms");
+  const [age, setAge] = useState<string>("35");
+  const [duration, setDuration] = useState("2 months");
+  const [hasChanged, setHasChanged] = useState(false);
+  const [itching, setItching] = useState(false);
+  const [pain, setPain] = useState(false);
+  const [bleeding, setBleeding] = useState(false);
+  const [sizeChanged, setSizeChanged] = useState(false);
+  const [prevCancer, setPrevCancer] = useState(false);
+  const [familyHistory, setFamilyHistory] = useState(false);
+
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
@@ -237,7 +251,22 @@ function ImagesPage() {
     const timer2 = setTimeout(() => setStageProgress(3), 1200);
 
     try {
-      const res = await analyseMedicalImage(region, imageBase64 || undefined, pixelMetrics || undefined);
+      const metadata = region.toLowerCase() === "skin" ? {
+        fitzpatrickGroup,
+        imageMode,
+        anatomicalLocation,
+        age: parseInt(age) || 35,
+        duration,
+        hasChanged,
+        itching,
+        pain,
+        bleeding,
+        sizeChanged,
+        prevCancer,
+        familyHistory
+      } : undefined;
+
+      const res = await analyseMedicalImage(region, imageBase64 || undefined, pixelMetrics || undefined, metadata);
       setStageProgress(4);
       setResult(res);
       if (res.suggestedSpecialty) {
@@ -329,6 +358,153 @@ function ImagesPage() {
                 </div>
                 <input type="file" accept="image/*" className="sr-only" onChange={handleFileChange} />
               </label>
+            )}
+
+            {region === "Skin" && (
+              <div className="space-y-4 rounded-xl border border-border p-4 bg-muted/20">
+                <div className="flex items-center gap-1.5 pb-2 border-b border-border/60">
+                  <h4 className="text-xs font-bold uppercase tracking-wider text-foreground">Multimodal Risk Assessment Inputs</h4>
+                </div>
+                
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="text-[11px] font-medium text-muted-foreground block mb-1">Skin Tone (Fitzpatrick Group)</label>
+                    <select
+                      value={fitzpatrickGroup}
+                      onChange={(e) => setFitzpatrickGroup(e.target.value as any)}
+                      className="w-full p-2 rounded-lg border border-border bg-background text-xs focus:ring-1 focus:ring-primary outline-none"
+                    >
+                      <option value="I-II">Fitzpatrick I-II (Light)</option>
+                      <option value="III-IV">Fitzpatrick III-IV (Medium)</option>
+                      <option value="V-VI">Fitzpatrick V-VI (Dark)</option>
+                    </select>
+                  </div>
+                  
+                  <div>
+                    <label className="text-[11px] font-medium text-muted-foreground block mb-1">Imaging Mode</label>
+                    <select
+                      value={imageMode}
+                      onChange={(e) => setImageMode(e.target.value as any)}
+                      className="w-full p-2 rounded-lg border border-border bg-background text-xs focus:ring-1 focus:ring-primary outline-none"
+                    >
+                      <option value="smartphone">Standard Smartphone Photo</option>
+                      <option value="dermoscopy">Dermoscopic Image</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="text-[11px] font-medium text-muted-foreground block mb-1">Anatomical Location</label>
+                    <select
+                      value={anatomicalLocation}
+                      onChange={(e) => setAnatomicalLocation(e.target.value)}
+                      className="w-full p-2 rounded-lg border border-border bg-background text-xs focus:ring-1 focus:ring-primary outline-none"
+                    >
+                      <option value="Arms">Arms</option>
+                      <option value="Legs">Legs</option>
+                      <option value="Face">Face / Neck</option>
+                      <option value="Back">Back</option>
+                      <option value="Chest">Chest / Abdomen</option>
+                      <option value="Scalp">Scalp</option>
+                      <option value="Other">Other / Hand / Foot</option>
+                    </select>
+                  </div>
+                  
+                  <div className="grid grid-cols-2 gap-2">
+                    <div>
+                      <label className="text-[11px] font-medium text-muted-foreground block mb-1">Age</label>
+                      <input
+                        type="number"
+                        min="1"
+                        max="120"
+                        value={age}
+                        onChange={(e) => setAge(e.target.value)}
+                        className="w-full p-2 rounded-lg border border-border bg-background text-xs focus:ring-1 focus:ring-primary outline-none"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-[11px] font-medium text-muted-foreground block mb-1">Duration</label>
+                      <input
+                        type="text"
+                        placeholder="e.g. 2 mo"
+                        value={duration}
+                        onChange={(e) => setDuration(e.target.value)}
+                        className="w-full p-2 rounded-lg border border-border bg-background text-xs focus:ring-1 focus:ring-primary outline-none"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                <div className="space-y-2 pt-1">
+                  <p className="text-[11px] font-medium text-muted-foreground">Symptoms & History (Select all that apply)</p>
+                  <div className="grid grid-cols-2 gap-x-4 gap-y-2">
+                    <label className="flex items-center gap-2 cursor-pointer select-none text-xs text-foreground">
+                      <input
+                        type="checkbox"
+                        checked={hasChanged}
+                        onChange={(e) => setHasChanged(e.target.checked)}
+                        className="rounded border-border text-primary focus:ring-primary size-3.5"
+                      />
+                      <span>Lesion has changed/grown</span>
+                    </label>
+                    <label className="flex items-center gap-2 cursor-pointer select-none text-xs text-foreground">
+                      <input
+                        type="checkbox"
+                        checked={itching}
+                        onChange={(e) => setItching(e.target.checked)}
+                        className="rounded border-border text-primary focus:ring-primary size-3.5"
+                      />
+                      <span>Lesion is itchy</span>
+                    </label>
+                    <label className="flex items-center gap-2 cursor-pointer select-none text-xs text-foreground">
+                      <input
+                        type="checkbox"
+                        checked={pain}
+                        onChange={(e) => setPain(e.target.checked)}
+                        className="rounded border-border text-primary focus:ring-primary size-3.5"
+                      />
+                      <span>Lesion is painful</span>
+                    </label>
+                    <label className="flex items-center gap-2 cursor-pointer select-none text-xs text-foreground">
+                      <input
+                        type="checkbox"
+                        checked={bleeding}
+                        onChange={(e) => setBleeding(e.target.checked)}
+                        className="rounded border-border text-primary focus:ring-primary size-3.5"
+                      />
+                      <span>Lesion has bled / oozed</span>
+                    </label>
+                    <label className="flex items-center gap-2 cursor-pointer select-none text-xs text-foreground">
+                      <input
+                        type="checkbox"
+                        checked={sizeChanged}
+                        onChange={(e) => setSizeChanged(e.target.checked)}
+                        className="rounded border-border text-primary focus:ring-primary size-3.5"
+                      />
+                      <span>Rapid size expansion</span>
+                    </label>
+                    <label className="flex items-center gap-2 cursor-pointer select-none text-xs text-foreground">
+                      <input
+                        type="checkbox"
+                        checked={prevCancer}
+                        onChange={(e) => setPrevCancer(e.target.checked)}
+                        className="rounded border-border text-primary focus:ring-primary size-3.5"
+                      />
+                      <span>Personal skin cancer history</span>
+                    </label>
+                    <label className="flex items-center gap-2 cursor-pointer select-none text-xs text-foreground col-span-2">
+                      <input
+                        type="checkbox"
+                        checked={familyHistory}
+                        onChange={(e) => setFamilyHistory(e.target.checked)}
+                        className="rounded border-border text-primary focus:ring-primary size-3.5"
+                      />
+                      <span>Family history of melanoma/skin cancer</span>
+                    </label>
+                  </div>
+                </div>
+              </div>
             )}
 
             <Button className="w-full gap-2" onClick={() => void run()} disabled={busy}>
@@ -520,59 +696,7 @@ function ImagesPage() {
                             )}
                           </div>
 
-                          {/* Step 9: Uncertainty Layer & Triage Referral */}
-                          {result.skinCancerClassification.uncertaintyLayer && (
-                            <div className="p-3 rounded-lg border text-xs space-y-2" style={{
-                              borderColor: result.skinCancerClassification.uncertaintyLayer.referralTriage === "highly_suspicious" ? "var(--destructive)" : "var(--border)",
-                              backgroundColor: result.skinCancerClassification.uncertaintyLayer.referralTriage === "highly_suspicious" ? "hsl(0 72% 51% / 0.03)" : "transparent"
-                            }}>
-                              <div className="flex items-center justify-between">
-                                <span className="font-semibold uppercase tracking-wider text-muted-foreground">Uncertainty & Triage Referral</span>
-                                <Badge variant={result.skinCancerClassification.uncertaintyLayer.referralTriage === "highly_suspicious" ? "destructive" : "secondary"} className="capitalize">
-                                  {result.skinCancerClassification.uncertaintyLayer.referralTriage.replace(/_/g, " ")}
-                                </Badge>
-                              </div>
-                              <p className="text-muted-foreground leading-relaxed">
-                                {result.skinCancerClassification.uncertaintyLayer.clinicalCertainty}
-                              </p>
-                            </div>
-                          )}
-
-                          {/* Steps 11: Decoupled TNM Staging */}
-                          {result.skinCancerClassification.tnmStagingReference && (
-                            <div className="p-3 bg-muted/65 rounded-lg border border-border/80 text-xs space-y-2">
-                              <p className="font-semibold uppercase tracking-wider text-muted-foreground">AJCC Decoupled TNM Staging</p>
-                              <div className="grid grid-cols-4 gap-2 text-center pt-1">
-                                <div className="bg-background rounded p-1.5 border border-border/50">
-                                  <span className="text-[9px] text-muted-foreground block">T (Breslow Depth)</span>
-                                  <span className="font-bold text-[10px] text-destructive">Pathology Req.</span>
-                                </div>
-                                <div className="bg-background rounded p-1.5 border border-border/50">
-                                  <span className="text-[9px] text-muted-foreground block">N (Lymph Nodes)</span>
-                                  <span className="font-bold text-[10px] text-destructive">Exam Req.</span>
-                                </div>
-                                <div className="bg-background rounded p-1.5 border border-border/50">
-                                  <span className="text-[9px] text-muted-foreground block">M (Metastasis)</span>
-                                  <span className="font-bold text-[10px] text-destructive">Imaging Req.</span>
-                                </div>
-                                <div className="bg-background rounded p-1.5 border border-border/50">
-                                  <span className="text-[9px] text-muted-foreground block">Stage Group</span>
-                                  <span className="font-bold text-[10px] text-muted-foreground">N/A</span>
-                                </div>
-                              </div>
-                              <p className="text-[10px] text-muted-foreground leading-relaxed italic pt-1 border-t border-border/40 mt-1">
-                                {result.skinCancerClassification.tnmStagingReference.reason}
-                              </p>
-                            </div>
-                          )}
-                          
-                          <div className="pt-2 border-t border-border">
-                            <div className="flex gap-4 text-xs text-muted-foreground">
-                              <span>📊 {result.skinCancerClassification.sensitivity}</span>
-                              <span>📈 {result.skinCancerClassification.specificity}</span>
-                            </div>
-                            <p className="text-xs text-muted-foreground mt-1.5">Clinical threshold: 23% (sensitivity-optimized to minimize false negatives for malignant detection)</p>
-                          </div>
+                          {/* Hidden diagnostic details per user request */}
                         </>
                       )}
                     </div>
@@ -738,29 +862,41 @@ function ImagesPage() {
                     <div className="bg-muted/40 p-3 px-4 border-b border-border">
                       <p className="text-sm font-medium">Recommended Specialist Nearby</p>
                     </div>
-                    <div className="p-4 flex gap-4 items-start">
+                    <div className="p-4 flex flex-col sm:flex-row gap-4 items-start sm:items-center">
                       <div className="size-12 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-lg shrink-0">
                         {doctor.photoInitials}
                       </div>
                       <div className="flex-1 space-y-1">
                         <p className="font-semibold">{doctor.name}</p>
-                        <p className="text-sm text-muted-foreground">{doctor.specialty}</p>
-                        <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-muted-foreground mt-1">
+                        <p className="text-xs text-muted-foreground font-medium">{doctor.specialty} · {doctor.branch || "Lifora Medical Center"}</p>
+                        <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground mt-1">
+                          <span className="flex items-center gap-0.5 text-amber-500 font-semibold">
+                            <Star className="size-3 fill-amber-500 text-amber-500" />
+                            {(doctor.rating || 4.9).toFixed(1)}
+                          </span>
                           <span className="flex items-center gap-1">
                             <MapPin className="size-3" />
                             {doctor.distanceKm} km away
                           </span>
-                          <span className="flex items-center gap-1 font-medium">
-                            {doctor.reviews} Reviews
+                          <span className="text-muted-foreground">
+                            ({doctor.reviews} Reviews)
                           </span>
                         </div>
                       </div>
-                      <Link to="/patient/book" search={{ doctorId: doctor.id }} className="shrink-0">
-                        <Button size="sm" variant="outline" className="gap-2 w-full">
-                          <UserPlus className="size-3" />
-                          Book
-                        </Button>
-                      </Link>
+                      <div className="flex gap-2 w-full sm:w-auto shrink-0 mt-2 sm:mt-0">
+                        <Link to="/patient/book" search={{ doctorId: doctor.id }} className="flex-1 sm:flex-none">
+                          <Button size="sm" className="gap-1.5 w-full">
+                            <UserPlus className="size-3" />
+                            Book Appointment
+                          </Button>
+                        </Link>
+                        <Link to="/patient/telemedicine" className="flex-1 sm:flex-none">
+                          <Button size="sm" variant="outline" className="gap-1.5 w-full">
+                            <Sparkles className="size-3 text-primary animate-pulse" />
+                            Telemedicine
+                          </Button>
+                        </Link>
+                      </div>
                     </div>
                   </div>
                 ))}

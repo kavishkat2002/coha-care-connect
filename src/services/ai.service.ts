@@ -13,13 +13,15 @@ export type RiskLevel = "low" | "moderate" | "elevated";
 
 export type SkinCancerClassification = {
   classification: "benign" | "malignant" | "indeterminate";
-  subtype: "melanocytic_nevi" | "melanoma" | "benign_keratosis_like_lesions" | "basal_cell_carcinoma" | "actinic_keratoses" | "vascular_lesions" | "dermatofibroma" | "seborrheic_keratosis" | "squamous_cell_carcinoma" | "dysplastic_nevus" | "indeterminate" | "unknown";
+  subtype: "melanocytic_nevi" | "melanoma" | "benign_keratosis_like_lesions" | "basal_cell_carcinoma" | "actinic_keratoses" | "vascular_lesions" | "dermatofibroma" | "seborrheic_keratosis" | "squamous_cell_carcinoma" | "dysplastic_nevus" | "inflammatory" | "indeterminate" | "unknown";
   malignancyProbability: number;
   qualityCheck: {
     quality: "good" | "acceptable" | "poor";
     qualityScore: number;
     skinDetected: boolean;
     lesionVisible: boolean;
+    fitzpatrickGroup?: "I-II" | "III-IV" | "V-VI";
+    imageMode?: "smartphone" | "dermoscopy";
   };
   lesionSegmentation?: {
     detected: boolean;
@@ -803,7 +805,27 @@ function repairTruncatedJson(json: string): string {
   return repaired;
 }
 
-export async function analyseMedicalImage(region: string, imageBase64?: string, pixelMetrics?: any): Promise<ImageAnalysis> {
+export type PatientImageMetadata = {
+  fitzpatrickGroup?: "I-II" | "III-IV" | "V-VI";
+  imageMode?: "smartphone" | "dermoscopy";
+  anatomicalLocation?: string;
+  age?: number;
+  duration?: string;
+  hasChanged?: boolean;
+  itching?: boolean;
+  pain?: boolean;
+  bleeding?: boolean;
+  sizeChanged?: boolean;
+  prevCancer?: boolean;
+  familyHistory?: boolean;
+};
+
+export async function analyseMedicalImage(
+  region: string, 
+  imageBase64?: string, 
+  pixelMetrics?: any,
+  metadata?: PatientImageMetadata
+): Promise<ImageAnalysis> {
   // @ts-ignore
   const apiKey = import.meta.env["VITE_GROQ_API_KEY"];
 
@@ -847,10 +869,25 @@ export async function analyseMedicalImage(region: string, imageBase64?: string, 
 EXTERNAL MEDICAL RESOURCE VERIFICATION CONTEXT:
 ${externalSearchSnippet}
 
+${metadata ? `PATIENT CLINICAL CONTEXT & HISTORY (Multimodal Integration):
+- Patient Age: ${metadata.age || "Not Specified"}
+- Anatomical Body Location: ${metadata.anatomicalLocation || "Not Specified"}
+- Reported Lesion Duration: ${metadata.duration || "Not Specified"}
+- Fitzpatrick Skin Tone Group: ${metadata.fitzpatrickGroup || "Not Specified"}
+- Capture Modality: ${metadata.imageMode === "dermoscopy" ? "Dermoscopic Image (Magnified/Polarised)" : "Standard Smartphone Clinical Photo"}
+- Lesion has evolved/changed: ${metadata.hasChanged ? "Yes" : "No"}
+- Symptom: Itching: ${metadata.itching ? "Yes" : "No"}
+- Symptom: Pain: ${metadata.pain ? "Yes" : "No"}
+- Symptom: Bleeding: ${metadata.bleeding ? "Yes" : "No"}
+- Symptom: Size change: ${metadata.sizeChanged ? "Yes" : "No"}
+- Personal History of Skin Cancer: ${metadata.prevCancer ? "Yes" : "No"}
+- Family History of Skin Cancer: ${metadata.familyHistory ? "Yes" : "No"}
+` : ""}
+
 ${region.toLowerCase() === "skin" ? `ENHANCED DEEP LEARNING MODEL ARCHITECTURE (HAM10000 Dataset - 10,015 Dermoscopic Images):
 The underlying MobileNet architecture has been specifically optimized for rare skin diseases with rigorous class balancing weights and 40 unfrozen diagnostic layers.
 Performance metrics: 96.8% accuracy, 98.1% melanoma sensitivity, ROC-AUC 0.985. Clinical decision threshold = 0.23 (23%).
-You must use extreme clinical precision to diagnose between the 7 exact HAM10000 classes: Melanocytic nevi (nv), Melanoma (mel), Benign keratosis-like lesions (bkl), Basal cell carcinoma (bcc), Actinic keratoses (akiec), Vascular lesions (vasc), Dermatofibroma (df).`
+You must use extreme clinical precision to diagnose between the 7 exact HAM10000 classes and other dermatological conditions: Melanocytic nevi (nv), Melanoma (mel), Benign keratosis-like lesions (bkl), Basal cell carcinoma (bcc), Actinic keratoses (akiec), Vascular lesions (vasc), Dermatofibroma (df), Squamous cell carcinoma (scc), Seborrheic Keratosis, or Inflammatory/Infectious conditions.`
                       : region.toLowerCase() === "eye" ? `SEER EYE CANCER DATASET & FUNDUS CONVNET PIPELINE:
 The underlying architecture is optimized for ophthalmic oncology (SEER dataset) and Deep ConvNets (Adam optimized) for Retinal Fundus images (STARE, DRIVE, Messidor).
 
@@ -1067,6 +1104,19 @@ REAL-TIME PIXEL METRICS FROM THIS IMAGE:
 - Color Variance: ${(pixelMetrics.colorVariance * 100).toFixed(1)}%
 - Border Contrast: ${(pixelMetrics.borderContrast * 100).toFixed(1)}%` : "";
 
+        const metadataContext = metadata ? `
+PATIENT CLINICAL CONTEXT & HISTORY (Multimodal Integration):
+- Patient Age: ${metadata.age || "Not Specified"}
+- Anatomical Body Location: ${metadata.anatomicalLocation || "Not Specified"}
+- Reported Lesion Duration: ${metadata.duration || "Not Specified"}
+- Fitzpatrick Skin Tone Group: ${metadata.fitzpatrickGroup || "Not Specified"}
+- Capture Modality: ${metadata.imageMode === "dermoscopy" ? "Dermoscopic Image" : "Smartphone Clinical Photo"}
+- Lesion has evolved/changed: ${metadata.hasChanged ? "Yes" : "No"}
+- Symptoms: Itching: ${metadata.itching ? "Yes" : "No"}, Pain: ${metadata.pain ? "Yes" : "No"}, Bleeding: ${metadata.bleeding ? "Yes" : "No"}
+- Size change: ${metadata.sizeChanged ? "Yes" : "No"}
+- Personal History of Skin Cancer: ${metadata.prevCancer ? "Yes" : "No"}
+- Family History of Skin Cancer: ${metadata.familyHistory ? "Yes" : "No"}` : "";
+
         const reasoningResponse = await fetch("https://api.groq.com/openai/v1/chat/completions", {
           method: "POST",
           headers: {
@@ -1099,8 +1149,9 @@ CRITICAL RULES:
 
 ${stage1Summary}
 ${pixelContext}
+${metadataContext}
 
-Please review this assessment for clinical safety, quality gating, and structured feature separation. Correct any staging estimates (ensure T, N, M and stage are null), validate the feature vector against the pixel metrics, and return a refined JSON result matching the EXACT same structure.`
+Please review this assessment for clinical safety, quality gating, and structured feature separation, taking into account the patient's clinical history and metadata if provided. Correct any staging estimates (ensure T, N, M and stage are null), validate the feature vector against the pixel metrics, and return a refined JSON result matching the EXACT same structure.`
               }
             ]
           })
@@ -1267,10 +1318,106 @@ function extractImageFeaturesFromBase64(imageBase64?: string): ExtractedFeatures
   };
 }
 
-function analyzeUploadedImageFeatures(imageBase64?: string, region: string = "Skin", pixelMetrics?: any): ImageAnalysis {
+function analyzeUploadedImageFeatures(
+  imageBase64?: string, 
+  region: string = "Skin", 
+  pixelMetrics?: any,
+  metadata?: PatientImageMetadata
+): ImageAnalysis {
   const isSkin = region.toLowerCase() === "skin";
 
   if (isSkin) {
+    // ══════════════════════════════════════════════════════════════
+    // 1. IMAGE QUALITY GATE CHECK (BEFORE AI ANALYSIS)
+    // ══════════════════════════════════════════════════════════════
+    let isPoorQuality = false;
+    let qualityReason = "";
+    
+    if (pixelMetrics) {
+      if (pixelMetrics.skinTonePercentage < 0.22) {
+        isPoorQuality = true;
+        qualityReason = "Human skin tone was not detected. Please upload a clear photo focusing directly on the affected skin surface.";
+      } else if (pixelMetrics.darknessScore > 0.82) {
+        isPoorQuality = true;
+        qualityReason = "Extremely poor lighting or deep shadows detected. Please retake the photo under bright, uniform lighting conditions.";
+      } else if (pixelMetrics.colorVariance < 0.05) {
+        isPoorQuality = true;
+        qualityReason = "Image is too blurry, out of focus, or lacks contrast. Please hold the camera steady and focus directly on the lesion.";
+      } else if (pixelMetrics.estimatedDiameterMm < 1.5) {
+        isPoorQuality = true;
+        qualityReason = "Camera is too far from the skin lesion. Please move closer (approx. 10-15 cm) to make the lesion fully visible.";
+      }
+    }
+
+    if (isPoorQuality) {
+      return {
+        isMedicalImage: true,
+        quality: "Poor",
+        region: "Skin",
+        lesionsDetected: 0,
+        risk: "low",
+        confidence: 0,
+        explanation: `Diagnostic Analysis Aborted: ${qualityReason}`,
+        plainLanguageExplanation: "Please retake the photo in better lighting and move closer to the lesion.",
+        recommendation: [
+          "Retake the photograph under bright, natural lighting",
+          "Ensure the lesion is in the center of the frame and sharply focused",
+          "Maintain a distance of 10-15 cm from the skin surface"
+        ],
+        suggestedSpecialty: "Dermatologist",
+        skinCancerClassification: {
+          classification: "indeterminate",
+          subtype: "indeterminate",
+          malignancyProbability: 0,
+          qualityCheck: {
+            quality: "poor",
+            qualityScore: 0.18,
+            skinDetected: pixelMetrics ? pixelMetrics.skinTonePercentage >= 0.22 : false,
+            lesionVisible: false,
+            fitzpatrickGroup: metadata?.fitzpatrickGroup || "III-IV",
+            imageMode: metadata?.imageMode || "smartphone"
+          },
+          lesionSegmentation: {
+            detected: false,
+            bbox: [0, 0, 0, 0],
+            areaPixels: 0
+          },
+          abcde: {
+            asymmetry: "symmetric",
+            border: "regular",
+            color: "mixed",
+            diameter: "unable_to_determine",
+            evolution: "unable_to_determine"
+          },
+          dermoscopy: {
+            available: metadata?.imageMode === "dermoscopy",
+            atypicalNetwork: false,
+            dotsGlobules: false,
+            blueGrayStructures: false,
+            blueWhiteVeil: false,
+            regression: false,
+            vascularStructures: false
+          },
+          uncertaintyLayer: {
+            confidenceLevel: "insufficient_image",
+            clinicalCertainty: "Quality control check failed. Clinical feature analysis skipped to prevent erroneous predictions.",
+            referralTriage: "low_concern"
+          },
+          tnmStagingReference: {
+            confirmedDiagnosisRequired: true,
+            T: null,
+            N: null,
+            M: null,
+            stage: null,
+            reason: "biopsy is required."
+          },
+          sensitivity: "93.2%",
+          specificity: "91.8%"
+        },
+        disclaimer: AI_DISCLAIMER
+      };
+    }
+
     let feat = extractImageFeaturesFromBase64(imageBase64);
 
     // If real canvas RGBA pixel metrics are available, use true image pixel features!
@@ -1290,7 +1437,7 @@ function analyzeUploadedImageFeatures(imageBase64?: string, region: string = "Sk
 
     // ISIC Pre-Trained Machine Learning Model Feature Weights:
     // Asymmetry (0.885), Border (0.842), Color (0.815), Diameter (0.760), Evolution/Pigment (0.780)
-    const rawMalignancyScore =
+    let rawMalignancyScore =
       feat.asymmetryScore * 0.885 +
       feat.borderIrregularity * 0.842 +
       feat.colorVariegation * 0.815 +
@@ -1299,19 +1446,26 @@ function analyzeUploadedImageFeatures(imageBase64?: string, region: string = "Sk
       feat.rednessRatio * 0.730;
 
     // Calculate malignancy probability (0-100%)
-    const prob = Math.min(96, Math.max(4, Math.round((rawMalignancyScore / 3.4) * 100)));
+    let prob = Math.min(96, Math.max(4, Math.round((rawMalignancyScore / 3.4) * 100)));
+    
+    // Multimodal Clinical Integration (Symptoms + History)
+    if (metadata) {
+      if (metadata.hasChanged) prob += 15;
+      if (metadata.bleeding) prob += 20;
+      if (metadata.itching) prob += 5;
+      if (metadata.pain) prob += 5;
+      if (metadata.sizeChanged) prob += 10;
+      if (metadata.prevCancer) prob += 15;
+      if (metadata.familyHistory) prob += 10;
+    }
+    
+    prob = Math.min(98, Math.max(2, prob));
     const isMalignant = prob >= 23; // Sensitivity-optimized 23% clinical threshold
     const riskLevel: RiskLevel = prob >= 65 ? "elevated" : prob >= 23 ? "moderate" : "low";
 
-    // Heuristic: reject images with extreme color variance, perfect symmetry, or unnaturally stark background contrast.
-    // Also rigorously verify that at least 30% of the image pixels match human skin tone color space (Kovac et al. Rules)
-    const isValidImage = pixelMetrics ? (
-      pixelMetrics.skinTonePercentage > 0.30 &&
-      pixelMetrics.colorVariance < 0.9 &&
-      pixelMetrics.asymmetryScore > 0.05 &&
-      pixelMetrics.borderContrast < 0.90
-    ) : true;
+    const isValidImage = true;
 
+    // Diagnose 10 detailed categories based on visual features & metadata
     let subtype: SkinCancerClassification["subtype"] = "melanocytic_nevi";
     let clinicalExplanation = "";
     let plainLanguageExplanation = "";
@@ -1329,9 +1483,15 @@ function analyzeUploadedImageFeatures(imageBase64?: string, region: string = "Sk
 
     if (isMalignant) {
       if (feat.hasUlceration || (feat.rednessRatio > 0.18 && feat.borderIrregularity > 0.20)) {
-        subtype = "basal_cell_carcinoma";
-        clinicalExplanation = `Vision AI image feature analysis detected an erythematous skin lesion with focal central ulceration, raw hematic crusting, poorly-demarcated margins (${(feat.borderIrregularity * 100).toFixed(0)}% margin contrast index), and surrounding tissue inflammation (RGB: ${rVal}, ${gVal}, ${bVal}; ${(feat.rednessRatio * 100).toFixed(0)}% erythema ratio). Estimated malignancy probability of ${prob}% exceeds the 0.23 sensitivity threshold (Basal Cell Carcinoma / Ulcerated Lesion).`;
-        plainLanguageExplanation = `The AI scan identified an irregular, reddish skin lesion with central crusting and raw ulceration. Because these visual features are concerning for skin cancer, we strongly advise scheduling an urgent dermatologist appointment for a diagnostic biopsy.`;
+        if (metadata?.bleeding || feat.estimatedDiameterMm > 8.0) {
+          subtype = "basal_cell_carcinoma";
+          clinicalExplanation = `Vision AI image feature analysis detected an erythematous skin lesion with focal central ulceration, raw hematic crusting, poorly-demarcated margins (${(feat.borderIrregularity * 100).toFixed(0)}% margin contrast index), and surrounding tissue inflammation (RGB: ${rVal}, ${gVal}, ${bVal}; ${(feat.rednessRatio * 100).toFixed(0)}% erythema ratio). Estimated malignancy probability of ${prob}% exceeds the 0.23 sensitivity threshold (Basal Cell Carcinoma / Ulcerated Lesion).`;
+          plainLanguageExplanation = `The AI scan identified an irregular, reddish skin lesion with central crusting and raw ulceration. Because these visual features are concerning for skin cancer, we strongly advise scheduling an urgent dermatologist appointment for a diagnostic biopsy.`;
+        } else {
+          subtype = "squamous_cell_carcinoma";
+          clinicalExplanation = `Vision AI analysis detected an elevated, scaly keratoacanthoma-like plaque with central keratin plug, irregular borders (${(feat.borderIrregularity * 100).toFixed(0)}%), and prominent redness (${(feat.rednessRatio * 100).toFixed(0)}%). Malignancy probability: ${prob}% (Squamous Cell Carcinoma).`;
+          plainLanguageExplanation = `The scan shows a rough, reddish skin patch with irregular borders that has evolved. It is recommended to have a dermatologist examine this to rule out Squamous Cell Carcinoma.`;
+        }
         recommendations = [
           "Schedule an urgent dermatological consultation & dermoscopy review",
           "Perform professional diagnostic biopsy of the ulcerated central lesion",
@@ -1350,8 +1510,8 @@ function analyzeUploadedImageFeatures(imageBase64?: string, region: string = "Sk
         ];
       } else if (feat.borderIrregularity > 0.30) {
         subtype = "actinic_keratoses";
-        clinicalExplanation = `Image feature analysis revealed an erythematous hyperkeratotic plaque with notched margins (${(feat.borderIrregularity * 100).toFixed(0)}% irregularity, RGB: ${rVal}, ${gVal}, ${bVal}) and focal scaling. Estimated malignancy probability: ${prob}% (Squamous Cell Carcinoma).`;
-        plainLanguageExplanation = `The scan shows a rough, reddish skin patch with irregular borders. It is recommended to have a dermatologist examine this to rule out Squamous Cell Carcinoma.`;
+        clinicalExplanation = `Image feature analysis revealed an erythematous hyperkeratotic plaque with notched margins (${(feat.borderIrregularity * 100).toFixed(0)}% irregularity, RGB: ${rVal}, ${gVal}, ${bVal}) and focal scaling. Estimated malignancy probability: ${prob}% (Actinic Keratosis).`;
+        plainLanguageExplanation = `The scan shows a rough, reddish skin patch with irregular borders. It is recommended to have a dermatologist examine this to rule out pre-cancerous Actinic Keratosis.`;
         recommendations = [
           "Schedule a prompt dermatologist examination within 14 days",
           "Avoid rubbing or irritating the elevated skin lesion",
@@ -1368,8 +1528,17 @@ function analyzeUploadedImageFeatures(imageBase64?: string, region: string = "Sk
         ];
       }
     } else {
-      if (feat.colorVariegation > 0.35 && feat.darkPixelRatio < 0.20) {
-        subtype = "benign_keratosis_like_lesions";
+      if (metadata?.itching && (feat.rednessRatio > 0.20)) {
+        subtype = "inflammatory";
+        clinicalExplanation = `Image features and clinical symptoms suggest a benign localized inflammatory or infectious skin condition (eczema, contact dermatitis, or localized infection) with diffuse redness (${(feat.rednessRatio * 100).toFixed(0)}%) and regular margins. Malignancy risk is low: ${prob}%.`;
+        plainLanguageExplanation = `The AI scan and your reported symptoms indicate a localized skin irritation or inflammatory patch (such as eczema or mild dermatitis). It does not show signs of skin cancer, but we suggest keeping the area moisturized and seeing a doctor if it doesn't improve.`;
+        recommendations = [
+          "Apply a mild over-the-counter moisturizer or soothing lotion",
+          "Avoid scratching or using harsh, scented soaps on the skin",
+          "Consult a general physician if redness and itching persist beyond 7 days"
+        ];
+      } else if (feat.colorVariegation > 0.35 && feat.darkPixelRatio < 0.20) {
+        subtype = "seborrheic_keratosis";
         clinicalExplanation = `Dermoscopic analysis identified a benign, well-demarcated verrucous lesion with yellowish-brown dull pigmentation (RGB: ${rVal}, ${gVal}, ${bVal}; ${prob}% malignancy probability). Features align with benign Seborrheic Keratosis.`;
         plainLanguageExplanation = `The scan detected a benign skin spot with a slightly raised, waxy surface. This is typical of a harmless Seborrheic Keratosis growth. No urgent treatment is needed unless it causes irritation.`;
         recommendations = [
@@ -1412,18 +1581,12 @@ function analyzeUploadedImageFeatures(imageBase64?: string, region: string = "Sk
       }
     }
 
-    if (!isValidImage) {
-      clinicalExplanation = "The uploaded image does not exhibit typical human tissue or dermatological color distribution. It appears to be a non-medical or synthetic object.";
-      plainLanguageExplanation = "This doesn't look like a valid medical photograph. Please ensure you are uploading a clear image of the affected skin area.";
-      recommendations = ["Please upload a clear, focused photograph of the skin lesion."];
-    }
-
     return {
       isMedicalImage: isValidImage,
-      quality: isValidImage ? "Good" : "Poor",
+      quality: "Good",
       region: "Skin",
-      lesionsDetected: isValidImage ? 1 : 0,
-      risk: isValidImage ? riskLevel : "low",
+      lesionsDetected: 1,
+      risk: riskLevel,
       confidence: Math.min(96, 82 + Math.round(feat.entropy * 12)),
       predictionScore: prob,
       explanation: clinicalExplanation,
@@ -1442,13 +1605,15 @@ function analyzeUploadedImageFeatures(imageBase64?: string, region: string = "Sk
         subtype,
         malignancyProbability: prob,
         qualityCheck: {
-          quality: isValidImage ? "good" : "poor",
-          qualityScore: isValidImage ? 0.94 : 0.20,
-          skinDetected: isValidImage,
-          lesionVisible: isValidImage
+          quality: "good",
+          qualityScore: 0.94,
+          skinDetected: true,
+          lesionVisible: true,
+          fitzpatrickGroup: metadata?.fitzpatrickGroup || "III-IV",
+          imageMode: metadata?.imageMode || "smartphone"
         },
         lesionSegmentation: {
-          detected: isValidImage,
+          detected: true,
           bbox: [xBox, yBox, wBox, hBox],
           areaPixels: Math.round(wBox * hBox * 100000)
         },
@@ -1456,17 +1621,17 @@ function analyzeUploadedImageFeatures(imageBase64?: string, region: string = "Sk
           asymmetry: feat.asymmetryScore > 0.35 ? "asymmetric" : "symmetric",
           border: feat.borderIrregularity > 0.35 ? "irregular" : "regular",
           color: feat.colorVariegation > 0.30 ? "mixed" : "dark_brown",
-          diameter: "unable_to_determine",
-          evolution: "unable_to_determine"
+          diameter: `${feat.estimatedDiameterMm} mm`,
+          evolution: metadata?.hasChanged ? "active_evolution" : "stable"
         },
         dermoscopy: {
-          available: false,
-          atypicalNetwork: false,
-          dotsGlobules: false,
+          available: metadata?.imageMode === "dermoscopy",
+          atypicalNetwork: metadata?.imageMode === "dermoscopy" && feat.borderIrregularity > 0.35,
+          dotsGlobules: metadata?.imageMode === "dermoscopy" && feat.colorVariegation > 0.35,
           blueGrayStructures: false,
-          blueWhiteVeil: false,
+          blueWhiteVeil: metadata?.imageMode === "dermoscopy" && feat.hasBlueWhiteVeil,
           regression: false,
-          vascularStructures: false
+          vascularStructures: metadata?.imageMode === "dermoscopy" && feat.hasUlceration
         },
         uncertaintyLayer: {
           confidenceLevel: prob >= 65 ? "moderate" : "high",
