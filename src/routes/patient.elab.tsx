@@ -459,73 +459,85 @@ function ElabPage() {
         {filteredLabs.map((lab) => (
           <Card 
             key={lab.id} 
-            className="shadow-soft border border-border flex flex-col justify-between overflow-hidden cursor-pointer hover:border-primary/35 hover:shadow transition-all duration-300 rounded-[24px] bg-card"
+            className="border border-border/85 flex flex-col justify-between overflow-hidden cursor-pointer hover:border-primary/50 hover:shadow-md transition-all duration-300 rounded-[24px] bg-card p-6 gap-5 shadow-sm group"
             onClick={() => setViewingLabId(lab.id)}
           >
-            <div>
-              {/* Header Banner Header */}
-              <div className={`p-5 bg-gradient-to-r ${lab.logoColor} text-white flex items-start justify-between relative`}>
-                <div className="space-y-1">
-                  <div className="flex items-center gap-2">
-                    <h3 className="font-extrabold text-lg tracking-tight">{lab.name}</h3>
-                    {lab.featured && (
-                      <Badge variant="secondary" className="bg-white/20 text-white border-none text-[9px] uppercase font-bold py-0.5">
-                        Main Partner
-                      </Badge>
-                    )}
+            <div className="space-y-4">
+              {/* Header: Logo, Name & Partner Badges */}
+              <div className="flex items-start justify-between gap-4">
+                <div className="flex gap-3">
+                  <div className="w-12 h-12 rounded-xl bg-muted/20 flex items-center justify-center shrink-0 overflow-hidden border border-border/60 p-1 shadow-sm group-hover:scale-105 transition-transform duration-300">
+                    <img src={lab.image} alt={lab.name} className="w-full h-full object-contain rounded-lg" />
                   </div>
-                  <div className="flex items-center gap-1 text-[11px] opacity-90">
-                    <MapPin className="size-3 shrink-0" />
-                    <span>{lab.location}</span>
+                  <div className="space-y-1">
+                    <h3 className="font-extrabold text-base text-foreground tracking-tight leading-tight group-hover:text-primary transition-colors">
+                      {lab.name}
+                    </h3>
+                    <div className="flex items-center gap-1 text-[11px] text-muted-foreground font-medium">
+                      <MapPin className="size-3.5 shrink-0 text-muted-foreground/75" />
+                      <span>{lab.location}</span>
+                    </div>
                   </div>
                 </div>
-                <div className="w-11 h-11 rounded-full bg-white flex items-center justify-center shrink-0 overflow-hidden border border-white/20 p-1 shadow-sm">
-                  <img src={lab.image} alt={lab.name} className="w-full h-full object-contain rounded-full" />
-                </div>
+                {lab.featured ? (
+                  <span className="bg-primary/10 text-primary text-[9px] uppercase font-extrabold px-2.5 py-0.5 rounded-full tracking-wider shrink-0">
+                    Main Partner
+                  </span>
+                ) : (
+                  <span className="bg-muted text-muted-foreground text-[9px] uppercase font-extrabold px-2.5 py-0.5 rounded-full tracking-wider shrink-0">
+                    Accredited
+                  </span>
+                )}
               </div>
 
-              {/* Accreditations */}
-              <div className="px-5 py-3 border-b border-border bg-muted/20 flex flex-wrap gap-1.5 items-center">
-                <ShieldCheck className="size-3.5 text-primary shrink-0" />
+              {/* Accreditations & Quality Certifications */}
+              <div className="flex flex-wrap gap-1.5 pt-1">
                 {lab.accreditation.map((acc: string, i: number) => (
-                  <span key={i} className="text-[10px] bg-background text-muted-foreground font-semibold px-2 py-0.5 rounded border border-border/40">
+                  <span key={i} className="text-[10px] bg-muted/40 text-muted-foreground font-semibold px-2.5 py-0.5 rounded-md border border-border/30">
                     {acc}
                   </span>
                 ))}
               </div>
 
-              <div className="p-5 space-y-4">
-                {/* Contact details grid */}
-                <div className="grid grid-cols-2 gap-y-2.5 gap-x-4 text-xs">
-                  <div className="flex items-center gap-1.5 text-muted-foreground">
-                    <Phone className="size-3.5 text-primary shrink-0" />
-                    <span>{lab.phone}</span>
-                  </div>
-                  <div className="flex items-center gap-1.5 text-muted-foreground">
-                    <Clock className="size-3.5 text-primary shrink-0" />
-                    <span>{lab.workingHours}</span>
-                  </div>
-                  <div className="col-span-2 flex items-center gap-1.5 flex-wrap pt-1">
-                    <span className="text-[10px] uppercase font-bold text-muted-foreground tracking-wider shrink-0">Specialties:</span>
-                    {lab.specialties.map((spec: string, i: number) => (
-                      <Badge key={i} variant="outline" className="text-[9px] py-0 border-border bg-muted/30">
-                        {spec}
-                      </Badge>
-                    ))}
-                  </div>
+              {/* Specialties & Diagnostic Areas */}
+              <div className="space-y-1.5">
+                <p className="text-[9px] uppercase font-bold text-muted-foreground tracking-wider">Diagnostic Specialties</p>
+                <div className="flex flex-wrap gap-1.5">
+                  {lab.specialties.map((spec: string, i: number) => (
+                    <span key={i} className="text-[10px] bg-primary/5 text-primary dark:text-blue-300 font-semibold px-2 py-0.5 rounded border border-primary/10">
+                      {spec}
+                    </span>
+                  ))}
+                </div>
+              </div>
+
+              {/* Contact Details & Working hours info */}
+              <div className="grid grid-cols-2 gap-3 pt-3 border-t border-border/40 text-xs text-muted-foreground font-medium">
+                <div className="flex items-center gap-1.5">
+                  <Phone className="size-3.5 text-primary shrink-0" />
+                  <span>{lab.phone}</span>
+                </div>
+                <div className="flex items-center gap-1.5 justify-end text-right">
+                  <Clock className="size-3.5 text-primary shrink-0" />
+                  <span>{lab.workingHours}</span>
                 </div>
               </div>
             </div>
 
-            <div className="p-4 pt-0 border-t border-border/40 bg-muted/5 flex items-center justify-between text-xs text-muted-foreground font-semibold">
-              <span className="flex items-center gap-1 text-[11px]">
-                <Check className="size-3.5 text-emerald-500 shrink-0" />
-                Home Sample Collection Available
+            {/* Bottom Actions Area */}
+            <div className="pt-3 border-t border-border/45 flex items-center justify-between gap-4">
+              <span className="text-[11px] text-emerald-600 dark:text-emerald-400 font-semibold flex items-center gap-1.5">
+                <Check className="size-3.5 shrink-0" />
+                Home Collection Available
               </span>
-              <span className="text-primary hover:underline flex items-center gap-0.5 text-[11px]">
-                View Services & Book
-                <ChevronRight className="size-3.5" />
-              </span>
+              <Button 
+                size="sm" 
+                variant="ghost"
+                className="text-primary hover:text-primary hover:bg-primary/5 font-bold text-xs h-8 px-3 rounded-lg group-hover:translate-x-0.5 transition-transform flex items-center gap-1 pl-1"
+              >
+                View & Book
+                <ChevronRight className="size-4" />
+              </Button>
             </div>
           </Card>
         ))}
