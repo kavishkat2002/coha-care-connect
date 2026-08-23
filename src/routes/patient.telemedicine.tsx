@@ -797,11 +797,7 @@ function TelemedicinePage() {
                     return docObj?.name || "Dr. Menaka De Alwis";
                   })()}
                 </p>
-                <p className="text-[11px] text-emerald-600 dark:text-emerald-400 font-medium flex items-center gap-1.5 mt-0.5">
-                  <span className="relative flex size-2">
-                    <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
-                    <span className="relative inline-flex size-2 rounded-full bg-emerald-500" />
-                  </span>
+                <p className="text-[11px] text-emerald-600 dark:text-emerald-400 font-medium mt-0.5">
                   Photos & PDF Enabled
                 </p>
               </div>
