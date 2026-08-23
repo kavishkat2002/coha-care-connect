@@ -371,7 +371,7 @@ function BookPage() {
             { id: "diag", label: "eDiagnostics", image: "/eDiagnosis.svg", isNew: false, color: "text-red-600" },
             { id: "visa", label: "eNutritionist", image: "/eNutritionist.svg", isNew: true, color: "text-sky-500" },
             { id: "dental", label: "eDental", image: "/images-1.jpg", isNew: true, color: "text-indigo-500" },
-            { id: "skin", label: "eSkinCare", image: "/images-2.png", isNew: true, color: "text-amber-500" },
+            { id: "skin", label: "eLAB", image: "/laboratory.png", isNew: true, color: "text-amber-500" },
             { id: "homeo", label: "MediFit", image: "/healthcare-trackers-wearables-sensors-abstract-concept-illustration_335657-2181.avif", isNew: true, color: "text-green-600" },
           ] as any[] ).map((item) => (
             <div
@@ -383,6 +383,8 @@ function BookPage() {
                   navigate({ to: "/patient/medmind-ecare" });
                 } else if (item.id === "mfa") {
                   navigate({ to: "/patient/epass" });
+                } else if (item.id === "skin") {
+                  navigate({ to: "/patient/reports" });
                 }
               }}
               className="relative p-5 bg-card border border-border shadow-soft rounded-2xl flex flex-col items-center justify-center gap-4 hover:shadow-md transition-shadow cursor-pointer"
