@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { BrainCircuit, CheckCircle2, ExternalLink, Eye, HeartPulse, MapPin, ScanLine, Search, Sparkles, Star, Target, Upload, UserPlus } from "lucide-react";
+import { BrainCircuit, CheckCircle2, ExternalLink, Eye, HeartPulse, MapPin, ScanLine, Search, Sparkles, Star, Stethoscope, Target, Upload, UserPlus } from "lucide-react";
 import { useState } from "react";
 
 import { PageHeader } from "@/components/shared/PageHeader";
@@ -892,7 +892,7 @@ function ImagesPage() {
                         </Link>
                         <Link to="/patient/telemedicine" className="flex-1 sm:flex-none">
                           <Button size="sm" variant="outline" className="gap-1.5 w-full">
-                            <Sparkles className="size-3 text-primary animate-pulse" />
+                            <Stethoscope className="size-3 text-primary animate-pulse" />
                             Telemedicine
                           </Button>
                         </Link>
