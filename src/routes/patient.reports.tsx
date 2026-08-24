@@ -439,6 +439,10 @@ ${350 + pdfLength}
       }
 
       // Automatically load the previous report analysis by default if none is active
+      const isReset = localStorage.getItem("meddoc_reports_reset_by_user") === "true";
+      if (isReset) {
+        return;
+      }
       const savedLastAnalysis = localStorage.getItem("meddoc_last_report_analysis");
       if (savedLastAnalysis) {
         try {
@@ -596,6 +600,7 @@ ${350 + pdfLength}
     try {
       const res = await analyseMedicalReport(fileName, imageBase64 || undefined);
       setResult(res);
+      localStorage.removeItem("meddoc_reports_reset_by_user");
       localStorage.setItem("meddoc_last_report_analysis", JSON.stringify(res));
       setPipelineStage(PIPELINE_STAGES.length + 1);
 
@@ -802,6 +807,7 @@ ${350 + pdfLength}
                                   try {
                                     const res = await analyseMedicalReport(rep.title);
                                     setResult(res);
+                                    localStorage.removeItem("meddoc_reports_reset_by_user");
                                     localStorage.setItem("meddoc_last_report_analysis", JSON.stringify(res));
                                   } catch (e) {
                                     toast.error("Failed to load report analysis.");
@@ -857,16 +863,38 @@ ${350 + pdfLength}
                   {result ? `${result.fileName}` : "Upload and run the extraction engine to display results."}
                 </CardDescription>
               </div>
-              {result && (
-                <div className="text-right">
-                  <Badge variant="secondary" className="bg-primary/10 text-primary border border-primary/20">
-                    {result.documentType}
-                  </Badge>
-                  <span className="block text-[10px] text-muted-foreground mt-1">
-                    Confidence: {(result.confidence * 100).toFixed(0)}%
-                  </span>
-                </div>
-              )}
+              <div className="flex items-center gap-3">
+                {result && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => {
+                      setResult(null);
+                      setImageBase64(null);
+                      setFileName("Uploaded Report");
+                      setPipelineStage(0);
+                      localStorage.removeItem("meddoc_last_report_analysis");
+                      localStorage.setItem("meddoc_reports_reset_by_user", "true");
+                      setSelectedCompareIds([]);
+                      toast.info("Report analysis section reset successfully.");
+                    }}
+                    className="h-8 px-2 text-xs font-bold text-muted-foreground hover:text-rose-600 gap-1.5 cursor-pointer hover:bg-rose-500/5 rounded-lg border border-border/40"
+                  >
+                    <RefreshCw className="size-3" />
+                    Reset
+                  </Button>
+                )}
+                {result && (
+                  <div className="text-right">
+                    <Badge variant="secondary" className="bg-primary/10 text-primary border border-primary/20">
+                      {result.documentType}
+                    </Badge>
+                    <span className="block text-[10px] text-muted-foreground mt-1">
+                      Confidence: {(result.confidence * 100).toFixed(0)}%
+                    </span>
+                  </div>
+                )}
+              </div>
             </div>
           </CardHeader>
           <CardContent className="space-y-5">
