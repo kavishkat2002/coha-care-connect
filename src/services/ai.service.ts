@@ -5,9 +5,11 @@
  */
 import { AI_DISCLAIMER, doctors, type Doctor } from "@/data/mock";
 import aiKnowledge from "@/data/ai_knowledge.json";
+import diseaseSymptoms from "@/data/disease_symptoms.json";
 import skinCancerModelMetrics from "@/data/skin_cancer_model_metrics.json";
 import skinCancerDatasetMetrics from "@/data/skin_cancer_dataset_metrics.json";
 import eyeCancerDatasetMetrics from "@/data/eye_cancer_dataset_metrics.json";
+import labTests from "@/data/lab_tests.json";
 
 export type RiskLevel = "low" | "moderate" | "elevated";
 
@@ -320,8 +322,10 @@ export function detectIntent(message: string) {
 // ──────────────────── Groq system prompt ────────────────────
 
 const CLINICAL_DATASET_BENCHMARK = JSON.stringify(aiKnowledge, null, 2);
+const LAB_TESTS_REFERENCE = JSON.stringify(labTests, null, 2);
 
-const SYMPTOM_SYSTEM_PROMPT = `You are an expert clinical AI physician built into MedDoc / Coha Care Connect. You converse with patients using the warm, empathetic, and thorough tone of an experienced attending doctor conducting a real medical consultation.
+function getSymptomSystemPrompt(dynamicClinicalDataset: string): string {
+  return `You are an expert clinical AI physician built into MedDoc / Coha Care Connect. You converse with patients using the warm, empathetic, and thorough tone of an experienced attending doctor conducting a real medical consultation.
 
 OXFORD HANDBOOK OF CLINICAL MEDICINE (OHCM) STANDARD CLINICAL RULES:
 - Align all clinical assessments, symptom interpretations, differential diagnostics, and triage recommendations with the evidence-based guidelines in the Oxford Handbook of Clinical Medicine (OHCM).
@@ -329,7 +333,11 @@ OXFORD HANDBOOK OF CLINICAL MEDICINE (OHCM) STANDARD CLINICAL RULES:
 - Always recommend evidence-based next steps (e.g. peak flow diary for asthma, home/ambulatory blood pressure monitoring for hypertension, HbA1c testing for diabetes, and strict urgent 2-week wait referral criteria for potential malignancies).
 
 CLINICAL DISEASE & SYMPTOMS KNOWLEDGE DATASET (Reference Guidelines):
-${CLINICAL_DATASET_BENCHMARK}
+${dynamicClinicalDataset}
+
+AVAILABLE LAB TESTS:
+${LAB_TESTS_REFERENCE}
+- If a lab test is clinically relevant for further investigation, recommend it from the list above. Provide the test name in your recommendations.
 
 DYNAMIC CLINICAL INTERVIEW PROTOCOL (Symptom-Aware & Intent-Driven):
 1. UNDERSTAND USER INTENT & SYMPTOMS DYNAMICALLY:
@@ -350,6 +358,10 @@ DYNAMIC CLINICAL INTERVIEW PROTOCOL (Symptom-Aware & Intent-Driven):
    - Speak naturally like a real human doctor in a consultation room.
    - NEVER use robotic script templates (DO NOT say "Thank you for describing your symptoms", "To help evaluate all of these symptoms accurately...").
    - NEVER refer to irrelevant disease categories (e.g., NEVER mention asthma/cough if the patient complains about kidney, abdominal, or skin issues). ALWAYS respond directly to what the patient described.
+4. FILE UPLOADS (IMAGES, PDFS, X-RAYS, LAB REPORTS):
+   - IF the user provides an image or document, YOUR ABSOLUTE FIRST PRIORITY must be to thoroughly analyze that specific file.
+   - You MUST provide a detailed interpretation, observation, and clinical analysis of the uploaded file in "plainLanguageSummary" BEFORE asking any follow-up questions.
+   - Explain what you see in the image/PDF clearly to the user, and base your assessment on that visual/document evidence. Only ask follow-up questions if absolutely necessary after giving your analysis.
 
 RESPONSE FORMAT:
 Return ONLY a valid JSON object matching this exact structure (no other text, no markdown):
@@ -379,6 +391,7 @@ Return ONLY a valid JSON object matching this exact structure (no other text, no
 
 SPECIAL CASES:
 - Emergency Red Flags (e.g., severe chest pain, sudden numbness, severe shortness of breath at rest, fainting, severe uncontrollable bleeding): Immediately set risk to "elevated" and advise urgent emergency care.`;
+}
 
 export async function analyseSymptoms(conversationHistory: ChatMessage[]): Promise<Assessment> {
   // @ts-ignore
@@ -403,6 +416,45 @@ export async function analyseSymptoms(conversationHistory: ChatMessage[]): Promi
   }
 
   if (apiKey && conversationHistory.length > 0) {
+    // Dynamically retrieve relevant diseases from the new dataset based on user symptoms
+    let dynamicDatasetString = CLINICAL_DATASET_BENCHMARK; // fallback
+    const queryLower = fullUserSymptomQuery.toLowerCase();
+    
+    // Scoring logic for diseases based on symptom overlap
+    const diseaseScores: { disease: string, score: number, symptoms: string[] }[] = [];
+    const allDiseases = Object.keys(diseaseSymptoms);
+    
+    for (const disease of allDiseases) {
+      const symptoms = (diseaseSymptoms as any)[disease] as string[];
+      let score = 0;
+      let matchedSymptoms = [];
+      for (const symptom of symptoms) {
+        if (queryLower.includes(symptom.toLowerCase())) {
+          score += 1;
+          matchedSymptoms.push(symptom);
+        }
+      }
+      if (score > 0) {
+        diseaseScores.push({ disease, score, symptoms });
+      }
+    }
+    
+    diseaseScores.sort((a, b) => b.score - a.score);
+    const topDiseases = diseaseScores.slice(0, 10);
+    
+    if (topDiseases.length > 0) {
+      const topContext = topDiseases.reduce((acc, d) => {
+        acc[d.disease] = {
+          matched_symptoms_in_query: d.score,
+          typical_symptoms: d.symptoms
+        };
+        return acc;
+      }, {} as any);
+      dynamicDatasetString = JSON.stringify(topContext, null, 2);
+    }
+    
+    const finalSystemPrompt = getSymptomSystemPrompt(dynamicDatasetString) + searchContext;
+
     try {
       const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
         method: "POST",
@@ -413,7 +465,7 @@ export async function analyseSymptoms(conversationHistory: ChatMessage[]): Promi
         body: JSON.stringify({
           model: hasImages ? "llama-3.2-11b-vision-preview" : "llama-3.3-70b-versatile",
           messages: [
-            { role: "system", content: SYMPTOM_SYSTEM_PROMPT + searchContext },
+            { role: "system", content: finalSystemPrompt },
             ...conversationHistory.map((m) => {
               if (m.imageBase64) {
                 return {
@@ -464,7 +516,7 @@ export async function analyseSymptoms(conversationHistory: ChatMessage[]): Promi
 
   // Fallback / Offline Logic — Intent-Driven Symptom-Aware Consultation
   await delay(800);
-  const hit = detectIntent(latestText);
+  const hit = detectIntent(fullUserSymptomQuery);
 
   if (hit.type === "book_specific_doctor") {
     const docName = (hit as any).doctorName;
@@ -583,6 +635,7 @@ export async function analyseSymptoms(conversationHistory: ChatMessage[]): Promi
   const isHeadache = hit.condition === "Hypertension" || queryLower.includes("headache") || queryLower.includes("dizzy");
   const isSkin = hit.condition === "Skin Condition" || queryLower.includes("rash") || queryLower.includes("skin") || queryLower.includes("mole");
   const isBreast = hit.condition === "Breast Condition" || queryLower.includes("breast") || queryLower.includes("lump") || queryLower.includes("mammogram");
+  const isOral = hit.condition === "Oral Condition" || queryLower.includes("mouth") || queryLower.includes("ulcer") || queryLower.includes("gum") || queryLower.includes("throat");
 
   // Check if patient has already provided comprehensive clinical context (e.g. detailed history + symptoms)
   const hasDetailedInfo = (queryLower.includes("history") || queryLower.includes("father") || queryLower.includes("mother") || queryLower.includes("blood pressure") || queryLower.includes("medication")) && (userTurnCount >= 3 || queryLower.length > 250);
@@ -626,6 +679,13 @@ export async function analyseSymptoms(conversationHistory: ChatMessage[]): Promi
         "Constant pain on one side, no lump",
         "Cyclic pain (comes and goes with cycle)",
         "Pain accompanied by a lump or swelling"
+      ];
+    } else if (isOral) {
+      doctorMessage = "I understand. Oral sores or mouth ulcers that persist for weeks need careful evaluation. To help me understand what's going on, how painful is it on a scale of 1 to 10, and have you noticed it changing in size or shape?";
+      quickReplies = [
+        "Very painful (7-10/10) and growing",
+        "Moderate pain (4-6/10) but stable",
+        "Mild pain but it won't heal"
       ];
     } else {
       quickReplies = [
@@ -686,6 +746,13 @@ export async function analyseSymptoms(conversationHistory: ChatMessage[]): Promi
         "Redness or skin dimpling present",
         "Family history of breast cancer/cysts"
       ];
+    } else if (isOral) {
+      doctorMessage = "Thank you for sharing that severity. Next, have you noticed any other symptoms like difficulty swallowing, bleeding from the gums, or do you have a history of smoking or using tobacco products?";
+      quickReplies = [
+        "Yes, I have difficulty swallowing or bleeding",
+        "Yes, I use tobacco products",
+        "No other symptoms or tobacco use"
+      ];
     } else {
       quickReplies = [
         "Worse at night or early morning",
@@ -713,7 +780,7 @@ export async function analyseSymptoms(conversationHistory: ChatMessage[]): Promi
   }
 
   // Turn 3+ OR Detailed Info Provided: Final Assessment & Care Recommendation
-  let finalDiagnosis = hit.condition !== "Unknown" ? hit.condition : "Renal / Urinary Condition";
+  let finalDiagnosis = hit.condition !== "Unknown" ? hit.condition : "General Illness";
   let finalExplanation = `Thank you for sharing your symptom details. Based on your report of symptoms, your presentation aligns with a ${finalDiagnosis}. Consulting a physician for evaluation is recommended.`;
 
   if (isKidney) {
@@ -728,6 +795,9 @@ export async function analyseSymptoms(conversationHistory: ChatMessage[]): Promi
   } else if (isBreast) {
     finalDiagnosis = "Breast Condition / Mastalgia Pattern";
     finalExplanation = `Thank you for sharing your symptom details. Based on your report of breast pain or localized discomfort, cyclic changes, or physical variations, your symptoms show patterns consistent with a Breast Condition (such as cyclic/non-cyclic mastalgia or fibroadenoma pattern). We recommend consulting a Gynaecologist or specialist for a physical examination and mammogram/ultrasound imaging.`;
+  } else if (isOral) {
+    finalDiagnosis = "Oral Lesion / Persistent Ulcer";
+    finalExplanation = `Thank you for sharing your symptom details. Based on your report of a persistent mouth ulcer lasting for weeks, along with the severity and lack of healing, your presentation shows patterns that require clinical evaluation. A non-healing ulcer could be related to an infection, nutritional deficiency, or in rare cases, precancerous changes. Consulting a Dentist or Oral Medicine specialist for a direct examination is strongly recommended.`;
   }
 
   return {
@@ -868,6 +938,10 @@ export async function analyseMedicalImage(
 
 EXTERNAL MEDICAL RESOURCE VERIFICATION CONTEXT:
 ${externalSearchSnippet}
+
+AVAILABLE LAB TESTS:
+${LAB_TESTS_REFERENCE}
+- If a lab test is clinically relevant for further investigation, recommend it from the list above. Provide the test name in your recommendations.
 
 ${metadata ? `PATIENT CLINICAL CONTEXT & HISTORY (Multimodal Integration):
 - Patient Age: ${metadata.age || "Not Specified"}
@@ -2120,6 +2194,7 @@ Follow these structured stages:
 4. Abnormality Detection: Detect abnormal values (low, high, critical).
 5. Pattern Recognition: Differentiate individual abnormal readings from general clinical patterns (e.g., microcytic anemia, metabolic syndrome, hepatic injury).
 6. Evidence & Safety Check: Formulate plain language summaries without offering definitive diagnostic absolute certainties. Suggest the best medical specialty.
+7. Lab Test Recommendations: Reference the following available lab tests list and recommend any follow-up tests if clinically relevant: ${LAB_TESTS_REFERENCE}
 
 Return ONLY a valid JSON object matching this exact structure (and absolutely no other text, thinking blocks, or markdown tags):
 {

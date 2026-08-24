@@ -1,0 +1,6937 @@
+{
+  "panic disorder": [
+    "depressive or psychotic symptoms",
+    "dizziness",
+    "insomnia",
+    "abnormal involuntary movements",
+    "breathing fast",
+    "chest tightness",
+    "irregular heartbeat",
+    "anxiety and nervousness",
+    "depression",
+    "palpitations",
+    "shortness of breath"
+  ],
+  "vocal cord polyp": [
+    "throat swelling",
+    "throat feels tight",
+    "difficulty speaking",
+    "hoarse voice",
+    "sore throat"
+  ],
+  "turner syndrome": [
+    "depression",
+    "emotional symptoms"
+  ],
+  "cryptorchidism": [
+    "lack of growth",
+    "symptoms of the scrotum and testes",
+    "swelling of scrotum"
+  ],
+  "poisoning due to ethylene glycol": [
+    "depression",
+    "depressive or psychotic symptoms",
+    "fainting",
+    "abusing alcohol"
+  ],
+  "atrophic vaginitis": [
+    "blood in urine",
+    "vaginal itching",
+    "suprapubic pain",
+    "pain during intercourse",
+    "painful urination",
+    "frequent urination",
+    "involuntary urination",
+    "vaginal discharge"
+  ],
+  "fracture of the hand": [
+    "arm stiffness or tightness",
+    "wrist swelling",
+    "arm pain",
+    "wrist stiffness or tightness",
+    "hand or finger pain",
+    "wrist pain",
+    "hand or finger swelling",
+    "hand or finger stiffness or tightness"
+  ],
+  "cellulitis or abscess of mouth": [
+    "throat swelling",
+    "abnormal appearing skin",
+    "sore throat",
+    "lip swelling",
+    "skin growth",
+    "toothache",
+    "difficulty in swallowing"
+  ],
+  "eye alignment disorder": [
+    "lack of growth",
+    "irregular appearing scalp",
+    "double vision",
+    "symptoms of eye",
+    "eye moves abnormally",
+    "cross-eyed",
+    "eye deviation",
+    "pain in eye",
+    "diminished vision"
+  ],
+  "headache after lumbar puncture": [
+    "painful urination",
+    "nausea",
+    "headache",
+    "vomiting",
+    "neck pain",
+    "low back pain",
+    "dizziness"
+  ],
+  "pyloric stenosis": [
+    "arm stiffness or tightness",
+    "cough",
+    "vomiting"
+  ],
+  "salivary gland disorder": [
+    "cough",
+    "throat feels tight",
+    "sore throat",
+    "swollen lymph nodes"
+  ],
+  "osteochondrosis": [
+    "elbow pain",
+    "hand or finger pain",
+    "bowlegged or knock-kneed",
+    "ankle pain",
+    "knee pain",
+    "foot or toe pain"
+  ],
+  "injury to the knee": [
+    "foot or toe swelling",
+    "leg pain",
+    "knee weakness",
+    "knee pain",
+    "problems with movement"
+  ],
+  "metabolic disorder": [
+    "jaundice",
+    "arm stiffness or tightness",
+    "smoking problems",
+    "weight gain"
+  ],
+  "vaginitis": [
+    "pain during intercourse",
+    "lower abdominal pain",
+    "vaginal pain",
+    "vaginal discharge",
+    "pelvic pain",
+    "vaginal redness",
+    "sharp abdominal pain",
+    "painful urination",
+    "pain during pregnancy",
+    "suprapubic pain",
+    "vaginal itching"
+  ],
+  "sick sinus syndrome": [
+    "shortness of breath",
+    "increased heart rate",
+    "irregular heartbeat",
+    "dizziness",
+    "fainting",
+    "palpitations",
+    "decreased heart rate",
+    "weakness"
+  ],
+  "tinnitus of unknown cause": [
+    "hoarse voice",
+    "itchy ear(s)",
+    "ringing in ear",
+    "diminished hearing",
+    "plugged feeling in ear",
+    "dizziness",
+    "headache",
+    "ear pain"
+  ],
+  "glaucoma": [
+    "foreign body sensation in eye",
+    "itchiness of eye",
+    "itchy eyelid",
+    "lacrimation",
+    "symptoms of eye",
+    "spots or clouds in vision",
+    "eye redness",
+    "diminished vision",
+    "pain in eye"
+  ],
+  "eating disorder": [
+    "abusing alcohol",
+    "insomnia",
+    "acne or pimples",
+    "depression",
+    "difficulty eating",
+    "anxiety and nervousness",
+    "depressive or psychotic symptoms",
+    "decreased appetite",
+    "weight gain"
+  ],
+  "transient ischemic attack": [
+    "focal weakness",
+    "depressive or psychotic symptoms",
+    "headache",
+    "dizziness",
+    "loss of sensation",
+    "difficulty speaking",
+    "symptoms of the face",
+    "paresthesia",
+    "disturbance of memory",
+    "weakness"
+  ],
+  "pyelonephritis": [
+    "sharp abdominal pain",
+    "low back pain",
+    "frequent urination",
+    "side pain",
+    "nausea",
+    "lower abdominal pain",
+    "painful urination",
+    "vomiting",
+    "blood in urine",
+    "suprapubic pain",
+    "back pain"
+  ],
+  "rotator cuff injury": [
+    "hand or finger stiffness or tightness",
+    "arm stiffness or tightness",
+    "shoulder pain",
+    "shoulder weakness",
+    "arm pain",
+    "shoulder stiffness or tightness"
+  ],
+  "chronic pain disorder": [
+    "pelvic pain",
+    "leg pain",
+    "low back pain",
+    "ache all over",
+    "back pain",
+    "knee pain",
+    "headache",
+    "hip pain",
+    "sharp abdominal pain",
+    "shoulder pain"
+  ],
+  "problem during pregnancy": [
+    "pelvic pain",
+    "lower abdominal pain",
+    "problems during pregnancy",
+    "back pain",
+    "spotting or bleeding during pregnancy",
+    "pain during pregnancy",
+    "nausea",
+    "vomiting",
+    "cramps and spasms",
+    "headache",
+    "sharp abdominal pain"
+  ],
+  "liver cancer": [
+    "groin mass",
+    "decreased appetite",
+    "sharp abdominal pain",
+    "stomach bloating",
+    "upper abdominal pain"
+  ],
+  "atelectasis": [
+    "headache",
+    "dizziness",
+    "sore throat",
+    "shortness of breath",
+    "cough",
+    "sharp chest pain"
+  ],
+  "injury to the hand": [
+    "wrist swelling",
+    "hand or finger swelling",
+    "hand or finger pain",
+    "joint pain",
+    "wrist pain",
+    "hand or finger stiffness or tightness",
+    "skin growth"
+  ],
+  "choledocholithiasis": [
+    "jaundice",
+    "decreased appetite",
+    "sharp abdominal pain",
+    "side pain",
+    "vomiting",
+    "chills",
+    "sharp chest pain",
+    "nausea",
+    "upper abdominal pain"
+  ],
+  "injury to the hip": [
+    "hand or finger swelling",
+    "neck pain",
+    "leg pain",
+    "hip pain"
+  ],
+  "cirrhosis": [
+    "vomiting blood",
+    "blood in stool",
+    "upper abdominal pain",
+    "abdominal distention",
+    "shortness of breath",
+    "peripheral edema",
+    "regurgitation",
+    "regurgitation.1",
+    "sharp abdominal pain"
+  ],
+  "thoracic aortic aneurysm": [
+    "jaundice",
+    "shortness of breath",
+    "sharp chest pain",
+    "sharp abdominal pain",
+    "fatigue",
+    "chest tightness",
+    "dizziness"
+  ],
+  "subdural hemorrhage": [
+    "irritable infant",
+    "dizziness",
+    "vomiting",
+    "facial pain",
+    "depressive or psychotic symptoms",
+    "headache"
+  ],
+  "diabetic retinopathy": [
+    "abnormal movement of eyelid",
+    "foreign body sensation in eye",
+    "double vision",
+    "symptoms of eye",
+    "itchiness of eye",
+    "diminished vision",
+    "spots or clouds in vision",
+    "lacrimation",
+    "pain in eye"
+  ],
+  "fibromyalgia": [
+    "low back pain",
+    "hip pain",
+    "leg pain",
+    "arm pain",
+    "muscle pain",
+    "neck pain",
+    "headache",
+    "ache all over",
+    "sharp chest pain",
+    "back pain"
+  ],
+  "ischemia of the bowel": [
+    "nausea",
+    "blood in stool",
+    "retention of urine",
+    "burning abdominal pain",
+    "vomiting",
+    "sharp abdominal pain",
+    "constipation"
+  ],
+  "fetal alcohol syndrome": [
+    "depressive or psychotic symptoms",
+    "emotional symptoms",
+    "excessive anger"
+  ],
+  "peritonitis": [
+    "back pain",
+    "side pain",
+    "shortness of breath",
+    "intermenstrual bleeding",
+    "groin mass",
+    "vomiting",
+    "sharp abdominal pain",
+    "nausea"
+  ],
+  "injury to the abdomen": [
+    "leg pain",
+    "back pain",
+    "blood in urine",
+    "sharp abdominal pain",
+    "sharp chest pain"
+  ],
+  "acute pancreatitis": [
+    "burning abdominal pain",
+    "nausea",
+    "vomiting",
+    "abusing alcohol",
+    "hemoptysis",
+    "diarrhea",
+    "upper abdominal pain",
+    "back pain",
+    "sharp abdominal pain",
+    "lower body pain",
+    "side pain",
+    "sharp chest pain"
+  ],
+  "thrombophlebitis": [
+    "skin swelling",
+    "arm swelling",
+    "arm pain",
+    "foot or toe pain",
+    "ache all over",
+    "lymphedema",
+    "leg pain",
+    "skin on leg or foot looks infected",
+    "leg swelling"
+  ],
+  "asthma": [
+    "coughing up sputum",
+    "nasal congestion",
+    "allergic reaction",
+    "wheezing",
+    "cough",
+    "difficulty breathing",
+    "fever",
+    "sharp chest pain",
+    "coryza",
+    "shortness of breath",
+    "chest tightness"
+  ],
+  "foreign body in the vagina": [
+    "emotional symptoms",
+    "painful urination",
+    "vaginal discharge"
+  ],
+  "restless leg syndrome": [
+    "insomnia",
+    "fatigue",
+    "headache",
+    "abnormal involuntary movements",
+    "sleepiness",
+    "depression",
+    "leg pain",
+    "apnea"
+  ],
+  "emphysema": [
+    "shortness of breath",
+    "cough",
+    "emotional symptoms",
+    "sharp chest pain"
+  ],
+  "cysticercosis": [
+    "shortness of breath",
+    "elbow weakness",
+    "seizures",
+    "headache"
+  ],
+  "induced abortion": [
+    "intermenstrual bleeding",
+    "groin pain",
+    "sharp abdominal pain",
+    "pain during pregnancy",
+    "spotting or bleeding during pregnancy",
+    "vaginal discharge",
+    "cramps and spasms",
+    "lower abdominal pain"
+  ],
+  "teething syndrome": [
+    "cough",
+    "ear pain",
+    "symptoms of infants",
+    "redness in ear",
+    "diarrhea",
+    "fever",
+    "nasal congestion",
+    "decreased appetite",
+    "temper problems"
+  ],
+  "infectious gastroenteritis": [
+    "nausea",
+    "decreased appetite",
+    "diarrhea",
+    "headache",
+    "chills",
+    "vomiting",
+    "burning abdominal pain",
+    "fever",
+    "sharp abdominal pain",
+    "fluid retention",
+    "flu-like syndrome",
+    "blood in stool"
+  ],
+  "acute sinusitis": [
+    "sore throat",
+    "coryza",
+    "sinus congestion",
+    "ear pain",
+    "frontal headache",
+    "cough",
+    "facial pain",
+    "coughing up sputum",
+    "fever",
+    "nasal congestion",
+    "painful sinuses"
+  ],
+  "substance-related mental disorder": [
+    "hostile behavior",
+    "insomnia",
+    "anxiety and nervousness",
+    "depressive or psychotic symptoms",
+    "feeling ill",
+    "delusions or hallucinations",
+    "drug abuse"
+  ],
+  "postpartum depression": [
+    "drug abuse",
+    "problems during pregnancy",
+    "delusions or hallucinations",
+    "depression",
+    "pain during pregnancy",
+    "anxiety and nervousness",
+    "depressive or psychotic symptoms",
+    "intermenstrual bleeding",
+    "excessive anger"
+  ],
+  "coronary atherosclerosis": [
+    "irregular heartbeat",
+    "palpitations",
+    "burning chest pain",
+    "sharp chest pain",
+    "fatigue",
+    "shortness of breath",
+    "leg cramps or spasms",
+    "chest tightness"
+  ],
+  "spondylitis": [
+    "stiffness all over",
+    "side pain",
+    "low back pain",
+    "back pain",
+    "or spasms\"",
+    "lower body pain",
+    "leg pain",
+    "hip pain",
+    "neck pain"
+  ],
+  "pituitary adenoma": [
+    "nausea",
+    "pain in eye",
+    "headache",
+    "muscle swelling"
+  ],
+  "uterine fibroids": [
+    "involuntary urination",
+    "intermenstrual bleeding",
+    "heavy menstrual flow",
+    "long menstrual periods",
+    "cramps and spasms",
+    "lower abdominal pain",
+    "pelvic pain",
+    "sharp abdominal pain",
+    "nosebleed"
+  ],
+  "idiopathic nonmenstrual bleeding": [
+    "painful urination",
+    "sharp abdominal pain",
+    "vaginal discharge",
+    "back mass or lump",
+    "intermenstrual bleeding",
+    "long menstrual periods"
+  ],
+  "chalazion": [
+    "mass on eyelid",
+    "diminished vision",
+    "frequent menstruation",
+    "lacrimation",
+    "foreign body sensation in eye",
+    "sweating",
+    "eye redness",
+    "pain in eye",
+    "symptoms of eye",
+    "skin growth"
+  ],
+  "ovarian torsion": [
+    "skin swelling",
+    "sharp abdominal pain",
+    "lower abdominal pain",
+    "groin mass",
+    "pelvic pain",
+    "ache all over"
+  ],
+  "retinopathy due to high blood pressure": [
+    "pus draining from ear",
+    "foreign body sensation in eye",
+    "pain in eye",
+    "diminished vision",
+    "symptoms of eye",
+    "spots or clouds in vision"
+  ],
+  "vaginal yeast infection": [
+    "suprapubic pain",
+    "symptoms of bladder",
+    "vaginal itching",
+    "vaginal pain",
+    "lower abdominal pain",
+    "vulvar irritation",
+    "painful urination",
+    "vaginal discharge",
+    "vaginal redness",
+    "sharp abdominal pain"
+  ],
+  "mastoiditis": [
+    "diminished hearing",
+    "nasal congestion",
+    "cough",
+    "dizziness",
+    "ear pain",
+    "facial pain"
+  ],
+  "lung contusion": [
+    "shortness of breath",
+    "sharp chest pain",
+    "ache all over",
+    "back pain"
+  ],
+  "hypertrophic obstructive cardiomyopathy (hocm)": [
+    "anxiety and nervousness",
+    "sharp chest pain",
+    "emotional symptoms"
+  ],
+  "ingrown toe nail": [
+    "neck swelling",
+    "unwanted hair",
+    "foot or toe swelling",
+    "sweating",
+    "skin on leg or foot looks infected",
+    "hurts to breath",
+    "abnormal appearing skin",
+    "skin growth",
+    "foot or toe pain",
+    "nailbiting"
+  ],
+  "pulmonary eosinophilia": [
+    "paresthesia",
+    "dizziness",
+    "cough",
+    "nasal congestion",
+    "sharp chest pain",
+    "fever",
+    "shortness of breath"
+  ],
+  "corneal disorder": [
+    "double vision",
+    "white discharge from eye",
+    "spots or clouds in vision",
+    "itchiness of eye",
+    "diminished vision",
+    "foreign body sensation in eye",
+    "pain in eye",
+    "lacrimation",
+    "eye redness",
+    "symptoms of eye"
+  ],
+  "foreign body in the gastrointestinal tract": [
+    "recent weight loss",
+    "lump in throat",
+    "vomiting blood",
+    "difficulty in swallowing",
+    "vomiting",
+    "sharp abdominal pain"
+  ],
+  "endophthalmitis": [
+    "painful urination",
+    "diminished vision",
+    "pain in eye",
+    "eye redness",
+    "sweating",
+    "itchiness of eye"
+  ],
+  "intestinal malabsorption": [
+    "cough",
+    "flatulence",
+    "vomiting",
+    "diarrhea",
+    "nasal congestion",
+    "allergic reaction",
+    "sharp abdominal pain"
+  ],
+  "viral warts": [
+    "lip swelling",
+    "skin swelling",
+    "skin irritation",
+    "skin lesion",
+    "skin growth",
+    "abnormal appearing skin",
+    "skin moles",
+    "acne or pimples",
+    "itchy scalp"
+  ],
+  "hyperhidrosis": [
+    "cough",
+    "skin irritation",
+    "fever",
+    "infertility",
+    "acne or pimples"
+  ],
+  "stroke": [
+    "headache",
+    "problems with movement",
+    "focal weakness",
+    "dizziness",
+    "slurring words",
+    "abnormal involuntary movements",
+    "seizures",
+    "difficulty speaking",
+    "disturbance of memory",
+    "depressive or psychotic symptoms"
+  ],
+  "pilonidal cyst": [
+    "pelvic pain",
+    "irregular appearing scalp",
+    "bones are painful",
+    "skin growth",
+    "skin swelling",
+    "pain of the anus",
+    "ache all over",
+    "lower body pain"
+  ],
+  "crushing injury": [
+    "neck swelling",
+    "hand or finger swelling",
+    "knee swelling",
+    "hand or finger stiffness or tightness",
+    "foot or toe pain",
+    "hand or finger pain"
+  ],
+  "normal pressure hydrocephalus": [
+    "palpitations",
+    "depressive or psychotic symptoms",
+    "problems with movement",
+    "headache"
+  ],
+  "alopecia": [
+    "symptoms of bladder",
+    "skin swelling",
+    "acne or pimples",
+    "irregular appearing scalp",
+    "foot or toe cramps or spasms",
+    "feeling ill",
+    "skin growth",
+    "hip swelling"
+  ],
+  "hashimoto thyroiditis": [
+    "abnormal involuntary movements",
+    "weight gain"
+  ],
+  "flat feet": [
+    "skin swelling",
+    "problems with movement",
+    "foot or toe pain",
+    "ankle pain",
+    "knee pain"
+  ],
+  "nonalcoholic liver disease (nash)": [
+    "mouth ulcer",
+    "sharp abdominal pain",
+    "dizziness",
+    "nausea",
+    "weight gain"
+  ],
+  "hemarthrosis": [
+    "frequent urination",
+    "elbow weakness",
+    "knee pain",
+    "knee swelling"
+  ],
+  "pelvic organ prolapse": [
+    "blood in urine",
+    "intermenstrual bleeding",
+    "involuntary urination",
+    "frequent urination",
+    "suprapubic pain",
+    "vaginal pain",
+    "eyelid lesion or rash",
+    "retention of urine",
+    "vaginal discharge"
+  ],
+  "fracture of the arm": [
+    "shoulder stiffness or tightness",
+    "wrist swelling",
+    "arm pain",
+    "elbow pain",
+    "premenstrual tension or irritability",
+    "shoulder pain",
+    "arm swelling",
+    "wrist pain",
+    "arm stiffness or tightness",
+    "wrist stiffness or tightness"
+  ],
+  "coagulation (bleeding) disorder": [
+    "blood in urine",
+    "melena",
+    "knee swelling",
+    "leg pain",
+    "eye redness"
+  ],
+  "intracranial hemorrhage": [
+    "depressive or psychotic symptoms",
+    "abnormal involuntary movements",
+    "vomiting",
+    "headache",
+    "difficulty speaking",
+    "dizziness",
+    "seizures",
+    "diminished vision"
+  ],
+  "hyperkalemia": [
+    "decreased heart rate",
+    "depressive or psychotic symptoms",
+    "weakness",
+    "feeling ill",
+    "dizziness",
+    "nausea",
+    "shortness of breath",
+    "sharp chest pain",
+    "vomiting",
+    "difficulty in swallowing"
+  ],
+  "cornea infection": [
+    "lip swelling",
+    "spots or clouds in vision",
+    "diminished vision",
+    "pain in eye",
+    "eye burns or stings",
+    "eye redness",
+    "lacrimation",
+    "foreign body sensation in eye",
+    "symptoms of eye",
+    "itchiness of eye",
+    "sweating"
+  ],
+  "abscess of the lung": [
+    "depressive or psychotic symptoms",
+    "shortness of breath",
+    "itchy eyelid",
+    "cough"
+  ],
+  "dengue fever": [
+    "sore throat",
+    "wrist pain"
+  ],
+  "chronic sinusitis": [
+    "cough",
+    "ear pain",
+    "headache",
+    "painful sinuses",
+    "congestion in chest",
+    "frontal headache",
+    "sinus congestion",
+    "sore throat",
+    "facial pain",
+    "fever"
+  ],
+  "cholesteatoma": [
+    "nasal congestion",
+    "diminished hearing",
+    "pus draining from ear",
+    "muscle swelling"
+  ],
+  "volvulus": [
+    "depressive or psychotic symptoms",
+    "vomiting",
+    "elbow weakness",
+    "sharp abdominal pain"
+  ],
+  "injury to the finger": [
+    "swelling of scrotum",
+    "hand or finger pain",
+    "hand or finger swelling",
+    "hand or finger stiffness or tightness"
+  ],
+  "poisoning due to analgesics": [
+    "skin swelling",
+    "depression",
+    "abusing alcohol",
+    "depressive or psychotic symptoms",
+    "vomiting",
+    "problems during pregnancy"
+  ],
+  "atrial fibrillation": [
+    "palpitations",
+    "dizziness",
+    "increased heart rate",
+    "shortness of breath",
+    "sharp chest pain",
+    "decreased heart rate",
+    "fatigue",
+    "irregular heartbeat"
+  ],
+  "pinworm infection": [
+    "constipation",
+    "retention of urine",
+    "mass on ear",
+    "pain of the anus",
+    "painful urination",
+    "sharp abdominal pain"
+  ],
+  "urethral valves": [
+    "suprapubic pain",
+    "elbow weakness",
+    "lower abdominal pain",
+    "side pain",
+    "sharp abdominal pain"
+  ],
+  "open wound of the neck": [
+    "skin swelling",
+    "ache all over",
+    "skin lesion",
+    "peripheral edema",
+    "abnormal appearing skin"
+  ],
+  "achalasia": [
+    "chest tightness",
+    "cough",
+    "throat feels tight",
+    "difficulty in swallowing",
+    "sharp chest pain"
+  ],
+  "conductive hearing loss": [
+    "hoarse voice",
+    "ear pain",
+    "plugged feeling in ear",
+    "elbow stiffness or tightness",
+    "difficulty speaking",
+    "diminished hearing",
+    "redness in ear",
+    "ringing in ear",
+    "fluid in ear",
+    "dizziness"
+  ],
+  "abdominal hernia": [
+    "symptoms of the scrotum and testes",
+    "lower abdominal pain",
+    "sharp abdominal pain",
+    "hand or finger weakness",
+    "upper abdominal pain",
+    "ache all over",
+    "swollen abdomen",
+    "groin mass",
+    "regurgitation",
+    "regurgitation.1"
+  ],
+  "cerebral palsy": [
+    "infant feeding problem",
+    "blindness",
+    "lack of growth",
+    "cramps and spasms",
+    "problems with movement",
+    "seizures"
+  ],
+  "marijuana abuse": [
+    "abusing alcohol",
+    "excessive anger",
+    "elbow stiffness or tightness",
+    "hostile behavior",
+    "fears and phobias",
+    "drug abuse",
+    "depressive or psychotic symptoms",
+    "depression",
+    "delusions or hallucinations",
+    "difficulty speaking",
+    "temper problems",
+    "anxiety and nervousness"
+  ],
+  "cryptococcosis": [
+    "depressive or psychotic symptoms",
+    "cross-eyed"
+  ],
+  "obesity": [
+    "weight gain",
+    "sleepiness",
+    "excessive appetite"
+  ],
+  "indigestion": [
+    "stomach bloating",
+    "heartburn",
+    "sharp abdominal pain",
+    "diarrhea",
+    "vomiting",
+    "nausea",
+    "sharp chest pain",
+    "decreased appetite",
+    "burning abdominal pain"
+  ],
+  "bursitis": [
+    "premenstrual tension or irritability",
+    "knee pain",
+    "hip pain",
+    "arm swelling",
+    "arm pain",
+    "elbow pain",
+    "arm stiffness or tightness",
+    "knee swelling",
+    "shoulder stiffness or tightness",
+    "leg pain",
+    "leg swelling",
+    "shoulder pain"
+  ],
+  "esophageal cancer": [
+    "sharp abdominal pain",
+    "stomach bloating",
+    "shortness of breath",
+    "decreased appetite",
+    "hoarse voice"
+  ],
+  "pulmonary congestion": [
+    "cough",
+    "chest tightness",
+    "leg swelling",
+    "sharp chest pain",
+    "nasal congestion",
+    "shortness of breath",
+    "weakness",
+    "fever",
+    "decreased heart rate"
+  ],
+  "juvenile rheumatoid arthritis": [
+    "wrist swelling",
+    "hand or finger pain",
+    "joint pain",
+    "back pain",
+    "knee pain"
+  ],
+  "actinic keratosis": [
+    "symptoms of the face",
+    "irregular appearing scalp",
+    "hurts to breath",
+    "skin moles",
+    "symptoms of bladder",
+    "abnormal appearing skin",
+    "skin growth",
+    "\"skin dryness",
+    "foot or toe cramps or spasms",
+    "skin swelling",
+    "skin lesion"
+  ],
+  "acute otitis media": [
+    "diminished hearing",
+    "coryza",
+    "plugged feeling in ear",
+    "fever",
+    "redness in ear",
+    "ear pain",
+    "nasal congestion",
+    "cough",
+    "sore throat",
+    "fluid in ear"
+  ],
+  "astigmatism": [
+    "pain in eye",
+    "eye deviation",
+    "double vision",
+    "diminished vision",
+    "symptoms of eye",
+    "spots or clouds in vision",
+    "lacrimation",
+    "foreign body sensation in eye"
+  ],
+  "tuberous sclerosis": [
+    "depressive or psychotic symptoms",
+    "elbow weakness",
+    "seizures"
+  ],
+  "empyema": [
+    "sharp chest pain",
+    "leg pain",
+    "shortness of breath",
+    "cough"
+  ],
+  "presbyacusis": [
+    "emotional symptoms",
+    "ear pain",
+    "dizziness",
+    "diminished hearing",
+    "ringing in ear"
+  ],
+  "neonatal jaundice": [
+    "lack of growth",
+    "infant feeding problem",
+    "jaundice",
+    "changes in stool appearance",
+    "irritable infant"
+  ],
+  "chronic obstructive pulmonary disease (copd)": [
+    "sharp chest pain",
+    "coryza",
+    "coughing up sputum",
+    "cough",
+    "nasal congestion",
+    "wheezing",
+    "congestion in chest",
+    "fever",
+    "sore throat",
+    "shortness of breath",
+    "chest tightness"
+  ],
+  "dislocation of the elbow": [
+    "premenstrual tension or irritability",
+    "irritable infant",
+    "arm stiffness or tightness",
+    "wrist pain",
+    "arm pain",
+    "depression",
+    "elbow pain"
+  ],
+  "spondylosis": [
+    "neck pain",
+    "low back pain",
+    "ache all over",
+    "back pain",
+    "arm pain",
+    "loss of sensation",
+    "hip pain",
+    "lower body pain",
+    "knee pain",
+    "shoulder pain",
+    "paresthesia",
+    "leg pain"
+  ],
+  "herpangina": [
+    "swollen lymph nodes",
+    "insomnia",
+    "decreased appetite",
+    "vomiting",
+    "cough",
+    "fever",
+    "foot or toe cramps or spasms",
+    "mouth ulcer",
+    "sore throat"
+  ],
+  "injury to the shoulder": [
+    "shoulder stiffness or tightness",
+    "bones are painful",
+    "\"muscle cramps",
+    "arm stiffness or tightness",
+    "elbow pain",
+    "shoulder pain",
+    "back pain",
+    "neck pain",
+    "arm pain"
+  ],
+  "poisoning due to antidepressants": [
+    "abusing alcohol",
+    "drug abuse",
+    "depression",
+    "emotional symptoms"
+  ],
+  "infection of open wound": [
+    "hand or finger swelling",
+    "insomnia",
+    "leg pain",
+    "abnormal appearing skin"
+  ],
+  "deep vein thrombosis (dvt)": [
+    "leg cramps or spasms",
+    "abnormal appearing skin",
+    "leg stiffness or tightness",
+    "arm swelling",
+    "leg pain",
+    "leg swelling",
+    "foot or toe swelling"
+  ],
+  "protein deficiency": [
+    "depression",
+    "vomiting",
+    "smoking problems",
+    "weakness",
+    "nausea"
+  ],
+  "myoclonus": [
+    "insomnia",
+    "muscle swelling",
+    "seizures",
+    "abnormal involuntary movements"
+  ],
+  "bone spur of the calcaneous": [
+    "elbow pain",
+    "foot or toe pain",
+    "ankle pain",
+    "foot or toe swelling",
+    "leg pain"
+  ],
+  "von willebrand disease": [
+    "blood in stool",
+    "muscle swelling",
+    "low back cramps or spasms"
+  ],
+  "open wound of the back": [
+    "irregular heartbeat",
+    "weight gain",
+    "skin lesion",
+    "lower body pain"
+  ],
+  "heart block": [
+    "weight gain",
+    "weakness",
+    "irregular heartbeat",
+    "palpitations",
+    "fainting",
+    "chest tightness",
+    "peripheral edema",
+    "dizziness",
+    "shortness of breath",
+    "sharp chest pain"
+  ],
+  "colonic polyp": [
+    "flatulence",
+    "sharp abdominal pain",
+    "pain of the anus",
+    "blood in stool",
+    "diarrhea",
+    "heartburn",
+    "rectal bleeding",
+    "upper abdominal pain"
+  ],
+  "magnesium deficiency": [
+    "sharp chest pain",
+    "shortness of breath",
+    "dizziness",
+    "leg pain"
+  ],
+  "female infertility of unknown cause": [
+    "pain during intercourse",
+    "back mass or lump",
+    "unpredictable menstruation",
+    "long menstrual periods",
+    "scanty menstrual flow"
+  ],
+  "pericarditis": [
+    "palpitations",
+    "lower body pain",
+    "chest tightness",
+    "sharp abdominal pain",
+    "shortness of breath",
+    "sharp chest pain"
+  ],
+  "attention deficit hyperactivity disorder (adhd)": [
+    "hostile behavior",
+    "lack of growth",
+    "drug abuse",
+    "depression",
+    "disturbance of smell or taste",
+    "temper problems",
+    "depressive or psychotic symptoms",
+    "anxiety and nervousness",
+    "restlessness"
+  ],
+  "pulmonic valve disease": [
+    "shortness of breath",
+    "emotional symptoms"
+  ],
+  "tietze syndrome": [
+    "difficulty breathing",
+    "cough",
+    "nausea",
+    "sharp chest pain",
+    "chest tightness",
+    "rib pain",
+    "shortness of breath",
+    "loss of sensation"
+  ],
+  "cranial nerve palsy": [
+    "facial pain",
+    "difficulty speaking",
+    "abnormal movement of eyelid",
+    "headache",
+    "abnormal involuntary movements",
+    "double vision",
+    "diminished vision",
+    "symptoms of the face"
+  ],
+  "injury to the arm": [
+    "wrist swelling",
+    "loss of sensation",
+    "premenstrual tension or irritability",
+    "arm stiffness or tightness",
+    "elbow pain",
+    "joint pain",
+    "arm pain",
+    "bones are painful",
+    "wrist pain",
+    "arm swelling",
+    "hand or finger swelling",
+    "hand or finger pain"
+  ],
+  "conversion disorder": [
+    "anxiety and nervousness",
+    "cough",
+    "depression",
+    "seizures"
+  ],
+  "complex regional pain syndrome": [
+    "back pain",
+    "foot or toe pain",
+    "neck pain",
+    "leg pain",
+    "arm pain",
+    "hand or finger pain",
+    "paresthesia",
+    "low back pain",
+    "loss of sensation",
+    "abnormal involuntary movements",
+    "ache all over",
+    "problems with movement"
+  ],
+  "otosclerosis": [
+    "emotional symptoms",
+    "dizziness",
+    "diminished hearing"
+  ],
+  "injury to the trunk": [
+    "symptoms of the scrotum and testes",
+    "neck pain",
+    "back pain",
+    "shoulder pain",
+    "rib pain",
+    "lower body pain",
+    "low back pain",
+    "wrist pain",
+    "headache",
+    "sharp chest pain",
+    "bones are painful"
+  ],
+  "hypothyroidism": [
+    "wrist swelling",
+    "hot flashes",
+    "fatigue",
+    "weight gain",
+    "hip swelling",
+    "muscle pain"
+  ],
+  "primary insomnia": [
+    "anxiety and nervousness",
+    "sleepiness",
+    "abnormal involuntary movements",
+    "insomnia",
+    "abnormal breathing sounds",
+    "fatigue",
+    "delusions or hallucinations"
+  ],
+  "lice": [
+    "nasal congestion",
+    "lip sore",
+    "peeling",
+    "cough",
+    "symptoms of bladder"
+  ],
+  "vitamin b12 deficiency": [
+    "knee stiffness or tightness",
+    "hot flashes",
+    "disturbance of memory",
+    "problems with movement",
+    "fatigue"
+  ],
+  "diabetes": [
+    "weight gain",
+    "obsessions and compulsions"
+  ],
+  "vulvodynia": [
+    "back pain",
+    "vaginal discharge",
+    "lower abdominal pain",
+    "nausea",
+    "pelvic pain",
+    "pain during pregnancy",
+    "painful urination",
+    "side pain",
+    "burning abdominal pain",
+    "cramps and spasms",
+    "sharp abdominal pain",
+    "vaginal pain"
+  ],
+  "endometriosis": [
+    "hot flashes",
+    "lower abdominal pain",
+    "burning abdominal pain",
+    "intermenstrual bleeding",
+    "unpredictable menstruation",
+    "pelvic pain",
+    "heavy menstrual flow",
+    "sharp abdominal pain",
+    "nosebleed"
+  ],
+  "vasculitis": [
+    "foot or toe swelling",
+    "leg stiffness or tightness",
+    "dizziness",
+    "headache",
+    "skin lesion",
+    "lymphedema",
+    "leg pain",
+    "foot or toe cramps or spasms"
+  ],
+  "concussion": [
+    "nausea",
+    "headache",
+    "disturbance of memory",
+    "double vision",
+    "back pain",
+    "facial pain",
+    "sleepiness",
+    "rib pain",
+    "vomiting",
+    "neck pain",
+    "difficulty speaking",
+    "dizziness"
+  ],
+  "oral leukoplakia": [
+    "skin swelling",
+    "tongue lesions",
+    "elbow weakness"
+  ],
+  "chronic kidney disease": [
+    "fatigue",
+    "feeling cold",
+    "peripheral edema",
+    "symptoms of the kidneys",
+    "shortness of breath"
+  ],
+  "bladder disorder": [
+    "painful urination",
+    "lower abdominal pain",
+    "frequent urination",
+    "sharp abdominal pain",
+    "suprapubic pain",
+    "eyelid lesion or rash",
+    "retention of urine",
+    "blood in urine",
+    "involuntary urination"
+  ],
+  "chorioretinitis": [
+    "double vision",
+    "muscle swelling",
+    "pain in eye",
+    "diminished vision",
+    "spots or clouds in vision"
+  ],
+  "priapism": [
+    "abusing alcohol",
+    "mouth pain",
+    "painful urination",
+    "elbow weakness"
+  ],
+  "myositis": [
+    "hip pain",
+    "problems with movement",
+    "headache",
+    "leg pain",
+    "knee pain",
+    "loss of sensation"
+  ],
+  "mononucleosis": [
+    "cough",
+    "swollen lymph nodes",
+    "feeling ill",
+    "sore throat",
+    "fever",
+    "headache",
+    "foot or toe cramps or spasms",
+    "nasal congestion"
+  ],
+  "neuralgia": [
+    "headache",
+    "hip pain",
+    "back pain",
+    "loss of sensation",
+    "neck pain",
+    "shoulder pain",
+    "low back pain",
+    "arm pain",
+    "ache all over",
+    "leg pain"
+  ],
+  "polycystic kidney disease": [
+    "retention of urine",
+    "side pain",
+    "back pain",
+    "sharp abdominal pain",
+    "blood in urine",
+    "low back pain",
+    "kidney mass",
+    "skin growth"
+  ],
+  "bipolar disorder": [
+    "insomnia",
+    "abusing alcohol",
+    "depression",
+    "delusions or hallucinations",
+    "depressive or psychotic symptoms",
+    "excessive anger",
+    "leg lump or mass",
+    "fears and phobias",
+    "anxiety and nervousness",
+    "temper problems"
+  ],
+  "amyloidosis": [
+    "anxiety and nervousness",
+    "wrist weakness",
+    "shortness of breath"
+  ],
+  "chronic inflammatory demyelinating polyneuropathy (cidp)": [
+    "dizziness",
+    "problems with movement",
+    "weakness",
+    "loss of sensation"
+  ],
+  "gastroesophageal reflux disease (gerd)": [
+    "cough",
+    "difficulty in swallowing",
+    "sharp abdominal pain",
+    "regurgitation",
+    "regurgitation.1",
+    "chest tightness",
+    "sharp chest pain",
+    "hoarse voice",
+    "burning abdominal pain",
+    "nausea"
+  ],
+  "vitreous hemorrhage": [
+    "pain in eye",
+    "spots or clouds in vision",
+    "symptoms of eye",
+    "lacrimation",
+    "diminished vision",
+    "blindness"
+  ],
+  "poisoning due to antimicrobial drugs": [
+    "shortness of breath",
+    "abnormal involuntary movements",
+    "foot or toe cramps or spasms",
+    "problems with movement",
+    "peripheral edema",
+    "allergic reaction"
+  ],
+  "open wound of the mouth": [
+    "mouth ulcer",
+    "lip swelling",
+    "peripheral edema",
+    "seizures",
+    "toothache",
+    "tongue lesions"
+  ],
+  "scleroderma": [
+    "feeling ill",
+    "skin lesion",
+    "\"skin dryness",
+    "lip swelling",
+    "skin growth",
+    "abnormal appearing skin",
+    "hurts to breath",
+    "symptoms of bladder"
+  ],
+  "myasthenia gravis": [
+    "shortness of breath",
+    "dizziness",
+    "coughing up sputum",
+    "double vision",
+    "weakness",
+    "fatigue",
+    "slurring words"
+  ],
+  "hypoglycemia": [
+    "feeling ill",
+    "nausea",
+    "seizures",
+    "fainting",
+    "infertility",
+    "abnormal involuntary movements",
+    "sleepiness",
+    "dizziness",
+    "weakness",
+    "problems with movement",
+    "decreased appetite",
+    "depressive or psychotic symptoms"
+  ],
+  "idiopathic absence of menstruation": [
+    "vaginal itching",
+    "sharp abdominal pain",
+    "lower abdominal pain",
+    "absence of menstruation",
+    "pelvic pain",
+    "heartburn",
+    "pain or soreness of breast",
+    "back mass or lump",
+    "nausea"
+  ],
+  "dislocation of the ankle": [
+    "emotional symptoms",
+    "too little hair",
+    "foot or toe pain",
+    "ankle pain"
+  ],
+  "carbon monoxide poisoning": [
+    "depressive or psychotic symptoms",
+    "emotional symptoms",
+    "headache",
+    "nausea",
+    "dizziness",
+    "vomiting"
+  ],
+  "panic attack": [
+    "anxiety and nervousness",
+    "chest tightness",
+    "sharp chest pain",
+    "irregular heartbeat",
+    "weakness",
+    "shortness of breath",
+    "loss of sensation"
+  ],
+  "plantar fasciitis": [
+    "muscle pain",
+    "problems with movement",
+    "bones are painful",
+    "knee pain",
+    "foot or toe pain",
+    "ankle pain",
+    "too little hair"
+  ],
+  "hyperopia": [
+    "eye deviation",
+    "difficulty speaking",
+    "symptoms of eye",
+    "diminished vision",
+    "spots or clouds in vision",
+    "eye redness"
+  ],
+  "poisoning due to sedatives": [
+    "hostile behavior",
+    "insomnia",
+    "drug abuse",
+    "depression",
+    "depressive or psychotic symptoms",
+    "sleepiness"
+  ],
+  "pemphigus": [
+    "hand or finger pain",
+    "skin lesion",
+    "abnormal appearing skin"
+  ],
+  "peyronie disease": [
+    "mass in scrotum",
+    "impotence",
+    "mouth pain",
+    "symptoms of prostate",
+    "emotional symptoms"
+  ],
+  "hiatal hernia": [
+    "difficulty in swallowing",
+    "nausea",
+    "upper abdominal pain",
+    "sharp abdominal pain",
+    "back pain",
+    "heartburn",
+    "regurgitation",
+    "regurgitation.1",
+    "dizziness",
+    "burning abdominal pain",
+    "vomiting blood",
+    "sharp chest pain"
+  ],
+  "extrapyramidal effect of drugs": [
+    "headache",
+    "restlessness",
+    "abnormal involuntary movements",
+    "seizures",
+    "anxiety and nervousness",
+    "arm stiffness or tightness"
+  ],
+  "meniere disease": [
+    "facial pain",
+    "ear pain",
+    "ringing in ear",
+    "nausea",
+    "dizziness",
+    "diminished hearing",
+    "headache",
+    "allergic reaction"
+  ],
+  "anal fissure": [
+    "vaginal dryness",
+    "sharp abdominal pain",
+    "changes in stool appearance",
+    "pain of the anus",
+    "lower body pain",
+    "rectal bleeding",
+    "blood in stool",
+    "constipation"
+  ],
+  "allergy": [
+    "fluid retention",
+    "allergic reaction",
+    "peripheral edema",
+    "skin swelling",
+    "symptoms of bladder",
+    "abnormal appearing skin",
+    "itchiness of eye",
+    "foot or toe cramps or spasms",
+    "lip swelling",
+    "cough",
+    "sweating"
+  ],
+  "chronic otitis media": [
+    "cough",
+    "painful sinuses",
+    "fever",
+    "nasal congestion",
+    "pulling at ears",
+    "allergic reaction",
+    "redness in ear",
+    "ear pain",
+    "plugged feeling in ear",
+    "fluid in ear"
+  ],
+  "fracture of the finger": [
+    "foot or toe pain",
+    "hand or finger swelling",
+    "hand or finger pain",
+    "hand or finger stiffness or tightness",
+    "foot or toe swelling"
+  ],
+  "hirschsprung disease": [
+    "emotional symptoms",
+    "sharp abdominal pain",
+    "constipation"
+  ],
+  "polymyalgia rheumatica": [
+    "irregular heartbeat",
+    "difficulty in swallowing",
+    "leg pain",
+    "sharp chest pain",
+    "shoulder pain",
+    "fatigue"
+  ],
+  "lymphedema": [
+    "foot or toe swelling",
+    "throat swelling",
+    "lymphedema",
+    "fluid retention",
+    "skin lesion",
+    "abnormal appearing skin",
+    "leg swelling",
+    "leg pain",
+    "peripheral edema"
+  ],
+  "bladder cancer": [
+    "mass in scrotum",
+    "retention of urine",
+    "groin mass",
+    "poor circulation",
+    "blood in urine",
+    "excessive urination at night",
+    "eyelid lesion or rash"
+  ],
+  "acute bronchospasm": [
+    "vomiting",
+    "cough",
+    "sore throat",
+    "difficulty breathing",
+    "wheezing",
+    "nasal congestion",
+    "sharp chest pain",
+    "fever",
+    "chest tightness",
+    "coryza",
+    "shortness of breath"
+  ],
+  "acute glaucoma": [
+    "double vision",
+    "foreign body sensation in eye",
+    "diminished vision",
+    "pain in eye",
+    "symptoms of eye",
+    "eye redness",
+    "blindness",
+    "spots or clouds in vision"
+  ],
+  "open wound of the chest": [
+    "sharp chest pain",
+    "drug abuse"
+  ],
+  "dislocation of the patella": [
+    "knee pain",
+    "knee stiffness or tightness",
+    "knee swelling"
+  ],
+  "sciatica": [
+    "leg pain",
+    "problems with movement",
+    "low back pain",
+    "lower body pain",
+    "skin oiliness",
+    "loss of sensation",
+    "hip pain",
+    "back cramps or spasms",
+    "unusual color or odor to urine",
+    "leg cramps or spasms"
+  ],
+  "hypercalcemia": [
+    "retention of urine",
+    "weakness",
+    "dizziness",
+    "loss of sensation"
+  ],
+  "stress incontinence": [
+    "hot flashes",
+    "intermenstrual bleeding",
+    "retention of urine",
+    "painful urination",
+    "frequent urination",
+    "involuntary urination",
+    "blood in urine"
+  ],
+  "varicose veins": [
+    "leg cramps or spasms",
+    "ache all over",
+    "leg swelling",
+    "skin lesion",
+    "leg pain",
+    "lip sore",
+    "peripheral edema",
+    "lymphedema"
+  ],
+  "benign kidney cyst": [
+    "impotence",
+    "vomiting",
+    "involuntary urination",
+    "blood in urine",
+    "sharp abdominal pain",
+    "side pain",
+    "low back pain"
+  ],
+  "hydrocele of the testicle": [
+    "symptoms of the scrotum and testes",
+    "groin mass",
+    "swelling of scrotum",
+    "mass in scrotum",
+    "pain in testicles",
+    "lower abdominal pain",
+    "groin pain",
+    "retention of urine"
+  ],
+  "degenerative disc disease": [
+    "shoulder pain",
+    "neck pain",
+    "low back pain",
+    "loss of sensation",
+    "joint pain",
+    "lower body pain",
+    "paresthesia",
+    "back pain",
+    "leg pain",
+    "hip pain",
+    "arm pain"
+  ],
+  "hirsutism": [
+    "abnormal appearing skin",
+    "acne or pimples",
+    "apnea",
+    "eyelid swelling"
+  ],
+  "dislocation of the foot": [
+    "vomiting",
+    "elbow weakness",
+    "foot or toe pain"
+  ],
+  "hydronephrosis": [
+    "pain in testicles",
+    "suprapubic pain",
+    "lower abdominal pain",
+    "vomiting",
+    "side pain",
+    "back pain",
+    "sharp abdominal pain",
+    "nausea"
+  ],
+  "diverticulosis": [
+    "nausea",
+    "rectal bleeding",
+    "upper abdominal pain",
+    "sharp abdominal pain",
+    "diarrhea",
+    "lower abdominal pain",
+    "heartburn",
+    "melena",
+    "vomiting",
+    "blood in stool"
+  ],
+  "pain after an operation": [
+    "leg pain",
+    "nausea",
+    "low back pain",
+    "headache",
+    "neck pain",
+    "back pain",
+    "vomiting",
+    "side pain",
+    "lower abdominal pain",
+    "sharp chest pain",
+    "sharp abdominal pain"
+  ],
+  "huntington disease": [
+    "anxiety and nervousness",
+    "elbow weakness"
+  ],
+  "lymphoma": [
+    "groin mass",
+    "hoarse voice",
+    "itchy ear(s)",
+    "regurgitation",
+    "neck mass",
+    "regurgitation.1",
+    "fatigue"
+  ],
+  "dermatitis due to sun exposure": [
+    "lack of growth",
+    "acne or pimples",
+    "foot or toe cramps or spasms",
+    "hurts to breath",
+    "skin moles",
+    "abnormal appearing skin",
+    "skin lesion",
+    "irregular appearing scalp",
+    "skin swelling"
+  ],
+  "anemia due to chronic kidney disease": [
+    "recent weight loss",
+    "weakness",
+    "shortness of breath",
+    "peripheral edema",
+    "fatigue",
+    "too little hair"
+  ],
+  "injury to internal organ": [
+    "frequent urination",
+    "sharp chest pain",
+    "retention of urine",
+    "back pain",
+    "side pain",
+    "sharp abdominal pain"
+  ],
+  "scleritis": [
+    "abnormal involuntary movements",
+    "headache",
+    "eye redness",
+    "spots or clouds in vision",
+    "pain in eye"
+  ],
+  "pterygium": [
+    "symptoms of eye",
+    "acne or pimples",
+    "lacrimation",
+    "foreign body sensation in eye",
+    "eye redness",
+    "spots or clouds in vision",
+    "diminished vision"
+  ],
+  "fungal infection of the skin": [
+    "acne or pimples",
+    "peeling",
+    "skin lesion",
+    "symptoms of bladder",
+    "foot or toe cramps or spasms",
+    "hip swelling",
+    "irregular appearing scalp",
+    "abnormal appearing skin",
+    "hurts to breath",
+    "skin swelling"
+  ],
+  "insulin overdose": [
+    "depressive or psychotic symptoms",
+    "emotional symptoms"
+  ],
+  "syndrome of inappropriate secretion of adh (siadh)": [
+    "feeling ill",
+    "dizziness",
+    "cross-eyed"
+  ],
+  "foreign body in the ear": [
+    "throat feels tight",
+    "ear pain",
+    "pelvic pressure",
+    "diminished hearing",
+    "fluid in ear"
+  ],
+  "premenstrual tension syndrome": [
+    "lower abdominal pain",
+    "depressive or psychotic symptoms",
+    "back pain",
+    "headache",
+    "long menstrual periods",
+    "low back swelling"
+  ],
+  "orbital cellulitis": [
+    "diminished hearing",
+    "peripheral edema",
+    "pain in eye",
+    "eye redness",
+    "sweating",
+    "symptoms of eye",
+    "fever"
+  ],
+  "injury to the leg": [
+    "leg swelling",
+    "problems with movement",
+    "knee swelling",
+    "knee pain",
+    "too little hair",
+    "foot or toe pain",
+    "foot or toe swelling",
+    "ankle pain",
+    "leg pain",
+    "unwanted hair",
+    "infant feeding problem",
+    "knee stiffness or tightness"
+  ],
+  "hepatic encephalopathy": [
+    "abusing alcohol",
+    "fainting",
+    "depressive or psychotic symptoms",
+    "shortness of breath",
+    "sharp abdominal pain",
+    "fluid retention"
+  ],
+  "bone cancer": [
+    "problems with movement",
+    "leg pain",
+    "peripheral edema",
+    "low back pain",
+    "fatigue"
+  ],
+  "syringomyelia": [
+    "fainting",
+    "headache",
+    "shoulder pain",
+    "back pain"
+  ],
+  "pulmonary fibrosis": [
+    "chest tightness",
+    "fever",
+    "shortness of breath",
+    "sharp chest pain",
+    "fainting",
+    "cough",
+    "difficulty breathing"
+  ],
+  "mitral valve disease": [
+    "infertility",
+    "shortness of breath",
+    "irregular heartbeat",
+    "chest tightness",
+    "shoulder lump or mass",
+    "dizziness",
+    "fatigue",
+    "sharp chest pain",
+    "increased heart rate"
+  ],
+  "parkinson disease": [
+    "focal weakness",
+    "stiffness all over",
+    "leg stiffness or tightness",
+    "abnormal involuntary movements",
+    "weakness",
+    "difficulty speaking",
+    "dizziness",
+    "disturbance of memory",
+    "problems with movement"
+  ],
+  "gout": [
+    "knee pain",
+    "foot or toe pain",
+    "knee swelling",
+    "foot or toe swelling",
+    "wrist swelling",
+    "ankle pain",
+    "too little hair",
+    "hand or finger swelling",
+    "wrist pain",
+    "joint pain",
+    "hand or finger pain",
+    "leg swelling"
+  ],
+  "otitis media": [
+    "vomiting",
+    "ear pain",
+    "coryza",
+    "diminished hearing",
+    "cough",
+    "fluid in ear",
+    "fever",
+    "pulling at ears",
+    "plugged feeling in ear",
+    "nasal congestion",
+    "sore throat"
+  ],
+  "drug abuse (opioids)": [
+    "restlessness",
+    "temper problems",
+    "drug abuse",
+    "insomnia",
+    "abusing alcohol",
+    "delusions or hallucinations",
+    "depression",
+    "anxiety and nervousness",
+    "excessive anger",
+    "depressive or psychotic symptoms"
+  ],
+  "myelodysplastic syndrome": [
+    "difficulty speaking",
+    "chills",
+    "fatigue"
+  ],
+  "fracture of the shoulder": [
+    "neck swelling",
+    "shoulder swelling",
+    "shoulder pain",
+    "bones are painful",
+    "arm pain",
+    "arm stiffness or tightness",
+    "shoulder stiffness or tightness"
+  ],
+  "acute kidney injury": [
+    "retention of urine",
+    "weakness",
+    "vomiting",
+    "nausea",
+    "kidney mass",
+    "peripheral edema",
+    "sharp chest pain",
+    "sharp abdominal pain",
+    "shortness of breath",
+    "dizziness",
+    "symptoms of the kidneys"
+  ],
+  "threatened pregnancy": [
+    "sharp abdominal pain",
+    "cramps and spasms",
+    "lower abdominal pain",
+    "pelvic pain",
+    "intermenstrual bleeding",
+    "problems during pregnancy",
+    "back pain",
+    "spotting or bleeding during pregnancy",
+    "uterine contractions",
+    "blood clots during menstrual periods",
+    "vaginal discharge"
+  ],
+  "intracranial abscess": [
+    "headache",
+    "depressive or psychotic symptoms",
+    "seizures"
+  ],
+  "gum disease": [
+    "mouth ulcer",
+    "toothache",
+    "ear pain",
+    "gum pain",
+    "facial pain",
+    "jaw swelling",
+    "peripheral edema",
+    "polyuria",
+    "fever",
+    "cloudy eye",
+    "lip swelling"
+  ],
+  "open wound from surgical incision": [
+    "skin swelling",
+    "flatulence",
+    "skin lesion"
+  ],
+  "gastrointestinal hemorrhage": [
+    "blood in stool",
+    "rectal bleeding",
+    "sharp abdominal pain",
+    "vomiting",
+    "nausea",
+    "vomiting blood",
+    "fainting",
+    "changes in stool appearance",
+    "diarrhea",
+    "melena",
+    "weakness",
+    "dizziness"
+  ],
+  "seborrheic dermatitis": [
+    "acne or pimples",
+    "hurts to breath",
+    "skin lesion",
+    "irregular appearing scalp",
+    "mass or swelling around the anus",
+    "symptoms of bladder",
+    "skin growth",
+    "symptoms of the face",
+    "foot or toe cramps or spasms",
+    "hip swelling",
+    "abnormal appearing skin"
+  ],
+  "drug abuse (methamphetamine)": [
+    "hostile behavior",
+    "anxiety and nervousness",
+    "feeling ill",
+    "shortness of breath",
+    "palpitations",
+    "drug abuse",
+    "depressive or psychotic symptoms",
+    "abusing alcohol"
+  ],
+  "torticollis": [
+    "throat swelling",
+    "arm pain",
+    "abnormal involuntary movements",
+    "neck stiffness or tightness",
+    "headache",
+    "shoulder pain",
+    "discharge in stools",
+    "neck pain"
+  ],
+  "poisoning due to antihypertensives": [
+    "sharp abdominal pain",
+    "depressive or psychotic symptoms",
+    "weakness"
+  ],
+  "tension headache": [
+    "neck stiffness or tightness",
+    "back cramps or spasms",
+    "nausea",
+    "neck pain",
+    "anxiety and nervousness",
+    "headache",
+    "dizziness",
+    "chills"
+  ],
+  "alcohol intoxication": [
+    "abnormal involuntary movements",
+    "anxiety and nervousness",
+    "sharp chest pain",
+    "problems with movement",
+    "depressive or psychotic symptoms",
+    "abusing alcohol",
+    "vomiting",
+    "depression"
+  ],
+  "scurvy": [
+    "sharp abdominal pain",
+    "knee lump or mass"
+  ],
+  "narcolepsy": [
+    "insomnia",
+    "disturbance of memory",
+    "shortness of breath",
+    "sleepiness",
+    "apnea",
+    "headache",
+    "fatigue"
+  ],
+  "food allergy": [
+    "lip swelling",
+    "cough",
+    "allergic reaction",
+    "abnormal appearing skin",
+    "symptoms of bladder",
+    "hand or finger swelling",
+    "vomiting",
+    "foot or toe cramps or spasms",
+    "nasal congestion"
+  ],
+  "labyrinthitis": [
+    "ear pain",
+    "diminished hearing",
+    "vomiting",
+    "loss of sensation",
+    "headache",
+    "infertility",
+    "nausea",
+    "dizziness",
+    "spots or clouds in vision",
+    "plugged feeling in ear"
+  ],
+  "anxiety": [
+    "sharp chest pain",
+    "depressive or psychotic symptoms",
+    "insomnia",
+    "depression",
+    "abnormal involuntary movements",
+    "headache",
+    "irregular heartbeat",
+    "shortness of breath",
+    "fears and phobias",
+    "palpitations",
+    "increased heart rate",
+    "anxiety and nervousness"
+  ],
+  "impulse control disorder": [
+    "excessive appetite",
+    "anxiety and nervousness",
+    "delusions or hallucinations",
+    "temper problems",
+    "depression",
+    "excessive anger",
+    "depressive or psychotic symptoms",
+    "insomnia"
+  ],
+  "stenosis of the tear duct": [
+    "white discharge from eye",
+    "abnormal movement of eyelid",
+    "cough",
+    "symptoms of eye",
+    "lacrimation"
+  ],
+  "abscess of nose": [
+    "vomiting",
+    "irritable infant",
+    "sore throat",
+    "nasal congestion",
+    "coryza",
+    "sinus congestion",
+    "cough",
+    "fever"
+  ],
+  "omphalitis": [
+    "emotional symptoms",
+    "flatulence",
+    "hand or finger weakness"
+  ],
+  "leukemia": [
+    "muscle stiffness or tightness",
+    "irregular belly button",
+    "fatigue",
+    "fever"
+  ],
+  "bell palsy": [
+    "diminished vision",
+    "abnormal involuntary movements",
+    "peripheral edema",
+    "focal weakness",
+    "symptoms of eye",
+    "symptoms of the face",
+    "facial pain",
+    "headache",
+    "weakness",
+    "loss of sensation"
+  ],
+  "conjunctivitis due to allergy": [
+    "eye redness",
+    "pupils unequal",
+    "itchiness of eye",
+    "nasal congestion",
+    "symptoms of eye",
+    "pain in eye",
+    "lacrimation",
+    "sweating",
+    "allergic reaction",
+    "diminished vision",
+    "eye burns or stings",
+    "cough"
+  ],
+  "drug reaction": [
+    "nausea",
+    "foot or toe cramps or spasms",
+    "allergic reaction",
+    "headache",
+    "peripheral edema",
+    "vomiting",
+    "dizziness",
+    "symptoms of bladder",
+    "abnormal appearing skin",
+    "shortness of breath",
+    "throat swelling"
+  ],
+  "adrenal cancer": [
+    "dizziness",
+    "diminished hearing"
+  ],
+  "myopia": [
+    "foreign body sensation in eye",
+    "eye deviation",
+    "eye redness",
+    "diminished vision",
+    "pain in eye",
+    "blindness",
+    "symptoms of eye",
+    "eye moves abnormally",
+    "spots or clouds in vision"
+  ],
+  "osteoarthritis": [
+    "hip pain",
+    "knee pain",
+    "knee weakness",
+    "ankle pain",
+    "muscle pain",
+    "knee swelling",
+    "elbow pain",
+    "back pain",
+    "leg pain",
+    "hand or finger pain",
+    "joint pain"
+  ],
+  "thyroid disease": [
+    "lump in throat",
+    "throat feels tight",
+    "neck mass",
+    "difficulty in swallowing"
+  ],
+  "pharyngitis": [
+    "hoarse voice",
+    "wheezing",
+    "cough",
+    "sore throat",
+    "fever"
+  ],
+  "chronic rheumatic fever": [
+    "throat feels tight",
+    "dizziness",
+    "chest tightness",
+    "palpitations",
+    "sharp chest pain",
+    "increased heart rate",
+    "shortness of breath"
+  ],
+  "hypocalcemia": [
+    "sharp chest pain",
+    "abnormal involuntary movements",
+    "shortness of breath",
+    "constipation",
+    "skin oiliness"
+  ],
+  "macular degeneration": [
+    "double vision",
+    "foreign body sensation in eye",
+    "blindness",
+    "lacrimation",
+    "abnormal movement of eyelid",
+    "bleeding from eye",
+    "spots or clouds in vision",
+    "pain in eye",
+    "diminished vision",
+    "itchiness of eye",
+    "symptoms of eye"
+  ],
+  "pneumonia": [
+    "vomiting",
+    "cough",
+    "nasal congestion",
+    "weakness",
+    "sore throat",
+    "sharp chest pain",
+    "wheezing",
+    "difficulty breathing",
+    "chills",
+    "coryza",
+    "fever",
+    "shortness of breath"
+  ],
+  "cold sore": [
+    "skin swelling",
+    "lip swelling",
+    "mouth ulcer",
+    "foot or toe cramps or spasms",
+    "sore throat",
+    "throat irritation",
+    "vaginal itching"
+  ],
+  "premature ventricular contractions (pvcs)": [
+    "shortness of breath",
+    "impotence",
+    "sleepiness",
+    "palpitations",
+    "chest tightness",
+    "sharp chest pain",
+    "irregular heartbeat",
+    "fainting"
+  ],
+  "testicular cancer": [
+    "anxiety and nervousness",
+    "diminished hearing",
+    "mass in scrotum"
+  ],
+  "hydrocephalus": [
+    "abnormal involuntary movements",
+    "lack of growth",
+    "headache",
+    "vomiting",
+    "depressive or psychotic symptoms",
+    "problems with movement",
+    "seizures"
+  ],
+  "breast cancer": [
+    "nightmares",
+    "bleeding or discharge from nipple",
+    "pain or soreness of breast",
+    "hot flashes"
+  ],
+  "anemia due to malignancy": [
+    "flatulence",
+    "fatigue",
+    "shortness of breath",
+    "difficulty in swallowing"
+  ],
+  "esophageal varices": [
+    "dizziness",
+    "nausea"
+  ],
+  "endometrial cancer": [
+    "absence of menstruation",
+    "hot flashes",
+    "vaginal itching",
+    "bleeding gums",
+    "intermenstrual bleeding"
+  ],
+  "cystic fibrosis": [
+    "intermenstrual bleeding",
+    "cough",
+    "decreased appetite",
+    "feeling ill"
+  ],
+  "intertrigo (skin condition)": [
+    "acne or pimples",
+    "skin lesion",
+    "foot or toe cramps or spasms",
+    "skin swelling",
+    "abnormal appearing skin",
+    "hurts to breath"
+  ],
+  "parathyroid adenoma": [
+    "throat feels tight",
+    "anxiety and nervousness",
+    "shoulder pain",
+    "disturbance of memory"
+  ],
+  "glucocorticoid deficiency": [
+    "lack of growth",
+    "shortness of breath",
+    "diarrhea"
+  ],
+  "temporomandibular joint disorder": [
+    "pain in eye",
+    "sore throat",
+    "diminished hearing",
+    "facial pain",
+    "headache",
+    "nasal congestion",
+    "ear pain",
+    "neck pain"
+  ],
+  "wilson disease": [
+    "insomnia",
+    "cough",
+    "sleepiness"
+  ],
+  "vesicoureteral reflux": [
+    "involuntary urination",
+    "blood in urine",
+    "suprapubic pain",
+    "fever"
+  ],
+  "vitamin a deficiency": [
+    "hand or finger pain",
+    "knee lump or mass"
+  ],
+  "gonorrhea": [
+    "problems with movement",
+    "vaginal pain",
+    "vaginal itching",
+    "sharp abdominal pain",
+    "posture problems",
+    "vaginal discharge"
+  ],
+  "fracture of the rib": [
+    "shortness of breath",
+    "back pain",
+    "rib pain",
+    "or spasms\"",
+    "side pain",
+    "sharp chest pain",
+    "bones are painful",
+    "irregular appearing nails",
+    "ache all over",
+    "hip pain",
+    "shoulder pain"
+  ],
+  "ependymoma": [
+    "headache",
+    "emotional symptoms",
+    "diminished vision",
+    "pain in eye"
+  ],
+  "hepatitis due to a toxin": [
+    "nausea",
+    "depression",
+    "rectal bleeding",
+    "feeling ill",
+    "sharp abdominal pain",
+    "vomiting",
+    "symptoms of bladder",
+    "jaundice"
+  ],
+  "vaginal cyst": [
+    "nosebleed",
+    "pelvic pain",
+    "lower abdominal pain",
+    "intermenstrual bleeding",
+    "pain during pregnancy",
+    "vaginal pain",
+    "cramps and spasms",
+    "blood clots during menstrual periods",
+    "vaginal discharge",
+    "problems during pregnancy",
+    "spotting or bleeding during pregnancy",
+    "sharp abdominal pain"
+  ],
+  "open wound of the shoulder": [
+    "abusing alcohol",
+    "shoulder pain",
+    "arm pain"
+  ],
+  "ectopic pregnancy": [
+    "intermenstrual bleeding",
+    "lower abdominal pain",
+    "vaginal discharge",
+    "sharp abdominal pain",
+    "nausea",
+    "dizziness",
+    "pelvic pain",
+    "pain during pregnancy"
+  ],
+  "chronic knee pain": [
+    "knee pain",
+    "leg pain",
+    "back pain",
+    "knee swelling",
+    "knee weakness",
+    "leg swelling",
+    "knee stiffness or tightness",
+    "hip pain",
+    "joint pain"
+  ],
+  "pinguecula": [
+    "headache",
+    "symptoms of eye",
+    "lump or mass of breast",
+    "lacrimation"
+  ],
+  "hypergammaglobulinemia": [
+    "blood in stool",
+    "fatigue"
+  ],
+  "alcohol abuse": [
+    "vomiting blood",
+    "hostile behavior",
+    "smoking problems",
+    "depression",
+    "elbow stiffness or tightness",
+    "drug abuse",
+    "abusing alcohol",
+    "depressive or psychotic symptoms",
+    "anxiety and nervousness"
+  ],
+  "carpal tunnel syndrome": [
+    "elbow pain",
+    "wrist swelling",
+    "neck pain",
+    "loss of sensation",
+    "wrist pain",
+    "paresthesia",
+    "hand or finger stiffness or tightness",
+    "arm pain",
+    "swollen tongue",
+    "hand or finger pain",
+    "hand or finger swelling"
+  ],
+  "pituitary disorder": [
+    "hot flashes",
+    "pain in eye",
+    "lack of growth",
+    "headache"
+  ],
+  "kidney stone": [
+    "vomiting",
+    "back pain",
+    "side pain",
+    "frequent urination",
+    "painful urination",
+    "low back pain",
+    "suprapubic pain",
+    "sharp abdominal pain",
+    "lower abdominal pain",
+    "retention of urine",
+    "blood in urine"
+  ],
+  "autism": [
+    "back mass or lump",
+    "difficulty speaking",
+    "hostile behavior",
+    "disturbance of smell or taste",
+    "depressive or psychotic symptoms",
+    "lack of growth",
+    "seizures",
+    "constipation",
+    "temper problems"
+  ],
+  "cat scratch disease": [
+    "skin swelling",
+    "groin mass",
+    "itchy eyelid"
+  ],
+  "chronic glaucoma": [
+    "itchiness of eye",
+    "white discharge from eye",
+    "spots or clouds in vision",
+    "pain in eye",
+    "diminished vision",
+    "symptoms of eye",
+    "frequent menstruation",
+    "lacrimation",
+    "eye burns or stings",
+    "foreign body sensation in eye"
+  ],
+  "retinal detachment": [
+    "double vision",
+    "lacrimation",
+    "itchiness of eye",
+    "pain in eye",
+    "spots or clouds in vision",
+    "diminished vision",
+    "symptoms of eye",
+    "blindness"
+  ],
+  "aplastic anemia": [
+    "lack of growth",
+    "slurring words",
+    "weakness",
+    "nausea",
+    "fatigue",
+    "fever"
+  ],
+  "overflow incontinence": [
+    "hand or finger stiffness or tightness",
+    "impotence",
+    "suprapubic pain",
+    "retention of urine",
+    "involuntary urination",
+    "eyelid lesion or rash",
+    "blood in urine"
+  ],
+  "hemolytic anemia": [
+    "skin growth",
+    "nausea",
+    "fatigue",
+    "cough"
+  ],
+  "lateral epicondylitis (tennis elbow)": [
+    "joint pain",
+    "hand or finger stiffness or tightness",
+    "hand or finger pain",
+    "arm pain",
+    "elbow pain",
+    "wrist pain",
+    "loss of sensation",
+    "shoulder pain"
+  ],
+  "open wound of the eye": [
+    "white discharge from eye",
+    "pain in eye",
+    "spots or clouds in vision",
+    "symptoms of eye",
+    "diminished vision"
+  ],
+  "syphilis": [
+    "muscle pain",
+    "vaginal discharge",
+    "foot or toe cramps or spasms",
+    "headache"
+  ],
+  "diabetic kidney disease": [
+    "blood in stool",
+    "impotence"
+  ],
+  "nose disorder": [
+    "ear pain",
+    "low back cramps or spasms",
+    "facial pain",
+    "difficulty breathing",
+    "painful sinuses",
+    "cough",
+    "nasal congestion",
+    "headache",
+    "fever",
+    "sinus congestion",
+    "coryza",
+    "sore throat"
+  ],
+  "drug withdrawal": [
+    "depression",
+    "sharp abdominal pain",
+    "anxiety and nervousness",
+    "dizziness",
+    "vomiting",
+    "chills",
+    "nausea"
+  ],
+  "dental caries": [
+    "facial pain",
+    "peripheral edema",
+    "restlessness",
+    "gum pain",
+    "irregular belly button",
+    "ear pain",
+    "toothache",
+    "cloudy eye",
+    "jaw swelling",
+    "neck swelling",
+    "\"skin dryness",
+    "skin swelling"
+  ],
+  "hypercholesterolemia": [
+    "weight gain",
+    "palpitations",
+    "sharp chest pain",
+    "hand or finger stiffness or tightness",
+    "excessive urination at night"
+  ],
+  "fracture of the patella": [
+    "bones are painful",
+    "hip pain",
+    "knee pain",
+    "skin oiliness",
+    "knee swelling",
+    "leg pain"
+  ],
+  "kidney failure": [
+    "swollen abdomen",
+    "sharp chest pain",
+    "nausea",
+    "arm swelling",
+    "vomiting",
+    "shortness of breath",
+    "symptoms of the kidneys",
+    "leg swelling"
+  ],
+  "fracture of the neck": [
+    "lower body pain",
+    "elbow pain",
+    "leg pain",
+    "hip pain",
+    "low back pain"
+  ],
+  "muscle spasm": [
+    "low back pain",
+    "leg pain",
+    "headache",
+    "loss of sensation",
+    "neck pain",
+    "arm pain",
+    "back pain",
+    "\"muscle cramps",
+    "abnormal involuntary movements",
+    "sharp chest pain"
+  ],
+  "hemophilia": [
+    "cough",
+    "frontal headache",
+    "polyuria",
+    "leg pain"
+  ],
+  "hyperosmotic hyperketotic state": [
+    "cough",
+    "weakness",
+    "frequent urination"
+  ],
+  "peritonsillar abscess": [
+    "ear pain",
+    "swollen lymph nodes",
+    "headache",
+    "throat swelling",
+    "sore throat",
+    "difficulty in swallowing",
+    "throat feels tight"
+  ],
+  "gastroparesis": [
+    "burning abdominal pain",
+    "sharp chest pain",
+    "upper abdominal pain",
+    "sharp abdominal pain",
+    "vomiting",
+    "regurgitation",
+    "regurgitation.1",
+    "nausea"
+  ],
+  "itching of unknown cause": [
+    "problems during pregnancy",
+    "fluid retention",
+    "vaginal itching",
+    "allergic reaction",
+    "peeling",
+    "abnormal appearing skin",
+    "symptoms of bladder",
+    "foot or toe cramps or spasms",
+    "hurts to breath"
+  ],
+  "polycythemia vera": [
+    "weight gain",
+    "dizziness",
+    "symptoms of eye",
+    "fatigue",
+    "headache"
+  ],
+  "thrombocytopenia": [
+    "irregular appearing scalp",
+    "blood in urine",
+    "sharp chest pain",
+    "fatigue",
+    "blood in stool",
+    "low back cramps or spasms",
+    "polyuria"
+  ],
+  "head and neck cancer": [
+    "hemoptysis",
+    "hoarse voice",
+    "plugged feeling in ear",
+    "neck mass",
+    "sore throat",
+    "difficulty in swallowing",
+    "throat feels tight",
+    "irregular belly button"
+  ],
+  "pseudohypoparathyroidism": [
+    "leg pain",
+    "wrist pain",
+    "knee pain",
+    "elbow weakness"
+  ],
+  "goiter": [
+    "lump in throat",
+    "hot flashes",
+    "difficulty in swallowing",
+    "fatigue",
+    "weight gain"
+  ],
+  "urge incontinence": [
+    "retention of urine",
+    "vaginal itching",
+    "blood in urine",
+    "frequent urination",
+    "involuntary urination",
+    "eyelid lesion or rash",
+    "painful urination",
+    "excessive urination at night",
+    "constipation"
+  ],
+  "edward syndrome": [
+    "suprapubic pain",
+    "cross-eyed"
+  ],
+  "open wound of the arm": [
+    "knee weakness",
+    "arm pain",
+    "elbow lump or mass",
+    "elbow pain"
+  ],
+  "muscular dystrophy": [
+    "cough",
+    "hip pain",
+    "fatigue",
+    "nasal congestion",
+    "feeling cold"
+  ],
+  "mittelschmerz": [
+    "diarrhea",
+    "vomiting",
+    "heavy menstrual flow",
+    "lower abdominal pain",
+    "pelvic pain",
+    "sharp abdominal pain"
+  ],
+  "corneal abrasion": [
+    "diminished vision",
+    "itchiness of eye",
+    "white discharge from eye",
+    "symptoms of eye",
+    "pain in eye",
+    "foreign body sensation in eye",
+    "lacrimation",
+    "eye redness",
+    "mass on eyelid"
+  ],
+  "anemia of chronic disease": [
+    "feeling ill",
+    "dizziness",
+    "emotional symptoms",
+    "weakness"
+  ],
+  "dysthymic disorder": [
+    "excessive anger",
+    "arm weakness",
+    "temper problems",
+    "depression",
+    "disturbance of memory",
+    "insomnia",
+    "anxiety and nervousness",
+    "depressive or psychotic symptoms",
+    "slurring words"
+  ],
+  "scarlet fever": [
+    "throat swelling",
+    "skin swelling",
+    "fever",
+    "foot or toe cramps or spasms",
+    "sore throat",
+    "cough"
+  ],
+  "hypertensive heart disease": [
+    "leg swelling",
+    "palpitations",
+    "difficulty breathing",
+    "fatigue",
+    "sharp chest pain",
+    "chest tightness",
+    "recent pregnancy",
+    "heartburn",
+    "insomnia",
+    "shortness of breath",
+    "weakness"
+  ],
+  "drug abuse (barbiturates)": [
+    "depression",
+    "anxiety and nervousness",
+    "hostile behavior",
+    "abnormal involuntary movements",
+    "drug abuse",
+    "delusions or hallucinations"
+  ],
+  "polycystic ovarian syndrome (pcos)": [
+    "hot flashes",
+    "absence of menstruation",
+    "back mass or lump",
+    "long menstrual periods",
+    "weight gain",
+    "unpredictable menstruation",
+    "pelvic pain",
+    "intermenstrual bleeding"
+  ],
+  "encephalitis": [
+    "insomnia",
+    "disturbance of memory",
+    "dizziness",
+    "loss of sensation",
+    "headache"
+  ],
+  "cyst of the eyelid": [
+    "diminished vision",
+    "abnormal movement of eyelid",
+    "skin growth",
+    "muscle swelling",
+    "frequent menstruation"
+  ],
+  "balanitis": [
+    "suprapubic pain",
+    "painful urination",
+    "cough",
+    "foot or toe cramps or spasms",
+    "arm lump or mass",
+    "leg weakness",
+    "abnormal appearing skin",
+    "symptoms of bladder",
+    "mouth pain"
+  ],
+  "foreign body in the throat": [
+    "throat swelling",
+    "shortness of breath",
+    "sore throat",
+    "difficulty in swallowing",
+    "vomiting",
+    "cough",
+    "infant spitting up"
+  ],
+  "drug abuse (cocaine)": [
+    "fears and phobias",
+    "abusing alcohol",
+    "excessive anger",
+    "drug abuse",
+    "depression",
+    "delusions or hallucinations",
+    "depressive or psychotic symptoms",
+    "sharp chest pain",
+    "hostile behavior"
+  ],
+  "optic neuritis": [
+    "headache",
+    "retention of urine",
+    "diminished vision",
+    "blindness"
+  ],
+  "alcohol withdrawal": [
+    "dizziness",
+    "depressive or psychotic symptoms",
+    "vomiting",
+    "seizures",
+    "disturbance of smell or taste",
+    "abusing alcohol",
+    "sharp chest pain",
+    "fainting",
+    "abnormal involuntary movements",
+    "delusions or hallucinations"
+  ],
+  "premature atrial contractions (pacs)": [
+    "shortness of breath",
+    "dizziness",
+    "fainting",
+    "muscle swelling",
+    "palpitations",
+    "irregular heartbeat",
+    "fatigue"
+  ],
+  "hemiplegia": [
+    "weakness",
+    "slurring words",
+    "difficulty speaking",
+    "arm stiffness or tightness",
+    "seizures",
+    "headache",
+    "problems with movement",
+    "loss of sensation",
+    "abnormal involuntary movements"
+  ],
+  "hammer toe": [
+    "skin growth",
+    "skin lesion",
+    "foot or toe pain",
+    "loss of sensation"
+  ],
+  "open wound of the cheek": [
+    "wrist pain",
+    "facial pain"
+  ],
+  "joint effusion": [
+    "wrist pain",
+    "knee stiffness or tightness",
+    "too little hair",
+    "knee swelling",
+    "ankle pain",
+    "problems with movement",
+    "wrist swelling",
+    "knee pain",
+    "elbow pain"
+  ],
+  "open wound of the knee": [
+    "leg pain",
+    "leg swelling"
+  ],
+  "meningioma": [
+    "dizziness",
+    "depressive or psychotic symptoms",
+    "headache",
+    "weakness",
+    "disturbance of memory"
+  ],
+  "brain cancer": [
+    "difficulty speaking",
+    "focal weakness",
+    "decreased appetite",
+    "slurring words",
+    "seizures",
+    "weakness",
+    "disturbance of memory",
+    "headache"
+  ],
+  "placental abruption": [
+    "nausea",
+    "emotional symptoms",
+    "spotting or bleeding during pregnancy",
+    "uterine contractions"
+  ],
+  "seasonal allergies (hay fever)": [
+    "lacrimation",
+    "ear pain",
+    "frontal headache",
+    "coryza",
+    "headache",
+    "allergic reaction",
+    "pupils unequal",
+    "cough",
+    "nasal congestion",
+    "sore throat",
+    "itchiness of eye"
+  ],
+  "lung cancer": [
+    "hemoptysis",
+    "fatigue",
+    "cough",
+    "shortness of breath",
+    "smoking problems",
+    "decreased appetite",
+    "skin oiliness"
+  ],
+  "primary kidney disease": [
+    "lack of growth",
+    "peripheral edema",
+    "impotence",
+    "blood in urine",
+    "symptoms of the kidneys"
+  ],
+  "uterine cancer": [
+    "groin mass",
+    "bleeding gums",
+    "pelvic pain"
+  ],
+  "dry eye of unknown cause": [
+    "foreign body sensation in eye",
+    "pain in eye",
+    "diminished vision",
+    "eye redness",
+    "lacrimation",
+    "symptoms of eye",
+    "abnormal movement of eyelid",
+    "spots or clouds in vision",
+    "itchiness of eye",
+    "double vision",
+    "white discharge from eye"
+  ],
+  "fibrocystic breast disease": [
+    "intermenstrual bleeding",
+    "bleeding or discharge from nipple",
+    "pain or soreness of breast",
+    "nightmares"
+  ],
+  "fungal infection of the hair": [
+    "skin growth",
+    "foot or toe cramps or spasms",
+    "pelvic pain",
+    "irregular appearing scalp",
+    "skin lesion",
+    "acne or pimples",
+    "symptoms of bladder",
+    "peeling",
+    "abnormal appearing skin",
+    "skin swelling",
+    "\"skin dryness",
+    "hurts to breath"
+  ],
+  "tooth abscess": [
+    "neck swelling",
+    "skin swelling",
+    "cloudy eye",
+    "gum pain",
+    "peripheral edema",
+    "jaw swelling",
+    "toothache",
+    "irregular belly button",
+    "lip swelling",
+    "facial pain"
+  ],
+  "envenomation from spider or animal bite": [
+    "arm swelling",
+    "symptoms of bladder",
+    "paresthesia",
+    "hand or finger swelling",
+    "fluid retention",
+    "allergic reaction",
+    "skin swelling",
+    "abnormal appearing skin",
+    "foot or toe swelling"
+  ],
+  "vacterl syndrome": [
+    "suprapubic pain",
+    "emotional symptoms"
+  ],
+  "vertebrobasilar insufficiency": [
+    "back pain",
+    "sharp chest pain",
+    "leg pain",
+    "dizziness"
+  ],
+  "rectal disorder": [
+    "heartburn",
+    "pain of the anus",
+    "constipation",
+    "sharp abdominal pain",
+    "burning abdominal pain",
+    "rectal bleeding",
+    "cramps and spasms",
+    "diarrhea",
+    "blood in stool",
+    "melena",
+    "mass on ear"
+  ],
+  "atonic bladder": [
+    "suprapubic pain",
+    "emotional symptoms",
+    "retention of urine",
+    "impotence",
+    "eyelid lesion or rash"
+  ],
+  "benign paroxysmal positional vertical (bppv)": [
+    "irregular heartbeat",
+    "fainting",
+    "headache",
+    "nausea",
+    "dizziness",
+    "vomiting",
+    "problems with movement",
+    "weakness",
+    "frontal headache"
+  ],
+  "blepharospasm": [
+    "headache",
+    "abnormal movement of eyelid",
+    "low back weakness",
+    "diminished vision"
+  ],
+  "sarcoidosis": [
+    "facial pain",
+    "sharp chest pain",
+    "pain in eye",
+    "peripheral edema",
+    "cough",
+    "headache",
+    "shortness of breath",
+    "chest tightness"
+  ],
+  "metastatic cancer": [
+    "vaginal dryness",
+    "neck mass",
+    "focal weakness",
+    "fatigue",
+    "decreased appetite"
+  ],
+  "trigger finger (finger disorder)": [
+    "bones are painful",
+    "hand or finger swelling",
+    "hand or finger stiffness or tightness",
+    "hand or finger pain",
+    "joint swelling",
+    "wrist pain"
+  ],
+  "stye": [
+    "skin swelling",
+    "swollen eye",
+    "sweating",
+    "mass on eyelid",
+    "frequent menstruation",
+    "eye burns or stings",
+    "pain in eye",
+    "itchiness of eye",
+    "abnormal appearing skin",
+    "symptoms of eye",
+    "eye redness"
+  ],
+  "hemochromatosis": [
+    "difficulty speaking",
+    "abnormal appearing skin",
+    "ache all over"
+  ],
+  "osteochondroma": [
+    "lower abdominal pain",
+    "skin growth",
+    "skin lesion",
+    "abnormal appearing skin",
+    "knee pain",
+    "foot or toe pain",
+    "lip swelling"
+  ],
+  "cushing syndrome": [
+    "emotional symptoms",
+    "weight gain"
+  ],
+  "typhoid fever": [
+    "wrist pain",
+    "fever"
+  ],
+  "vitreous degeneration": [
+    "double vision",
+    "eye redness",
+    "foreign body sensation in eye",
+    "symptoms of eye",
+    "lacrimation",
+    "diminished vision",
+    "spots or clouds in vision",
+    "pain in eye"
+  ],
+  "atrophic skin condition": [
+    "acne or pimples",
+    "lip swelling",
+    "skin lesion",
+    "skin growth",
+    "\"skin dryness",
+    "abnormal appearing skin",
+    "skin moles",
+    "skin swelling",
+    "muscle weakness"
+  ],
+  "aspergillosis": [
+    "shortness of breath",
+    "knee lump or mass"
+  ],
+  "uterine atony": [
+    "back cramps or spasms",
+    "intermenstrual bleeding",
+    "spotting or bleeding during pregnancy",
+    "pain during pregnancy",
+    "sharp abdominal pain",
+    "lower abdominal pain",
+    "blood in urine",
+    "uterine contractions",
+    "problems during pregnancy"
+  ],
+  "trichinosis": [
+    "nasal congestion",
+    "knee lump or mass"
+  ],
+  "whooping cough": [
+    "nasal congestion",
+    "sore throat",
+    "shortness of breath",
+    "vomiting",
+    "cough"
+  ],
+  "open wound of the lip": [
+    "mouth ulcer",
+    "lip swelling",
+    "irregular belly button",
+    "dry lips",
+    "facial pain"
+  ],
+  "subacute thyroiditis": [
+    "blood in stool",
+    "palpitations",
+    "problems during pregnancy",
+    "pain during pregnancy",
+    "uterine contractions"
+  ],
+  "oral mucosal lesion": [
+    "cough",
+    "lip swelling",
+    "fever",
+    "irregular belly button",
+    "toothache",
+    "facial pain",
+    "gum pain",
+    "tongue lesions",
+    "mouth ulcer",
+    "sore throat"
+  ],
+  "open wound due to trauma": [
+    "wrist swelling",
+    "nailbiting"
+  ],
+  "intracerebral hemorrhage": [
+    "diminished vision",
+    "focal weakness",
+    "nausea",
+    "headache",
+    "seizures",
+    "weakness",
+    "dizziness",
+    "blindness",
+    "depressive or psychotic symptoms",
+    "vomiting"
+  ],
+  "alzheimer disease": [
+    "eye burns or stings",
+    "hostile behavior",
+    "irregular appearing scalp",
+    "depressive or psychotic symptoms",
+    "difficulty speaking",
+    "delusions or hallucinations",
+    "disturbance of memory",
+    "depression"
+  ],
+  "vaginismus": [
+    "suprapubic pain",
+    "sharp abdominal pain",
+    "pelvic pain",
+    "vaginal pain",
+    "pain during intercourse",
+    "lower abdominal pain"
+  ],
+  "systemic lupus erythematosis (sle)": [
+    "hand or finger stiffness or tightness",
+    "bones are painful",
+    "knee pain",
+    "leg swelling",
+    "sharp chest pain",
+    "ache all over"
+  ],
+  "premature ovarian failure": [
+    "lack of growth",
+    "absence of menstruation",
+    "weight gain",
+    "unpredictable menstruation",
+    "pelvic pain"
+  ],
+  "thoracic outlet syndrome": [
+    "sharp chest pain",
+    "loss of sensation",
+    "hand or finger pain",
+    "arm pain",
+    "decreased appetite",
+    "shoulder pain"
+  ],
+  "ganglion cyst": [
+    "knee lump or mass",
+    "leg pain",
+    "foot or toe pain",
+    "skin growth",
+    "hand or finger pain",
+    "knee swelling",
+    "redness in or around nose",
+    "wrist swelling",
+    "knee pain",
+    "hand or finger lump or mass"
+  ],
+  "dislocation of the knee": [
+    "knee pain",
+    "knee swelling",
+    "knee stiffness or tightness"
+  ],
+  "crohn disease": [
+    "pain of the anus",
+    "nausea",
+    "sharp abdominal pain",
+    "vomiting",
+    "regurgitation",
+    "regurgitation.1",
+    "diarrhea",
+    "burning abdominal pain",
+    "blood in stool",
+    "rectal bleeding"
+  ],
+  "postoperative infection": [
+    "jaw swelling",
+    "skin swelling",
+    "skin on leg or foot looks infected",
+    "fever",
+    "abnormal appearing skin",
+    "sharp abdominal pain"
+  ],
+  "folate deficiency": [
+    "sharp abdominal pain",
+    "vomiting blood",
+    "difficulty breathing",
+    "shortness of breath",
+    "sharp chest pain"
+  ],
+  "fluid overload": [
+    "nausea",
+    "vomiting",
+    "sharp chest pain",
+    "shortness of breath",
+    "hand or finger swelling",
+    "peripheral edema",
+    "sharp abdominal pain",
+    "fluid retention"
+  ],
+  "atrial flutter": [
+    "sharp chest pain",
+    "swollen lymph nodes",
+    "irregular heartbeat",
+    "increased heart rate",
+    "palpitations",
+    "frequent urination",
+    "shortness of breath",
+    "chest tightness"
+  ],
+  "skin disorder": [
+    "abnormal appearing skin",
+    "\"skin dryness",
+    "skin moles",
+    "skin lesion",
+    "hurts to breath",
+    "symptoms of bladder",
+    "skin growth",
+    "acne or pimples",
+    "irregular appearing scalp",
+    "skin swelling"
+  ],
+  "floaters": [
+    "symptoms of eye",
+    "foreign body sensation in eye",
+    "lacrimation",
+    "diminished vision",
+    "spots or clouds in vision"
+  ],
+  "tooth disorder": [
+    "peripheral edema",
+    "mouth ulcer",
+    "ear pain",
+    "toothache",
+    "facial pain",
+    "jaw swelling",
+    "polyuria",
+    "gum pain",
+    "cloudy eye",
+    "headache"
+  ],
+  "heart attack": [
+    "heartburn",
+    "fainting",
+    "nausea",
+    "increased heart rate",
+    "arm pain",
+    "burning chest pain",
+    "irregular heartbeat",
+    "shortness of breath",
+    "chest tightness",
+    "infertility",
+    "sharp chest pain"
+  ],
+  "open wound of the abdomen": [
+    "sharp abdominal pain",
+    "blindness",
+    "hand or finger weakness"
+  ],
+  "fracture of the leg": [
+    "knee weakness",
+    "leg stiffness or tightness",
+    "too little hair",
+    "knee swelling",
+    "hip pain",
+    "problems with movement",
+    "leg swelling",
+    "knee pain",
+    "leg pain",
+    "ankle pain"
+  ],
+  "oral thrush (yeast infection)": [
+    "irritable infant",
+    "constipation",
+    "tongue lesions",
+    "cough",
+    "nasal congestion",
+    "irregular belly button",
+    "mouth ulcer",
+    "fever",
+    "foot or toe cramps or spasms",
+    "sore throat"
+  ],
+  "pityriasis rosea": [
+    "vaginal itching",
+    "skin swelling",
+    "abnormal appearing skin",
+    "symptoms of bladder",
+    "skin irritation",
+    "foot or toe cramps or spasms"
+  ],
+  "allergy to animals": [
+    "sore throat",
+    "cough",
+    "cross-eyed",
+    "nasal congestion",
+    "allergic reaction"
+  ],
+  "orthostatic hypotension": [
+    "abnormal involuntary movements",
+    "feeling ill",
+    "headache",
+    "fainting",
+    "dizziness",
+    "sharp chest pain",
+    "irregular heartbeat",
+    "weakness"
+  ],
+  "obstructive sleep apnea (osa)": [
+    "mouth dryness",
+    "fatigue",
+    "infertility",
+    "difficulty breathing",
+    "abnormal breathing sounds",
+    "abnormal involuntary movements",
+    "apnea",
+    "weight gain",
+    "difficulty in swallowing",
+    "insomnia",
+    "sleepiness",
+    "shortness of breath"
+  ],
+  "hypokalemia": [
+    "sharp chest pain",
+    "diarrhea",
+    "nausea",
+    "fainting",
+    "sharp abdominal pain",
+    "vomiting",
+    "shortness of breath",
+    "fever",
+    "loss of sensation",
+    "headache"
+  ],
+  "psoriasis": [
+    "skin swelling",
+    "foot or toe cramps or spasms",
+    "irregular appearing scalp",
+    "peeling",
+    "skin growth",
+    "skin moles",
+    "symptoms of bladder",
+    "hurts to breath",
+    "abnormal appearing skin",
+    "joint pain",
+    "skin lesion"
+  ],
+  "dislocation of the shoulder": [
+    "neck mass",
+    "arm stiffness or tightness",
+    "arm swelling",
+    "arm pain",
+    "wrist pain",
+    "shoulder pain"
+  ],
+  "intussusception": [
+    "blood in stool",
+    "emotional symptoms",
+    "sharp abdominal pain"
+  ],
+  "cervicitis": [
+    "painful urination",
+    "nausea",
+    "vaginal itching",
+    "pain during pregnancy",
+    "sharp abdominal pain",
+    "pelvic pain",
+    "vaginal discharge",
+    "suprapubic pain"
+  ],
+  "abscess of the pharynx": [
+    "sharp chest pain",
+    "headache",
+    "throat swelling",
+    "sore throat",
+    "fever",
+    "difficulty in swallowing",
+    "cough",
+    "nasal congestion"
+  ],
+  "primary thrombocythemia": [
+    "dizziness",
+    "flatulence",
+    "fatigue"
+  ],
+  "arthritis of the hip": [
+    "pelvic pain",
+    "knee pain",
+    "ache all over",
+    "groin pain",
+    "swollen or red tonsils",
+    "problems with movement",
+    "hip pain",
+    "back pain",
+    "lower body pain",
+    "low back pain",
+    "joint pain",
+    "leg pain"
+  ],
+  "decubitus ulcer": [
+    "or roughness\"",
+    "skin lesion",
+    "skin on leg or foot looks infected",
+    "difficulty speaking"
+  ],
+  "hypernatremia": [
+    "shortness of breath",
+    "fainting",
+    "fever",
+    "weakness",
+    "difficulty breathing"
+  ],
+  "sensorineural hearing loss": [
+    "hoarse voice",
+    "throat feels tight",
+    "ear pain",
+    "nasal congestion",
+    "plugged feeling in ear",
+    "diminished hearing",
+    "fluid in ear",
+    "itchy ear(s)",
+    "ringing in ear",
+    "dizziness"
+  ],
+  "chronic ulcer": [
+    "skin lesion",
+    "wrinkles on skin"
+  ],
+  "osteoporosis": [
+    "leg cramps or spasms",
+    "disturbance of memory",
+    "feet turned in",
+    "back pain",
+    "bones are painful",
+    "hip pain",
+    "joint pain",
+    "stomach bloating",
+    "\"muscle cramps"
+  ],
+  "ileus": [
+    "lower abdominal pain",
+    "headache",
+    "diarrhea",
+    "vomiting",
+    "sharp abdominal pain",
+    "pain of the anus",
+    "burning abdominal pain",
+    "nausea",
+    "constipation"
+  ],
+  "sickle cell crisis": [
+    "vomiting",
+    "arm pain",
+    "sharp abdominal pain",
+    "leg pain",
+    "knee pain",
+    "burning abdominal pain",
+    "back pain",
+    "low back pain",
+    "ache all over",
+    "hip pain",
+    "sharp chest pain"
+  ],
+  "urethritis": [
+    "vaginal itching",
+    "suprapubic pain",
+    "painful urination",
+    "posture problems",
+    "blood in urine",
+    "retention of urine",
+    "mouth pain",
+    "sharp abdominal pain",
+    "frequent urination"
+  ],
+  "prostatitis": [
+    "sharp abdominal pain",
+    "retention of urine",
+    "impotence",
+    "blood in urine",
+    "frequent urination",
+    "lower abdominal pain",
+    "chills",
+    "fever",
+    "painful urination",
+    "back pain"
+  ],
+  "otitis externa (swimmer's ear)": [
+    "itchy ear(s)",
+    "fever",
+    "ear pain",
+    "plugged feeling in ear",
+    "redness in ear",
+    "cough",
+    "fluid in ear",
+    "facial pain",
+    "ringing in ear",
+    "diminished hearing",
+    "sore throat"
+  ],
+  "poisoning due to anticonvulsants": [
+    "difficulty speaking",
+    "depression",
+    "problems with movement",
+    "dizziness"
+  ],
+  "testicular torsion": [
+    "emotional symptoms",
+    "back pain",
+    "sharp abdominal pain",
+    "swelling of scrotum",
+    "symptoms of the scrotum and testes",
+    "pain in testicles"
+  ],
+  "tricuspid valve disease": [
+    "anxiety and nervousness",
+    "emotional symptoms"
+  ],
+  "urethral stricture": [
+    "symptoms of the scrotum and testes",
+    "suprapubic pain",
+    "blood in urine",
+    "retention of urine",
+    "painful urination",
+    "eyelid lesion or rash",
+    "involuntary urination",
+    "symptoms of prostate"
+  ],
+  "vitamin d deficiency": [
+    "arm stiffness or tightness",
+    "hot flashes",
+    "fatigue"
+  ],
+  "hydatidiform mole": [
+    "dizziness",
+    "sharp abdominal pain",
+    "diminished vision",
+    "pain during pregnancy",
+    "spotting or bleeding during pregnancy"
+  ],
+  "pain disorder affecting the neck": [
+    "neck stiffness or tightness",
+    "arm pain",
+    "headache",
+    "neck pain",
+    "back pain",
+    "low back pain",
+    "disturbance of memory",
+    "insomnia",
+    "dizziness"
+  ],
+  "tuberculosis": [
+    "vaginal itching",
+    "cough",
+    "congestion in chest",
+    "shortness of breath"
+  ],
+  "pelvic fistula": [
+    "dizziness",
+    "elbow weakness",
+    "vaginal discharge"
+  ],
+  "acute bronchiolitis": [
+    "nasal congestion",
+    "fever",
+    "wheezing",
+    "vomiting",
+    "irregular appearing nails",
+    "cough",
+    "decreased appetite",
+    "difficulty breathing",
+    "irritable infant",
+    "pulling at ears",
+    "shortness of breath",
+    "coryza"
+  ],
+  "presbyopia": [
+    "pain in eye",
+    "abnormal movement of eyelid",
+    "foreign body sensation in eye",
+    "difficulty speaking",
+    "symptoms of eye",
+    "spots or clouds in vision",
+    "diminished vision"
+  ],
+  "dementia": [
+    "insomnia",
+    "depressive or psychotic symptoms",
+    "hostile behavior",
+    "delusions or hallucinations",
+    "focal weakness",
+    "disturbance of memory",
+    "abnormal involuntary movements",
+    "problems with movement"
+  ],
+  "insect bite": [
+    "leg swelling",
+    "hand or finger swelling",
+    "foot or toe cramps or spasms",
+    "peripheral edema",
+    "abnormal appearing skin",
+    "symptoms of bladder",
+    "skin lesion",
+    "skin swelling",
+    "fluid retention",
+    "lip swelling"
+  ],
+  "paroxysmal ventricular tachycardia": [
+    "dizziness",
+    "decreased heart rate",
+    "fainting",
+    "chest tightness",
+    "sharp chest pain",
+    "increased heart rate",
+    "fatigue",
+    "weight gain",
+    "shortness of breath",
+    "irregular heartbeat"
+  ],
+  "congenital heart defect": [
+    "hand or finger stiffness or tightness",
+    "arm swelling",
+    "lack of growth",
+    "sharp chest pain"
+  ],
+  "connective tissue disorder": [
+    "difficulty in swallowing",
+    "feeling ill",
+    "joint pain"
+  ],
+  "foreign body in the eye": [
+    "white discharge from eye",
+    "symptoms of eye",
+    "eye redness",
+    "itchiness of eye",
+    "eye burns or stings",
+    "foreign body sensation in eye",
+    "pain in eye",
+    "lacrimation"
+  ],
+  "poisoning due to gas": [
+    "dizziness",
+    "sharp chest pain",
+    "headache",
+    "wheezing",
+    "shortness of breath",
+    "cough",
+    "skin rash"
+  ],
+  "pyogenic skin infection": [
+    "foot or toe pain",
+    "abnormal appearing skin",
+    "peripheral edema",
+    "leg swelling",
+    "foot or toe cramps or spasms",
+    "hand or finger swelling",
+    "leg pain",
+    "foot or toe swelling",
+    "skin lesion",
+    "skin swelling",
+    "hand or finger pain"
+  ],
+  "endometrial hyperplasia": [
+    "involuntary urination",
+    "back weakness",
+    "bleeding gums",
+    "nosebleed",
+    "long menstrual periods"
+  ],
+  "acanthosis nigricans": [
+    "skin growth",
+    "acne or pimples",
+    "skin lesion",
+    "weight gain"
+  ],
+  "central atherosclerosis": [
+    "irregular heartbeat",
+    "shortness of breath",
+    "blood in urine",
+    "fatigue"
+  ],
+  "viral exanthem": [
+    "skin swelling",
+    "fever",
+    "abnormal appearing skin",
+    "foot or toe cramps or spasms",
+    "pulling at ears",
+    "symptoms of bladder",
+    "decreased appetite",
+    "nasal congestion",
+    "vomiting",
+    "cough"
+  ],
+  "noninfectious gastroenteritis": [
+    "diarrhea",
+    "nausea",
+    "sharp abdominal pain",
+    "decreased appetite",
+    "vomiting",
+    "headache",
+    "rectal bleeding",
+    "burning abdominal pain",
+    "chills",
+    "fever",
+    "fluid retention",
+    "blood in stool"
+  ],
+  "benign prostatic hyperplasia (bph)": [
+    "symptoms of prostate",
+    "frequent urination",
+    "blood in urine",
+    "impotence",
+    "eyelid lesion or rash",
+    "swelling of scrotum",
+    "hand or finger cramps or spasms",
+    "pain in testicles",
+    "involuntary urination",
+    "mass on vulva",
+    "retention of urine",
+    "excessive urination at night"
+  ],
+  "menopause": [
+    "vaginal itching",
+    "involuntary urination",
+    "hot flashes",
+    "infertility",
+    "absence of menstruation",
+    "long menstrual periods"
+  ],
+  "primary immunodeficiency": [
+    "arm stiffness or tightness",
+    "decreased appetite",
+    "fatigue",
+    "cough",
+    "frontal headache"
+  ],
+  "ovarian cancer": [
+    "groin mass",
+    "stomach bloating",
+    "sharp abdominal pain",
+    "decreased appetite"
+  ],
+  "cataract": [
+    "double vision",
+    "symptoms of eye",
+    "blindness",
+    "lacrimation",
+    "change in skin mole size or color",
+    "pain in eye",
+    "spots or clouds in vision",
+    "abnormal movement of eyelid",
+    "itchiness of eye",
+    "diminished vision"
+  ],
+  "dislocation of the hip": [
+    "abusing alcohol",
+    "leg pain",
+    "hip pain"
+  ],
+  "spinal stenosis": [
+    "back pain",
+    "neck pain",
+    "problems with movement",
+    "arm pain",
+    "lower body pain",
+    "hip pain",
+    "low back pain",
+    "paresthesia",
+    "headache",
+    "loss of sensation",
+    "leg pain",
+    "shoulder pain"
+  ],
+  "intestinal obstruction": [
+    "vaginal itching",
+    "nausea",
+    "stomach bloating",
+    "sharp abdominal pain",
+    "retention of urine",
+    "vomiting",
+    "pain of the anus",
+    "constipation",
+    "burning abdominal pain"
+  ],
+  "heart contusion": [
+    "depression",
+    "elbow weakness"
+  ],
+  "congenital malformation syndrome": [
+    "diminished hearing",
+    "seizures",
+    "lack of growth",
+    "gum pain"
+  ],
+  "sporotrichosis": [
+    "wrist pain",
+    "knee pain"
+  ],
+  "lymphangitis": [
+    "arm pain",
+    "neck swelling"
+  ],
+  "wernicke korsakoff syndrome": [
+    "anxiety and nervousness",
+    "abusing alcohol",
+    "depressive or psychotic symptoms"
+  ],
+  "intestinal disease": [
+    "fainting",
+    "burning abdominal pain",
+    "regurgitation",
+    "regurgitation.1",
+    "nausea",
+    "vomiting",
+    "sharp chest pain",
+    "diarrhea",
+    "sharp abdominal pain"
+  ],
+  "acute bronchitis": [
+    "nasal congestion",
+    "fever",
+    "coryza",
+    "cough",
+    "headache",
+    "sore throat",
+    "sharp chest pain",
+    "congestion in chest",
+    "wheezing",
+    "coughing up sputum",
+    "difficulty breathing",
+    "shortness of breath"
+  ],
+  "persistent vomiting of unknown cause": [
+    "abnormal involuntary movements",
+    "dizziness",
+    "nausea",
+    "fever",
+    "sharp abdominal pain",
+    "vomiting",
+    "diarrhea"
+  ],
+  "open wound of the foot": [
+    "foot or toe pain",
+    "incontinence of stool",
+    "skin on leg or foot looks infected",
+    "unwanted hair",
+    "skin lesion",
+    "foot or toe swelling"
+  ],
+  "myocarditis": [
+    "sharp chest pain",
+    "dizziness",
+    "palpitations"
+  ],
+  "preeclampsia": [
+    "vaginal redness",
+    "pain during pregnancy",
+    "uterine contractions",
+    "headache",
+    "sharp abdominal pain",
+    "problems during pregnancy",
+    "spots or clouds in vision",
+    "lower abdominal pain",
+    "recent pregnancy"
+  ],
+  "ischemic heart disease": [
+    "muscle pain",
+    "sharp chest pain",
+    "peripheral edema",
+    "chest tightness",
+    "fatigue",
+    "palpitations",
+    "difficulty breathing",
+    "dizziness",
+    "throat feels tight",
+    "lymphedema",
+    "shortness of breath"
+  ],
+  "neurofibromatosis": [
+    "abnormal involuntary movements",
+    "groin mass",
+    "headache",
+    "abnormal appearing skin"
+  ],
+  "chickenpox": [
+    "pain in testicles",
+    "cough",
+    "symptoms of bladder",
+    "fever",
+    "foot or toe cramps or spasms",
+    "abnormal appearing skin"
+  ],
+  "pancreatic cancer": [
+    "arm swelling",
+    "ache all over",
+    "stomach bloating",
+    "nausea",
+    "jaundice",
+    "diarrhea",
+    "sharp abdominal pain"
+  ],
+  "neuropathy due to drugs": [
+    "vomiting",
+    "foot or toe pain",
+    "cough",
+    "problems with movement",
+    "loss of sensation"
+  ],
+  "croup": [
+    "nasal congestion",
+    "vomiting",
+    "cough",
+    "pulling at ears",
+    "abnormal breathing sounds",
+    "hoarse voice",
+    "fever",
+    "wheezing",
+    "coryza",
+    "sore throat",
+    "shortness of breath"
+  ],
+  "idiopathic excessive menstruation": [
+    "sharp abdominal pain",
+    "cramps and spasms",
+    "painful menstruation",
+    "long menstrual periods",
+    "heavy menstrual flow",
+    "blood clots during menstrual periods",
+    "back mass or lump",
+    "involuntary urination",
+    "intermenstrual bleeding",
+    "nosebleed",
+    "vaginal discharge"
+  ],
+  "amblyopia": [
+    "pus draining from ear",
+    "cross-eyed",
+    "eye deviation",
+    "diminished vision",
+    "pain in eye"
+  ],
+  "meckel diverticulum": [
+    "lower abdominal pain",
+    "knee lump or mass"
+  ],
+  "dislocation of the wrist": [
+    "elbow weakness",
+    "hand or finger pain",
+    "depression",
+    "arm pain"
+  ],
+  "ear drum damage": [
+    "pus draining from ear",
+    "ringing in ear",
+    "redness in ear",
+    "pulling at ears",
+    "plugged feeling in ear",
+    "ear pain",
+    "fluid in ear",
+    "cough",
+    "nasal congestion",
+    "diminished hearing",
+    "pelvic pressure"
+  ],
+  "erectile dysfunction": [
+    "involuntary urination",
+    "arm weakness",
+    "symptoms of prostate",
+    "frequent urination",
+    "blood in urine",
+    "impotence",
+    "excessive urination at night",
+    "pain during intercourse",
+    "pain in testicles",
+    "retention of urine"
+  ],
+  "temporary or benign blood in urine": [
+    "painful urination",
+    "suprapubic pain",
+    "frequent urination",
+    "lower abdominal pain",
+    "back pain",
+    "blood in urine",
+    "regurgitation",
+    "regurgitation.1",
+    "involuntary urination",
+    "sharp abdominal pain",
+    "retention of urine",
+    "eyelid lesion or rash"
+  ],
+  "kidney disease due to longstanding hypertension": [
+    "feeling cold",
+    "shortness of breath",
+    "symptoms of the kidneys",
+    "difficulty speaking"
+  ],
+  "chondromalacia of the patella": [
+    "knee weakness",
+    "problems with movement",
+    "knee pain",
+    "leg pain",
+    "knee swelling",
+    "bones are painful"
+  ],
+  "onychomycosis": [
+    "skin growth",
+    "abnormal appearing skin",
+    "skin swelling",
+    "skin on leg or foot looks infected",
+    "hurts to breath",
+    "hip swelling",
+    "foot or toe cramps or spasms",
+    "foot or toe pain",
+    "unwanted hair"
+  ],
+  "urethral disorder": [
+    "vomiting",
+    "sharp abdominal pain",
+    "side pain",
+    "involuntary urination",
+    "painful urination",
+    "suprapubic pain",
+    "abusing alcohol",
+    "retention of urine"
+  ],
+  "lyme disease": [
+    "hip pain",
+    "depressive or psychotic symptoms",
+    "headache",
+    "fever",
+    "abnormal appearing skin",
+    "fatigue",
+    "symptoms of the face"
+  ],
+  "iron deficiency anemia": [
+    "intermenstrual bleeding",
+    "heartburn",
+    "weakness",
+    "nosebleed",
+    "rectal bleeding",
+    "fatigue",
+    "blood in stool",
+    "regurgitation",
+    "weight gain",
+    "regurgitation.1",
+    "dizziness"
+  ],
+  "acute respiratory distress syndrome (ards)": [
+    "chills",
+    "chest tightness",
+    "fever",
+    "sharp chest pain",
+    "wheezing",
+    "difficulty breathing",
+    "depressive or psychotic symptoms",
+    "cough",
+    "shortness of breath"
+  ],
+  "toxic multinodular goiter": [
+    "irregular heartbeat",
+    "involuntary urination",
+    "double vision",
+    "fatigue",
+    "abnormal involuntary movements"
+  ],
+  "open wound of the finger": [
+    "hand or finger pain",
+    "hand or finger swelling",
+    "hand or finger stiffness or tightness",
+    "nailbiting"
+  ],
+  "autonomic nervous system disorder": [
+    "headache",
+    "dizziness",
+    "decreased appetite",
+    "difficulty in swallowing",
+    "leg pain"
+  ],
+  "psychosexual disorder": [
+    "involuntary urination",
+    "depression",
+    "sleepwalking",
+    "fatigue",
+    "arm weakness",
+    "pain during intercourse",
+    "impotence"
+  ],
+  "anemia": [
+    "changes in stool appearance",
+    "vomiting blood",
+    "low back cramps or spasms",
+    "dizziness",
+    "weakness",
+    "melena",
+    "shortness of breath",
+    "fatigue"
+  ],
+  "tendinitis": [
+    "hand or finger swelling",
+    "ankle pain",
+    "arm pain",
+    "shoulder pain",
+    "knee pain",
+    "foot or toe pain",
+    "hip pain",
+    "hand or finger pain",
+    "wrist pain",
+    "leg pain"
+  ],
+  "common cold": [
+    "chills",
+    "headache",
+    "ear pain",
+    "cough",
+    "vomiting",
+    "wheezing",
+    "fever",
+    "flu-like syndrome",
+    "coryza",
+    "nasal congestion",
+    "sore throat"
+  ],
+  "amyotrophic lateral sclerosis (als)": [
+    "abnormal involuntary movements",
+    "difficulty in swallowing",
+    "difficulty speaking",
+    "leg cramps or spasms",
+    "weakness"
+  ],
+  "central retinal artery or vein occlusion": [
+    "irregular heartbeat",
+    "symptoms of eye",
+    "pain in eye",
+    "diminished vision",
+    "blindness",
+    "foreign body sensation in eye"
+  ],
+  "paroxysmal supraventricular tachycardia": [
+    "involuntary urination",
+    "sharp chest pain",
+    "increased heart rate",
+    "chest tightness",
+    "irregular heartbeat",
+    "weakness",
+    "palpitations",
+    "dizziness",
+    "shortness of breath"
+  ],
+  "venous insufficiency": [
+    "leg pain",
+    "skin on leg or foot looks infected",
+    "burning chest pain",
+    "abnormal appearing skin",
+    "lymphedema",
+    "skin lesion",
+    "leg cramps or spasms",
+    "fluid retention"
+  ],
+  "trichomonas infection": [
+    "vomiting",
+    "vaginal itching",
+    "pain during pregnancy",
+    "nausea",
+    "sharp abdominal pain",
+    "lower abdominal pain",
+    "long menstrual periods",
+    "vaginal discharge"
+  ],
+  "acne": [
+    "irregular appearing scalp",
+    "hurts to breath",
+    "back mass or lump",
+    "abnormal appearing skin",
+    "foot or toe cramps or spasms",
+    "acne or pimples",
+    "skin moles",
+    "skin swelling",
+    "skin growth"
+  ],
+  "depression": [
+    "disturbance of memory",
+    "abusing alcohol",
+    "hostile behavior",
+    "temper problems",
+    "drug abuse",
+    "delusions or hallucinations",
+    "depression",
+    "insomnia",
+    "excessive anger",
+    "depressive or psychotic symptoms",
+    "anxiety and nervousness"
+  ],
+  "drug abuse": [
+    "smoking problems",
+    "disturbance of smell or taste",
+    "drug abuse",
+    "abusing alcohol",
+    "infertility",
+    "depression",
+    "hostile behavior",
+    "delusions or hallucinations",
+    "anxiety and nervousness",
+    "depressive or psychotic symptoms"
+  ],
+  "urinary tract obstruction": [
+    "painful urination",
+    "excessive urination at night",
+    "blood in urine",
+    "frequent urination",
+    "symptoms of prostate",
+    "suprapubic pain",
+    "sharp abdominal pain",
+    "retention of urine",
+    "back pain",
+    "side pain"
+  ],
+  "diabetes insipidus": [
+    "dizziness",
+    "emotional symptoms"
+  ],
+  "iridocyclitis": [
+    "headache",
+    "foreign body sensation in eye",
+    "lacrimation",
+    "pain in eye",
+    "eye redness",
+    "eye burns or stings",
+    "diminished vision",
+    "symptoms of eye",
+    "change in skin mole size or color"
+  ],
+  "varicocele of the testicles": [
+    "involuntary urination",
+    "pain of the anus",
+    "unpredictable menstruation",
+    "pain in testicles",
+    "groin pain",
+    "skin growth",
+    "lower abdominal pain",
+    "swelling of scrotum",
+    "mass in scrotum",
+    "symptoms of the scrotum and testes"
+  ],
+  "irritable bowel syndrome": [
+    "flatulence",
+    "insomnia",
+    "nausea",
+    "lower abdominal pain",
+    "sharp abdominal pain",
+    "upper abdominal pain",
+    "diarrhea",
+    "burning abdominal pain",
+    "anxiety and nervousness"
+  ],
+  "fracture of the foot": [
+    "foot or toe pain",
+    "throat redness",
+    "ankle pain",
+    "foot or toe swelling",
+    "too little hair",
+    "drainage in throat"
+  ],
+  "ovarian cyst": [
+    "intermenstrual bleeding",
+    "vaginal discharge",
+    "vomiting",
+    "lower abdominal pain",
+    "nausea",
+    "sharp abdominal pain",
+    "heavy menstrual flow",
+    "burning abdominal pain",
+    "pelvic pain"
+  ],
+  "chlamydia": [
+    "pelvic pain",
+    "vaginal itching",
+    "sharp abdominal pain",
+    "vaginal discharge",
+    "lower abdominal pain",
+    "vaginal pain"
+  ],
+  "parasitic disease": [
+    "retention of urine",
+    "cough",
+    "hand or finger swelling",
+    "sharp abdominal pain",
+    "abnormal appearing skin",
+    "foot or toe cramps or spasms"
+  ],
+  "fracture of the jaw": [
+    "bones are painful",
+    "pain in eye",
+    "facial pain",
+    "peripheral edema",
+    "jaw swelling",
+    "irregular belly button"
+  ],
+  "lipoma": [
+    "bones are painful",
+    "groin mass",
+    "penile discharge",
+    "abnormal appearing skin",
+    "bleeding in mouth",
+    "neck mass",
+    "skin lesion",
+    "skin growth",
+    "or spasms\"",
+    "skin swelling"
+  ],
+  "female genitalia infection": [
+    "skin swelling",
+    "vaginal discharge",
+    "skin lesion",
+    "vulvar irritation",
+    "vaginal pain",
+    "itching of the anus",
+    "groin pain"
+  ],
+  "pulmonary hypertension": [
+    "feeling ill",
+    "apnea",
+    "sharp chest pain",
+    "palpitations",
+    "difficulty breathing",
+    "shortness of breath",
+    "fatigue",
+    "hemoptysis",
+    "cough"
+  ],
+  "thyroid nodule": [
+    "diminished hearing",
+    "hoarse voice",
+    "back weakness",
+    "difficulty in swallowing",
+    "fatigue",
+    "neck mass",
+    "throat feels tight"
+  ],
+  "broken tooth": [
+    "lip swelling",
+    "dry lips",
+    "toothache",
+    "facial pain",
+    "polyuria",
+    "difficulty eating",
+    "gum pain"
+  ],
+  "dumping syndrome": [
+    "vomiting",
+    "nausea",
+    "knee lump or mass"
+  ],
+  "lymphadenitis": [
+    "cough",
+    "sharp abdominal pain",
+    "neck swelling",
+    "fever",
+    "neck pain",
+    "sore throat",
+    "neck mass",
+    "ear pain",
+    "skin swelling"
+  ],
+  "injury to the face": [
+    "diminished hearing",
+    "neck stiffness or tightness",
+    "neck pain",
+    "low back cramps or spasms",
+    "irregular belly button",
+    "ear pain",
+    "pelvic pressure",
+    "headache",
+    "facial pain"
+  ],
+  "aortic valve disease": [
+    "irregular heartbeat",
+    "sharp chest pain",
+    "difficulty breathing",
+    "palpitations",
+    "fainting",
+    "lymphedema",
+    "peripheral edema",
+    "shortness of breath",
+    "groin mass"
+  ],
+  "rheumatoid arthritis": [
+    "wrist swelling",
+    "premenstrual tension or irritability",
+    "ache all over",
+    "wrist pain",
+    "knee pain",
+    "eyelid retracted",
+    "joint pain",
+    "peripheral edema",
+    "hand or finger swelling",
+    "hand or finger pain"
+  ],
+  "spermatocele": [
+    "frequent urination",
+    "retention of urine",
+    "elbow weakness",
+    "mass in scrotum",
+    "pain in testicles"
+  ],
+  "impetigo": [
+    "mouth ulcer",
+    "skin swelling",
+    "skin lesion",
+    "skin on head or neck looks infected",
+    "abnormal appearing skin",
+    "foot or toe cramps or spasms",
+    "nasal congestion",
+    "cough",
+    "fever",
+    "symptoms of bladder"
+  ],
+  "anal fistula": [
+    "mass in scrotum",
+    "blood in stool",
+    "rectal bleeding",
+    "pain of the anus"
+  ],
+  "hypothermia": [
+    "fainting",
+    "emotional symptoms",
+    "depressive or psychotic symptoms",
+    "weakness"
+  ],
+  "oppositional disorder": [
+    "elbow stiffness or tightness",
+    "hostile behavior",
+    "fainting",
+    "excessive anger",
+    "restlessness",
+    "hand or finger cramps or spasms",
+    "leg lump or mass",
+    "disturbance of smell or taste",
+    "depressive or psychotic symptoms",
+    "temper problems"
+  ],
+  "migraine": [
+    "blindness",
+    "nausea",
+    "diminished vision",
+    "vomiting",
+    "spots or clouds in vision",
+    "disturbance of memory",
+    "dizziness",
+    "headache",
+    "symptoms of the face"
+  ],
+  "diabetic peripheral neuropathy": [
+    "lymphedema",
+    "drainage in throat",
+    "skin lesion",
+    "leg pain",
+    "paresthesia",
+    "foot or toe pain",
+    "foot or toe swelling",
+    "loss of sensation",
+    "problems with movement"
+  ],
+  "testicular disorder": [
+    "symptoms of the scrotum and testes",
+    "hoarse voice",
+    "arm weakness",
+    "impotence",
+    "fatigue"
+  ],
+  "gestational diabetes": [
+    "vaginal redness",
+    "dry or flaky scalp",
+    "pain during pregnancy",
+    "problems during pregnancy",
+    "uterine contractions"
+  ],
+  "hidradenitis suppurativa": [
+    "groin mass",
+    "skin swelling",
+    "skin lesion",
+    "arm pain",
+    "skin growth",
+    "foot or toe cramps or spasms"
+  ],
+  "valley fever": [
+    "hand or finger pain",
+    "shortness of breath",
+    "fever",
+    "shoulder swelling"
+  ],
+  "conjunctivitis due to bacteria": [
+    "abnormal appearing skin",
+    "nasal congestion",
+    "cough",
+    "sore throat",
+    "eye redness",
+    "fever"
+  ],
+  "lewy body dementia": [
+    "hostile behavior",
+    "depressive or psychotic symptoms",
+    "abnormal involuntary movements",
+    "disturbance of memory",
+    "delusions or hallucinations"
+  ],
+  "multiple myeloma": [
+    "lip swelling",
+    "problems with movement",
+    "fatigue",
+    "disturbance of memory",
+    "weakness"
+  ],
+  "head injury": [
+    "double vision",
+    "lip swelling",
+    "facial pain",
+    "back pain",
+    "neck pain",
+    "fainting",
+    "headache",
+    "dizziness"
+  ],
+  "ascending cholangitis": [
+    "shortness of breath",
+    "retention of urine",
+    "jaundice",
+    "sharp abdominal pain",
+    "fever"
+  ],
+  "idiopathic irregular menstrual cycle": [
+    "cramps and spasms",
+    "nosebleed",
+    "long menstrual periods",
+    "back mass or lump",
+    "pelvic pain",
+    "heavy menstrual flow",
+    "painful menstruation",
+    "lower abdominal pain",
+    "sharp abdominal pain",
+    "intermenstrual bleeding",
+    "unpredictable menstruation"
+  ],
+  "interstitial lung disease": [
+    "sore throat",
+    "shortness of breath",
+    "wheezing",
+    "cough",
+    "nasal congestion",
+    "fever",
+    "headache",
+    "sleepiness",
+    "abnormal breathing sounds"
+  ],
+  "mononeuritis": [
+    "leg pain",
+    "hand or finger pain",
+    "wrist pain",
+    "elbow swelling",
+    "ankle pain",
+    "arm pain",
+    "loss of sensation",
+    "elbow pain",
+    "foot or toe pain",
+    "shoulder pain"
+  ],
+  "malaria": [
+    "fainting",
+    "headache",
+    "knee lump or mass",
+    "fever"
+  ],
+  "somatization disorder": [
+    "fainting",
+    "dizziness",
+    "depression",
+    "anxiety and nervousness",
+    "ache all over"
+  ],
+  "hypovolemia": [
+    "fainting",
+    "dizziness",
+    "diarrhea",
+    "vomiting",
+    "feeling ill",
+    "sharp abdominal pain",
+    "fever",
+    "nausea",
+    "decreased appetite"
+  ],
+  "schizophrenia": [
+    "insomnia",
+    "depression",
+    "penis redness",
+    "fears and phobias",
+    "excessive anger",
+    "depressive or psychotic symptoms",
+    "temper problems",
+    "delusions or hallucinations",
+    "elbow stiffness or tightness",
+    "anxiety and nervousness",
+    "hostile behavior"
+  ],
+  "knee ligament or meniscus tear": [
+    "knee lump or mass",
+    "knee stiffness or tightness",
+    "skin oiliness",
+    "knee weakness",
+    "knee swelling",
+    "knee pain",
+    "leg stiffness or tightness"
+  ],
+  "endocarditis": [
+    "irregular heartbeat",
+    "palpitations",
+    "shortness of breath",
+    "sharp chest pain",
+    "dizziness",
+    "increased heart rate"
+  ],
+  "sepsis": [
+    "shortness of breath",
+    "fever",
+    "feeling ill",
+    "vomiting",
+    "difficulty breathing",
+    "weakness",
+    "cough",
+    "decreased appetite",
+    "sharp abdominal pain",
+    "suprapubic pain",
+    "chills"
+  ],
+  "heat stroke": [
+    "dizziness",
+    "ankle swelling"
+  ],
+  "cholecystitis": [
+    "vomiting",
+    "back pain",
+    "side pain",
+    "sharp abdominal pain",
+    "burning abdominal pain",
+    "regurgitation.1",
+    "symptoms of the kidneys",
+    "lower body pain",
+    "nausea",
+    "upper abdominal pain",
+    "sharp chest pain",
+    "stomach bloating"
+  ],
+  "cardiac arrest": [
+    "palpitations",
+    "irregular heartbeat",
+    "arm swelling",
+    "decreased heart rate",
+    "shortness of breath",
+    "weakness",
+    "sharp chest pain",
+    "difficulty breathing"
+  ],
+  "cardiomyopathy": [
+    "decreased heart rate",
+    "chest tightness",
+    "irregular heartbeat",
+    "fatigue",
+    "sharp chest pain",
+    "shortness of breath",
+    "heartburn",
+    "peripheral edema"
+  ],
+  "social phobia": [
+    "abusing alcohol",
+    "excessive appetite",
+    "excessive anger",
+    "depression",
+    "fears and phobias",
+    "anxiety and nervousness",
+    "insomnia",
+    "delusions or hallucinations",
+    "depressive or psychotic symptoms"
+  ],
+  "meningitis": [
+    "cough",
+    "nausea",
+    "fever",
+    "vomiting",
+    "ache all over",
+    "neck pain",
+    "headache",
+    "neck stiffness or tightness"
+  ],
+  "spherocytosis": [
+    "cough",
+    "elbow weakness",
+    "foot or toe cramps or spasms"
+  ],
+  "hormone disorder": [
+    "acne or pimples",
+    "hot flashes",
+    "headache",
+    "lack of growth",
+    "excessive growth"
+  ],
+  "raynaud disease": [
+    "hand or finger pain",
+    "hand or finger swelling",
+    "loss of sensation"
+  ],
+  "reactive arthritis": [
+    "hip pain",
+    "knee lump or mass"
+  ],
+  "scabies": [
+    "long menstrual periods",
+    "foot or toe swelling",
+    "skin swelling",
+    "problems during pregnancy",
+    "symptoms of bladder",
+    "abnormal appearing skin",
+    "foot or toe cramps or spasms"
+  ],
+  "ear wax impaction": [
+    "fluid in ear",
+    "sinus congestion",
+    "plugged feeling in ear",
+    "ringing in ear",
+    "diminished hearing",
+    "nasal congestion",
+    "fever",
+    "pulling at ears",
+    "ear pain",
+    "cough"
+  ],
+  "hypertension of pregnancy": [
+    "heartburn",
+    "problems during pregnancy",
+    "headache",
+    "pain during pregnancy",
+    "spotting or bleeding during pregnancy",
+    "uterine contractions"
+  ],
+  "peripheral arterial embolism": [
+    "paresthesia",
+    "knee swelling",
+    "abnormal appearing skin",
+    "leg pain",
+    "loss of sensation",
+    "leg swelling"
+  ],
+  "rosacea": [
+    "abnormal appearing skin",
+    "symptoms of eye",
+    "skin growth",
+    "acne or pimples",
+    "hurts to breath",
+    "skin moles",
+    "skin lesion",
+    "skin swelling",
+    "lymphedema",
+    "symptoms of bladder"
+  ],
+  "fracture of the skull": [
+    "depressive or psychotic symptoms",
+    "drug abuse",
+    "vomiting",
+    "diminished hearing",
+    "headache"
+  ],
+  "uveitis": [
+    "elbow weakness",
+    "symptoms of eye",
+    "diminished vision"
+  ],
+  "fracture of the facial bones": [
+    "lip swelling",
+    "pain in eye",
+    "double vision",
+    "facial pain",
+    "headache",
+    "peripheral edema",
+    "elbow lump or mass",
+    "sweating",
+    "abusing alcohol"
+  ],
+  "tracheitis": [
+    "nasal congestion",
+    "hoarse voice",
+    "shortness of breath",
+    "cough",
+    "sore throat",
+    "fever",
+    "pupils unequal"
+  ],
+  "jaw disorder": [
+    "difficulty in swallowing",
+    "neck mass",
+    "jaw swelling",
+    "headache",
+    "toothache",
+    "peripheral edema",
+    "irregular belly button",
+    "facial pain"
+  ],
+  "perirectal infection": [
+    "skin swelling",
+    "skin lesion",
+    "pain in testicles",
+    "pain of the anus",
+    "swelling of scrotum",
+    "abnormal appearing skin"
+  ],
+  "breast cyst": [
+    "vaginal dryness",
+    "skin growth",
+    "pain or soreness of breast",
+    "nightmares"
+  ],
+  "post-traumatic stress disorder (ptsd)": [
+    "hostile behavior",
+    "temper problems",
+    "insomnia",
+    "abusing alcohol",
+    "drug abuse",
+    "delusions or hallucinations",
+    "excessive anger",
+    "depression",
+    "depressive or psychotic symptoms",
+    "anxiety and nervousness"
+  ],
+  "kidney cancer": [
+    "groin mass",
+    "involuntary urination",
+    "blood in urine",
+    "kidney mass",
+    "retention of urine"
+  ],
+  "vulvar cancer": [
+    "insomnia",
+    "back pain",
+    "emotional symptoms"
+  ],
+  "blepharitis": [
+    "eye burns or stings",
+    "mass on eyelid",
+    "spots or clouds in vision",
+    "lacrimation",
+    "diminished vision",
+    "pain in eye",
+    "eye redness",
+    "sweating",
+    "itchiness of eye",
+    "white discharge from eye",
+    "symptoms of eye"
+  ],
+  "celiac disease": [
+    "peripheral edema",
+    "sharp chest pain",
+    "sharp abdominal pain",
+    "vomiting",
+    "regurgitation.1",
+    "nausea"
+  ],
+  "cystitis": [
+    "involuntary urination",
+    "side pain",
+    "eyelid lesion or rash",
+    "frequent urination",
+    "suprapubic pain",
+    "lower abdominal pain",
+    "blood in urine",
+    "sharp abdominal pain",
+    "painful urination",
+    "back pain",
+    "retention of urine",
+    "pelvic pain"
+  ],
+  "sickle cell anemia": [
+    "dry lips",
+    "ache all over",
+    "temper problems",
+    "pulling at ears",
+    "back pain",
+    "fever",
+    "joint pain",
+    "leg pain"
+  ],
+  "subconjunctival hemorrhage": [
+    "foreign body sensation in eye",
+    "headache",
+    "pain in eye",
+    "bleeding from eye",
+    "eye redness",
+    "diminished vision",
+    "symptoms of eye",
+    "facial pain"
+  ],
+  "hemorrhoids": [
+    "heartburn",
+    "lower body pain",
+    "constipation",
+    "rectal bleeding",
+    "changes in stool appearance",
+    "warts",
+    "mass on ear",
+    "melena",
+    "blood in stool",
+    "pain of the anus",
+    "sharp abdominal pain"
+  ],
+  "contact dermatitis": [
+    "skin moles",
+    "allergic reaction",
+    "symptoms of bladder",
+    "\"skin dryness",
+    "hurts to breath",
+    "foot or toe cramps or spasms",
+    "abnormal appearing skin",
+    "sweating",
+    "skin swelling",
+    "acne or pimples",
+    "skin lesion"
+  ],
+  "sinus bradycardia": [
+    "chest tightness",
+    "irregular heartbeat",
+    "fainting",
+    "decreased heart rate",
+    "increased heart rate",
+    "sharp chest pain",
+    "feeling ill",
+    "palpitations",
+    "weakness",
+    "shortness of breath",
+    "dizziness"
+  ],
+  "high blood pressure": [
+    "sharp chest pain",
+    "headache"
+  ],
+  "pelvic inflammatory disease": [
+    "burning abdominal pain",
+    "painful urination",
+    "intermenstrual bleeding",
+    "lower abdominal pain",
+    "vaginal discharge",
+    "nausea",
+    "back pain",
+    "sharp abdominal pain",
+    "vomiting",
+    "pelvic pain",
+    "suprapubic pain"
+  ],
+  "liver disease": [
+    "upper abdominal pain",
+    "nausea",
+    "blood in stool",
+    "peripheral edema",
+    "jaundice",
+    "sharp abdominal pain",
+    "unusual color or odor to urine",
+    "side pain",
+    "diarrhea",
+    "weakness",
+    "heartburn",
+    "shortness of breath"
+  ],
+  "chronic constipation": [
+    "retention of urine",
+    "lower abdominal pain",
+    "vomiting",
+    "constipation",
+    "pain of the anus",
+    "rectal bleeding",
+    "blood in stool",
+    "changes in stool appearance",
+    "nausea",
+    "burning abdominal pain",
+    "sharp abdominal pain"
+  ],
+  "thyroid cancer": [
+    "swollen lymph nodes",
+    "difficulty in swallowing",
+    "fatigue",
+    "neck mass"
+  ],
+  "flu": [
+    "sore throat",
+    "headache",
+    "nausea",
+    "chills",
+    "diarrhea",
+    "ache all over",
+    "coryza",
+    "cough",
+    "fever",
+    "vomiting"
+  ],
+  "friedrich ataxia": [
+    "cough",
+    "knee lump or mass",
+    "ear pain"
+  ],
+  "tic (movement) disorder": [
+    "problems with movement",
+    "depressive or psychotic symptoms",
+    "headache",
+    "abnormal movement of eyelid",
+    "abnormal involuntary movements",
+    "symptoms of eye"
+  ],
+  "skin polyp": [
+    "skin swelling",
+    "skin moles",
+    "skin irritation",
+    "irregular appearing scalp",
+    "skin growth",
+    "acne or pimples",
+    "abnormal appearing skin",
+    "hurts to breath",
+    "\"skin dryness",
+    "symptoms of bladder",
+    "skin lesion"
+  ],
+  "brachial neuritis": [
+    "elbow pain",
+    "neck pain",
+    "paresthesia",
+    "low back pain",
+    "back pain",
+    "shoulder pain",
+    "hand or finger pain",
+    "elbow swelling",
+    "arm pain",
+    "loss of sensation",
+    "headache"
+  ],
+  "cervical cancer": [
+    "vaginal itching",
+    "jaundice",
+    "pelvic pain",
+    "nosebleed",
+    "vaginal discharge",
+    "vulvar irritation"
+  ],
+  "adrenal adenoma": [
+    "shortness of breath",
+    "anxiety and nervousness",
+    "back weakness",
+    "sharp abdominal pain"
+  ],
+  "esophagitis": [
+    "difficulty in swallowing",
+    "upper abdominal pain",
+    "vomiting",
+    "sore throat",
+    "cough",
+    "sharp chest pain",
+    "nausea",
+    "chest tightness",
+    "heartburn",
+    "sharp abdominal pain",
+    "shortness of breath",
+    "burning abdominal pain"
+  ],
+  "gas gangrene": [
+    "sharp abdominal pain",
+    "wrist pain"
+  ],
+  "yeast infection": [
+    "suprapubic pain",
+    "frequent urination",
+    "sharp abdominal pain",
+    "vaginal discharge",
+    "vaginal itching",
+    "foot or toe cramps or spasms",
+    "vaginal pain",
+    "arm lump or mass",
+    "pelvic pain"
+  ],
+  "spina bifida": [
+    "eye moves abnormally",
+    "disturbance of memory",
+    "skin lesion",
+    "back pain",
+    "headache",
+    "involuntary urination"
+  ],
+  "drug poisoning due to medication": [
+    "lip swelling",
+    "abusing alcohol",
+    "slurring words",
+    "drug abuse",
+    "depressive or psychotic symptoms",
+    "sleepiness",
+    "depression"
+  ],
+  "alcoholic liver disease": [
+    "abnormal involuntary movements",
+    "weight gain",
+    "stomach bloating",
+    "diarrhea",
+    "sharp abdominal pain",
+    "peripheral edema",
+    "abusing alcohol"
+  ],
+  "malignant hypertension": [
+    "insomnia",
+    "depressive or psychotic symptoms",
+    "headache",
+    "vomiting",
+    "lower body pain",
+    "shortness of breath",
+    "sharp chest pain"
+  ],
+  "diverticulitis": [
+    "constipation",
+    "sharp abdominal pain",
+    "lower abdominal pain",
+    "nausea",
+    "diarrhea",
+    "vomiting",
+    "chills",
+    "side pain",
+    "burning abdominal pain",
+    "fever",
+    "blood in stool",
+    "upper abdominal pain"
+  ],
+  "moyamoya disease": [
+    "depressive or psychotic symptoms",
+    "elbow weakness"
+  ],
+  "heat exhaustion": [
+    "shortness of breath",
+    "vomiting",
+    "weakness",
+    "fainting",
+    "fluid retention",
+    "dizziness",
+    "sharp chest pain",
+    "headache"
+  ],
+  "psychotic disorder": [
+    "insomnia",
+    "hostile behavior",
+    "delusions or hallucinations",
+    "fears and phobias",
+    "depression",
+    "temper problems",
+    "abusing alcohol",
+    "depressive or psychotic symptoms",
+    "penis redness",
+    "excessive anger",
+    "anxiety and nervousness"
+  ],
+  "frostbite": [
+    "sharp chest pain",
+    "elbow weakness",
+    "foot or toe pain"
+  ],
+  "atrophy of the corpus cavernosum": [
+    "frequent urination",
+    "itchy scalp",
+    "impotence",
+    "abnormal appearing skin",
+    "skin growth"
+  ],
+  "smoking or tobacco addiction": [
+    "excessive anger",
+    "smoking problems",
+    "irregular appearing nails",
+    "drug abuse",
+    "sharp chest pain",
+    "coughing up sputum",
+    "abusing alcohol",
+    "cough",
+    "headache",
+    "hemoptysis",
+    "shortness of breath"
+  ],
+  "sprain or strain": [
+    "back pain",
+    "arm pain",
+    "wrist pain",
+    "foot or toe pain",
+    "low back pain",
+    "shoulder pain",
+    "headache",
+    "neck pain",
+    "hand or finger pain",
+    "ankle pain",
+    "knee pain",
+    "leg pain"
+  ],
+  "essential tremor": [
+    "hoarse voice",
+    "dizziness",
+    "loss of sensation",
+    "abnormal involuntary movements",
+    "problems with movement",
+    "muscle pain",
+    "disturbance of memory"
+  ],
+  "open wound of the ear": [
+    "dry lips",
+    "facial pain",
+    "ear pain",
+    "pelvic pressure",
+    "fluid in ear"
+  ],
+  "foreign body in the nose": [
+    "nasal congestion",
+    "regurgitation.1"
+  ],
+  "idiopathic painful menstruation": [
+    "vaginal discharge",
+    "pelvic pain",
+    "cramps and spasms",
+    "nosebleed",
+    "vaginal itching",
+    "back mass or lump",
+    "heavy menstrual flow",
+    "long menstrual periods",
+    "blood clots during menstrual periods",
+    "lower abdominal pain",
+    "sharp abdominal pain"
+  ],
+  "down syndrome": [
+    "difficulty speaking",
+    "nasal congestion",
+    "lack of growth",
+    "decreased appetite",
+    "cough",
+    "seizures"
+  ],
+  "idiopathic infrequent menstruation": [
+    "sharp abdominal pain",
+    "nausea",
+    "retention of urine",
+    "long menstrual periods"
+  ],
+  "pneumothorax": [
+    "shoulder pain",
+    "drug abuse",
+    "side pain",
+    "shortness of breath",
+    "back pain",
+    "irregular appearing nails",
+    "cough",
+    "sharp chest pain"
+  ],
+  "de quervain disease": [
+    "abnormal involuntary movements",
+    "wrist swelling",
+    "arm pain",
+    "hand or finger pain",
+    "wrist pain",
+    "hand or finger swelling",
+    "shoulder pain"
+  ],
+  "fracture of the vertebra": [
+    "hand or finger stiffness or tightness",
+    "bones are painful",
+    "low back pain",
+    "neck pain",
+    "back pain",
+    "pelvic pain",
+    "hip pain",
+    "leg stiffness or tightness"
+  ],
+  "human immunodeficiency virus infection (hiv)": [
+    "drug abuse",
+    "fears and phobias",
+    "shoulder lump or mass"
+  ],
+  "mumps": [
+    "swollen lymph nodes",
+    "shoulder swelling",
+    "ear pain",
+    "sore throat"
+  ],
+  "subarachnoid hemorrhage": [
+    "symptoms of eye",
+    "vomiting",
+    "fainting",
+    "loss of sensation",
+    "dizziness",
+    "headache"
+  ],
+  "acute fatty liver of pregnancy (aflp)": [
+    "emotional symptoms",
+    "sharp abdominal pain"
+  ],
+  "ectropion": [
+    "white discharge from eye",
+    "symptoms of eye",
+    "eye redness",
+    "pain in eye",
+    "lacrimation"
+  ],
+  "scar": [
+    "skin swelling",
+    "skin moles",
+    "lip swelling",
+    "skin lesion",
+    "abnormal appearing skin",
+    "symptoms of bladder",
+    "skin growth"
+  ],
+  "lactose intolerance": [
+    "nasal congestion",
+    "flatulence",
+    "impotence",
+    "burning abdominal pain",
+    "shortness of breath",
+    "diarrhea"
+  ],
+  "eustachian tube dysfunction (ear disorder)": [
+    "sore throat",
+    "abnormal breathing sounds",
+    "ringing in ear",
+    "ear pain",
+    "diminished hearing",
+    "bleeding from ear",
+    "redness in ear",
+    "dizziness",
+    "allergic reaction",
+    "plugged feeling in ear",
+    "nasal congestion"
+  ],
+  "appendicitis": [
+    "decreased appetite",
+    "burning abdominal pain",
+    "lower abdominal pain",
+    "vomiting",
+    "nausea",
+    "stomach bloating",
+    "side pain",
+    "diarrhea",
+    "upper abdominal pain",
+    "fever",
+    "sharp abdominal pain"
+  ],
+  "graves disease": [
+    "irregular heartbeat",
+    "dizziness",
+    "involuntary urination",
+    "hemoptysis",
+    "palpitations",
+    "infertility",
+    "abnormal involuntary movements"
+  ],
+  "dissociative disorder": [
+    "back weakness",
+    "disturbance of memory",
+    "excessive anger",
+    "anxiety and nervousness",
+    "depressive or psychotic symptoms"
+  ],
+  "open wound of the face": [
+    "wrist swelling",
+    "facial pain"
+  ],
+  "dislocation of the vertebra": [
+    "leg pain",
+    "elbow weakness",
+    "neck pain",
+    "back pain",
+    "low back pain"
+  ],
+  "phimosis": [
+    "symptoms of the scrotum and testes",
+    "painful urination",
+    "blood in urine",
+    "retention of urine",
+    "mouth pain",
+    "leg weakness"
+  ],
+  "hyperemesis gravidarum": [
+    "vomiting blood",
+    "burning abdominal pain",
+    "nausea",
+    "pain during pregnancy",
+    "diarrhea",
+    "weakness",
+    "headache",
+    "sharp abdominal pain",
+    "problems during pregnancy",
+    "vomiting",
+    "dizziness"
+  ],
+  "pregnancy": [
+    "problems during pregnancy",
+    "cramps and spasms",
+    "pain during pregnancy",
+    "spotting or bleeding during pregnancy",
+    "uterine contractions",
+    "dry or flaky scalp"
+  ],
+  "thalassemia": [
+    "insomnia",
+    "elbow weakness"
+  ],
+  "placenta previa": [
+    "involuntary urination",
+    "spotting or bleeding during pregnancy",
+    "pain during pregnancy",
+    "cramps and spasms"
+  ],
+  "epidural hemorrhage": [
+    "depressive or psychotic symptoms",
+    "dizziness",
+    "emotional symptoms"
+  ],
+  "septic arthritis": [
+    "leg pain",
+    "hip pain",
+    "knee swelling",
+    "knee pain",
+    "fever"
+  ],
+  "athlete's foot": [
+    "skin lesion",
+    "unwanted hair",
+    "abnormal appearing skin",
+    "skin swelling",
+    "foot or toe swelling",
+    "foot or toe pain",
+    "hurts to breath",
+    "foot or toe cramps or spasms"
+  ],
+  "pleural effusion": [
+    "sharp abdominal pain",
+    "weakness",
+    "rib pain",
+    "irregular appearing nails",
+    "back pain",
+    "side pain",
+    "sharp chest pain",
+    "difficulty breathing",
+    "cough",
+    "shortness of breath"
+  ],
+  "aphakia": [
+    "symptoms of eye",
+    "diminished vision",
+    "eye burns or stings",
+    "spots or clouds in vision"
+  ],
+  "vulvar disorder": [
+    "pain during intercourse",
+    "vaginal itching",
+    "vaginal pain",
+    "vaginal discharge",
+    "hurts to breath",
+    "vulvar irritation"
+  ],
+  "sialoadenitis": [
+    "swollen lymph nodes",
+    "cough",
+    "sore throat",
+    "facial pain",
+    "peripheral edema",
+    "nasal congestion",
+    "neck swelling",
+    "jaw swelling",
+    "neck mass"
+  ],
+  "gynecomastia": [
+    "bones are painful",
+    "skin swelling",
+    "nightmares",
+    "back pain",
+    "problems with shape or size of breast",
+    "neck pain",
+    "pain or soreness of breast"
+  ],
+  "urinary tract infection": [
+    "suprapubic pain",
+    "painful urination",
+    "side pain",
+    "vomiting",
+    "blood in urine",
+    "frequent urination",
+    "back pain",
+    "lower abdominal pain",
+    "nausea",
+    "retention of urine",
+    "fever"
+  ],
+  "histoplasmosis": [
+    "cough",
+    "elbow weakness",
+    "lacrimation"
+  ],
+  "erythema multiforme": [
+    "difficulty in swallowing",
+    "vomiting",
+    "foot or toe cramps or spasms",
+    "fever",
+    "mouth ulcer"
+  ],
+  "scoliosis": [
+    "knee stiffness or tightness",
+    "knee swelling",
+    "low back pain",
+    "problems with movement",
+    "lower body pain",
+    "leg pain",
+    "back pain"
+  ],
+  "bunion": [
+    "skin growth",
+    "skin moles",
+    "foot or toe pain",
+    "knee pain",
+    "incontinence of stool"
+  ],
+  "arrhythmia": [
+    "fainting",
+    "dizziness",
+    "shortness of breath",
+    "palpitations",
+    "sharp chest pain",
+    "fatigue",
+    "chest tightness",
+    "leg cramps or spasms"
+  ],
+  "trigeminal neuralgia": [
+    "abnormal involuntary movements",
+    "symptoms of the face",
+    "dizziness",
+    "headache",
+    "facial pain",
+    "pain in eye",
+    "toothache"
+  ],
+  "ankylosing spondylitis": [
+    "paresthesia",
+    "elbow pain",
+    "ache all over",
+    "low back pain",
+    "knee pain",
+    "stiffness all over",
+    "lower body pain",
+    "back pain",
+    "leg pain",
+    "hip pain"
+  ],
+  "peripheral nerve disorder": [
+    "skin oiliness",
+    "loss of sensation",
+    "arm pain",
+    "back pain",
+    "foot or toe pain",
+    "leg pain",
+    "abnormal involuntary movements",
+    "paresthesia",
+    "swollen tongue",
+    "problems with movement",
+    "disturbance of memory",
+    "dizziness"
+  ],
+  "sebaceous cyst": [
+    "skin moles",
+    "skin growth",
+    "neck mass",
+    "hand or finger lump or mass",
+    "irregular appearing scalp",
+    "acne or pimples",
+    "abnormal appearing skin",
+    "or spasms\"",
+    "skin swelling",
+    "skin lesion",
+    "penile discharge"
+  ],
+  "poisoning due to antipsychotics": [
+    "anxiety and nervousness",
+    "sharp chest pain",
+    "delusions or hallucinations"
+  ],
+  "neurosis": [
+    "smoking problems",
+    "hostile behavior",
+    "depression",
+    "excessive anger",
+    "leg lump or mass",
+    "drug abuse",
+    "insomnia",
+    "headache",
+    "depressive or psychotic symptoms",
+    "delusions or hallucinations",
+    "anxiety and nervousness"
+  ],
+  "prostate cancer": [
+    "involuntary urination",
+    "flushing",
+    "retention of urine",
+    "impotence",
+    "blood in urine",
+    "pain during intercourse",
+    "symptoms of prostate",
+    "excessive urination at night"
+  ],
+  "cerebral edema": [
+    "dizziness",
+    "vomiting",
+    "arm pain",
+    "headache",
+    "neck pain",
+    "focal weakness"
+  ],
+  "dislocation of the finger": [
+    "difficulty speaking",
+    "hand or finger stiffness or tightness",
+    "hand or finger pain",
+    "hand or finger swelling",
+    "wrist pain"
+  ],
+  "birth trauma": [
+    "depressive or psychotic symptoms",
+    "emotional symptoms",
+    "arm stiffness or tightness"
+  ],
+  "chronic pancreatitis": [
+    "skin growth",
+    "back pain",
+    "diarrhea",
+    "nausea",
+    "vomiting",
+    "abusing alcohol",
+    "sharp abdominal pain",
+    "ache all over"
+  ],
+  "hematoma": [
+    "arm swelling",
+    "ache all over",
+    "skin swelling",
+    "swelling of scrotum",
+    "sharp abdominal pain"
+  ],
+  "carcinoid syndrome": [
+    "involuntary urination",
+    "knee lump or mass"
+  ],
+  "open wound of the head": [
+    "abusing alcohol",
+    "headache"
+  ],
+  "seborrheic keratosis": [
+    "symptoms of bladder",
+    "skin moles",
+    "abnormal appearing skin",
+    "skin growth",
+    "\"skin dryness",
+    "foot or toe cramps or spasms",
+    "skin irritation",
+    "skin lesion",
+    "irregular appearing scalp",
+    "acne or pimples",
+    "skin swelling"
+  ],
+  "burn": [
+    "\"skin dryness",
+    "wrist swelling",
+    "wrist pain",
+    "hand or finger pain",
+    "headache",
+    "knee pain"
+  ],
+  "spontaneous abortion": [
+    "burning abdominal pain",
+    "uterine contractions",
+    "pain during pregnancy",
+    "pelvic pain",
+    "nosebleed",
+    "intermenstrual bleeding",
+    "lower abdominal pain",
+    "spotting or bleeding during pregnancy",
+    "problems during pregnancy",
+    "cramps and spasms",
+    "sharp abdominal pain",
+    "blood clots during menstrual periods"
+  ],
+  "genital herpes": [
+    "skin lesion",
+    "vaginal itching",
+    "suprapubic pain",
+    "vaginal discharge",
+    "recent pregnancy",
+    "foot or toe cramps or spasms",
+    "painful urination"
+  ],
+  "adjustment reaction": [
+    "delusions or hallucinations",
+    "insomnia",
+    "depression",
+    "hostile behavior",
+    "fears and phobias",
+    "anxiety and nervousness",
+    "restlessness",
+    "excessive anger",
+    "shoulder lump or mass"
+  ],
+  "gallstone": [
+    "regurgitation.1",
+    "back pain",
+    "burning abdominal pain",
+    "nausea",
+    "upper abdominal pain",
+    "sharp abdominal pain",
+    "side pain",
+    "lower body pain",
+    "heartburn",
+    "vomiting",
+    "sharp chest pain"
+  ],
+  "multiple sclerosis": [
+    "abnormal involuntary movements",
+    "skin oiliness",
+    "loss of sensation",
+    "fatigue",
+    "weakness",
+    "disturbance of memory",
+    "problems with movement",
+    "paresthesia",
+    "headache",
+    "dizziness",
+    "focal weakness"
+  ],
+  "zenker diverticulum": [
+    "sore throat",
+    "elbow weakness",
+    "sharp chest pain"
+  ],
+  "fracture of the pelvis": [
+    "difficulty speaking",
+    "knee pain",
+    "ache all over",
+    "back pain",
+    "hip pain",
+    "leg pain",
+    "groin pain"
+  ],
+  "pneumoconiosis": [
+    "dizziness",
+    "shortness of breath",
+    "cough",
+    "fever"
+  ],
+  "hyperlipidemia": [
+    "sharp chest pain",
+    "smoking problems",
+    "weight gain"
+  ],
+  "ulcerative colitis": [
+    "swollen lymph nodes",
+    "nausea",
+    "sharp abdominal pain",
+    "vomiting",
+    "lower abdominal pain",
+    "blood in stool",
+    "rectal bleeding",
+    "diarrhea",
+    "burning abdominal pain"
+  ],
+  "male genitalia infection": [
+    "irritable infant",
+    "swelling of scrotum",
+    "abnormal appearing skin",
+    "itchy scalp",
+    "pain in testicles",
+    "mass in scrotum"
+  ],
+  "hpv": [
+    "involuntary urination",
+    "vaginal itching",
+    "skin irritation"
+  ],
+  "angina": [
+    "hot flashes",
+    "palpitations",
+    "sharp chest pain",
+    "chest tightness",
+    "irregular heartbeat",
+    "lower body pain",
+    "arm pain",
+    "increased heart rate",
+    "infertility",
+    "shortness of breath",
+    "dizziness"
+  ],
+  "injury to the spinal cord": [
+    "retention of urine",
+    "headache",
+    "back pain",
+    "neck pain"
+  ],
+  "nasal polyp": [
+    "frontal headache",
+    "painful sinuses",
+    "hoarse voice",
+    "cough",
+    "headache",
+    "nasal congestion",
+    "allergic reaction",
+    "facial pain"
+  ],
+  "lichen simplex": [
+    "vaginal itching",
+    "difficulty speaking",
+    "symptoms of bladder",
+    "skin lesion",
+    "foot or toe cramps or spasms"
+  ],
+  "trichiasis": [
+    "diminished vision",
+    "emotional symptoms",
+    "foreign body sensation in eye",
+    "eye redness",
+    "swollen eye"
+  ],
+  "acariasis": [
+    "emotional symptoms",
+    "swelling of scrotum",
+    "symptoms of bladder",
+    "foot or toe cramps or spasms"
+  ],
+  "colorectal cancer": [
+    "rectal bleeding",
+    "blood in stool",
+    "sharp abdominal pain",
+    "pain of the anus",
+    "warts",
+    "skin rash"
+  ],
+  "skin pigmentation disorder": [
+    "irregular appearing scalp",
+    "skin irritation",
+    "skin growth",
+    "skin moles",
+    "hurts to breath",
+    "acne or pimples",
+    "abnormal appearing skin",
+    "symptoms of bladder",
+    "foot or toe cramps or spasms",
+    "skin swelling",
+    "skin lesion"
+  ],
+  "factitious disorder": [
+    "depression",
+    "elbow weakness",
+    "depressive or psychotic symptoms",
+    "disturbance of memory"
+  ],
+  "lymphogranuloma venereum": [
+    "ear pain",
+    "knee lump or mass",
+    "sore throat"
+  ],
+  "galactorrhea of unknown cause": [
+    "anxiety and nervousness",
+    "bleeding or discharge from nipple",
+    "pain or soreness of breast",
+    "emotional symptoms"
+  ],
+  "g6pd enzyme deficiency": [
+    "cough",
+    "emotional symptoms"
+  ],
+  "nerve impingement near the shoulder": [
+    "hand or finger stiffness or tightness",
+    "neck pain",
+    "problems with movement",
+    "shoulder pain",
+    "elbow pain",
+    "shoulder stiffness or tightness",
+    "arm pain",
+    "shoulder weakness"
+  ],
+  "toxoplasmosis": [
+    "emotional symptoms",
+    "diminished vision"
+  ],
+  "fibroadenoma": [
+    "vaginal dryness",
+    "hot flashes",
+    "bones are painful",
+    "pain or soreness of breast",
+    "bleeding or discharge from nipple",
+    "nightmares"
+  ],
+  "open wound of the hand": [
+    "hand or finger pain",
+    "hand or finger swelling",
+    "hand or finger stiffness or tightness",
+    "nailbiting"
+  ],
+  "missed abortion": [
+    "blood in stool",
+    "problems during pregnancy",
+    "intermenstrual bleeding",
+    "spotting or bleeding during pregnancy",
+    "cramps and spasms",
+    "sharp abdominal pain",
+    "pain during pregnancy",
+    "lower abdominal pain",
+    "blood clots during menstrual periods"
+  ],
+  "diabetic ketoacidosis": [
+    "frequent urination",
+    "decreased appetite",
+    "nausea",
+    "sharp abdominal pain",
+    "fluid retention",
+    "sharp chest pain",
+    "vomiting",
+    "diarrhea",
+    "weakness",
+    "depressive or psychotic symptoms"
+  ],
+  "granuloma inguinale": [
+    "sharp chest pain",
+    "knee lump or mass"
+  ],
+  "obsessive compulsive disorder (ocd)": [
+    "feeling ill",
+    "lack of growth",
+    "elbow stiffness or tightness",
+    "anxiety and nervousness",
+    "depression",
+    "depressive or psychotic symptoms",
+    "hostile behavior",
+    "temper problems",
+    "leg lump or mass"
+  ],
+  "injury of the ankle": [
+    "wrist swelling",
+    "ankle pain",
+    "joint pain",
+    "throat redness",
+    "foot or toe swelling",
+    "too little hair",
+    "leg pain",
+    "foot or toe pain"
+  ],
+  "hyponatremia": [
+    "shortness of breath",
+    "back pain",
+    "sharp chest pain",
+    "vomiting",
+    "weakness",
+    "nausea",
+    "sharp abdominal pain",
+    "fainting",
+    "seizures"
+  ],
+  "stricture of the esophagus": [
+    "heartburn",
+    "sharp chest pain",
+    "difficulty in swallowing",
+    "problems with movement",
+    "vomiting",
+    "regurgitation.1"
+  ],
+  "fracture of the ankle": [
+    "foot or toe pain",
+    "knee weakness",
+    "too little hair",
+    "ankle pain",
+    "lump over jaw",
+    "leg pain",
+    "foot or toe swelling"
+  ],
+  "soft tissue sarcoma": [
+    "groin mass",
+    "hurts to breath",
+    "skin moles",
+    "symptoms of bladder",
+    "skin lesion",
+    "abnormal appearing skin",
+    "skin growth"
+  ],
+  "bone disorder": [
+    "difficulty speaking",
+    "leg cramps or spasms",
+    "leg pain",
+    "muscle stiffness or tightness",
+    "knee pain",
+    "bones are painful",
+    "back pain"
+  ],
+  "epilepsy": [
+    "lack of growth",
+    "abnormal involuntary movements",
+    "disturbance of memory",
+    "seizures",
+    "difficulty speaking",
+    "itching of scrotum",
+    "headache"
+  ],
+  "personality disorder": [
+    "temper problems",
+    "hostile behavior",
+    "delusions or hallucinations",
+    "insomnia",
+    "elbow stiffness or tightness",
+    "fears and phobias",
+    "excessive anger",
+    "drug abuse",
+    "depression",
+    "anxiety and nervousness",
+    "depressive or psychotic symptoms"
+  ],
+  "shingles (herpes zoster)": [
+    "sharp chest pain",
+    "headache",
+    "foot or toe cramps or spasms",
+    "skin lesion",
+    "back pain",
+    "abnormal appearing skin",
+    "symptoms of bladder",
+    "facial pain",
+    "pain in eye"
+  ],
+  "tourette syndrome": [
+    "drug abuse",
+    "abnormal involuntary movements",
+    "allergic reaction",
+    "headache",
+    "depressive or psychotic symptoms"
+  ],
+  "avascular necrosis": [
+    "drug abuse",
+    "shoulder pain",
+    "knee pain",
+    "hip pain"
+  ],
+  "strep throat": [
+    "vomiting",
+    "headache",
+    "ear pain",
+    "foot or toe cramps or spasms",
+    "decreased appetite",
+    "chills",
+    "nasal congestion",
+    "ache all over",
+    "cough",
+    "fever",
+    "sore throat",
+    "difficulty in swallowing"
+  ],
+  "spinocerebellar ataxia": [
+    "anxiety and nervousness",
+    "abnormal involuntary movements",
+    "dizziness",
+    "problems with movement"
+  ],
+  "osteomyelitis": [
+    "bones are painful",
+    "difficulty speaking",
+    "arm swelling",
+    "skin lesion",
+    "skin on leg or foot looks infected",
+    "hand or finger pain",
+    "hand or finger swelling"
+  ],
+  "sjogren syndrome": [
+    "pain in eye",
+    "difficulty in swallowing",
+    "diminished vision",
+    "symptoms of eye",
+    "ache all over",
+    "joint pain"
+  ],
+  "adhesive capsulitis of the shoulder": [
+    "muscle pain",
+    "arm pain",
+    "shoulder stiffness or tightness",
+    "neck pain",
+    "ache all over",
+    "shoulder pain"
+  ],
+  "viral hepatitis": [
+    "hand or finger stiffness or tightness",
+    "abusing alcohol",
+    "melena",
+    "sharp abdominal pain",
+    "stomach bloating"
+  ],
+  "tonsillar hypertrophy": [
+    "difficulty in swallowing",
+    "abnormal breathing sounds",
+    "fever",
+    "nasal congestion",
+    "cough",
+    "redness in ear",
+    "sore throat",
+    "apnea"
+  ],
+  "gastritis": [
+    "headache",
+    "diarrhea",
+    "sharp abdominal pain",
+    "regurgitation.1",
+    "nausea",
+    "vomiting",
+    "vomiting blood",
+    "fever",
+    "sharp chest pain",
+    "burning abdominal pain"
+  ],
+  "skin cancer": [
+    "irregular appearing scalp",
+    "lip swelling",
+    "skin lesion",
+    "skin growth",
+    "skin moles",
+    "skin irritation",
+    "\"skin dryness",
+    "abnormal appearing skin",
+    "hurts to breath",
+    "skin swelling"
+  ],
+  "rheumatic fever": [
+    "knee lump or mass",
+    "itchiness of eye"
+  ],
+  "aphthous ulcer": [
+    "headache",
+    "cough",
+    "irregular belly button",
+    "mouth ulcer",
+    "fever",
+    "sore throat",
+    "tongue lesions",
+    "toothache"
+  ],
+  "tonsillitis": [
+    "lump in throat",
+    "diminished hearing",
+    "abnormal breathing sounds",
+    "postpartum problems of the breast",
+    "nasal congestion",
+    "throat feels tight",
+    "bleeding from ear",
+    "sore throat",
+    "redness in ear"
+  ],
+  "intestinal cancer": [
+    "throat feels tight",
+    "foot or toe swelling",
+    "neck mass",
+    "sharp abdominal pain",
+    "diarrhea"
+  ],
+  "rocky mountain spotted fever": [
+    "headache",
+    "wrist pain"
+  ],
+  "stomach cancer": [
+    "difficulty in swallowing",
+    "diarrhea",
+    "sharp abdominal pain",
+    "nausea",
+    "burning abdominal pain",
+    "vomiting",
+    "heartburn"
+  ],
+  "developmental disability": [
+    "restlessness",
+    "temper problems",
+    "seizures",
+    "leg lump or mass",
+    "fears and phobias",
+    "hostile behavior",
+    "delusions or hallucinations",
+    "difficulty speaking",
+    "disturbance of smell or taste",
+    "depressive or psychotic symptoms",
+    "lack of growth"
+  ],
+  "acute stress reaction": [
+    "abnormal involuntary movements",
+    "sharp chest pain",
+    "headache",
+    "dizziness",
+    "depressive or psychotic symptoms",
+    "fatigue",
+    "burning abdominal pain",
+    "insomnia",
+    "depression",
+    "shortness of breath",
+    "anxiety and nervousness"
+  ],
+  "delirium": [
+    "slurring words",
+    "problems with movement",
+    "hostile behavior",
+    "delusions or hallucinations",
+    "difficulty speaking",
+    "focal weakness",
+    "abnormal involuntary movements",
+    "depressive or psychotic symptoms",
+    "disturbance of memory",
+    "depression"
+  ],
+  "callus": [
+    "acne or pimples",
+    "skin swelling",
+    "foot or toe swelling",
+    "skin growth",
+    "foot or toe pain",
+    "skin lesion",
+    "unwanted hair",
+    "abnormal appearing skin",
+    "foot or toe cramps or spasms"
+  ],
+  "guillain barre syndrome": [
+    "dizziness",
+    "hand or finger pain",
+    "leg pain",
+    "difficulty speaking",
+    "loss of sensation"
+  ],
+  "lumbago": [
+    "hip pain",
+    "side pain",
+    "muscle pain",
+    "contractures",
+    "low back pain",
+    "back pain",
+    "leg pain"
+  ],
+  "deviated nasal septum": [
+    "facial pain",
+    "low back cramps or spasms",
+    "painful sinuses",
+    "headache",
+    "difficulty breathing",
+    "abnormal breathing sounds",
+    "allergic reaction",
+    "apnea",
+    "nasal congestion",
+    "sore throat"
+  ],
+  "hemangioma": [
+    "lip swelling",
+    "irregular appearing scalp",
+    "skin moles",
+    "skin lesion",
+    "skin growth",
+    "lymphedema",
+    "hurts to breath",
+    "abnormal appearing skin",
+    "skin swelling",
+    "unwanted hair"
+  ],
+  "peripheral arterial disease": [
+    "symptoms of the kidneys",
+    "leg cramps or spasms",
+    "skin lesion",
+    "feeling cold",
+    "lymphedema",
+    "leg pain",
+    "loss of sex drive",
+    "foot or toe pain"
+  ],
+  "chronic back pain": [
+    "back cramps or spasms",
+    "side pain",
+    "low back pain",
+    "hip pain",
+    "neck pain",
+    "tongue pain",
+    "back pain",
+    "lower body pain",
+    "loss of sensation",
+    "groin pain",
+    "leg pain"
+  ],
+  "heart failure": [
+    "cough",
+    "palpitations",
+    "difficulty breathing",
+    "sharp chest pain",
+    "irregular appearing nails",
+    "weight gain",
+    "leg swelling",
+    "fluid retention",
+    "chest tightness",
+    "weakness",
+    "shortness of breath"
+  ],
+  "conjunctivitis": [
+    "sore throat",
+    "pain in eye",
+    "coryza",
+    "sweating",
+    "eye redness",
+    "cough",
+    "itchiness of eye",
+    "fever",
+    "nasal congestion",
+    "white discharge from eye",
+    "lacrimation"
+  ],
+  "herniated disk": [
+    "arm pain",
+    "low back pain",
+    "paresthesia",
+    "back pain",
+    "neck pain",
+    "loss of sensation",
+    "hip pain",
+    "leg pain",
+    "skin oiliness",
+    "shoulder pain",
+    "swollen tongue"
+  ],
+  "rhabdomyolysis": [
+    "leg pain",
+    "arm pain",
+    "depressive or psychotic symptoms",
+    "sharp chest pain",
+    "hoarse voice"
+  ],
+  "breast infection (mastitis)": [
+    "skin growth",
+    "chills",
+    "mouth dryness",
+    "pain or soreness of breast",
+    "nightmares",
+    "fever",
+    "vaginal bleeding after menopause",
+    "abnormal appearing skin",
+    "bleeding or discharge from nipple"
+  ],
+  "abdominal aortic aneurysm": [
+    "palpitations",
+    "burning abdominal pain",
+    "shortness of breath",
+    "arm swelling",
+    "sharp abdominal pain",
+    "back pain"
+  ],
+  "pulmonary embolism": [
+    "leg pain",
+    "sharp chest pain",
+    "cough",
+    "side pain",
+    "difficulty breathing",
+    "leg swelling",
+    "infertility",
+    "shortness of breath",
+    "hemoptysis",
+    "weakness",
+    "chest tightness"
+  ],
+  "conduct disorder": [
+    "abusing alcohol",
+    "lack of growth",
+    "hostile behavior",
+    "temper problems",
+    "depressive or psychotic symptoms",
+    "excessive anger",
+    "seizures",
+    "depression",
+    "penis redness",
+    "fainting"
+  ],
+  "mastectomy": [
+    "arm stiffness or tightness",
+    "pain or soreness of breast",
+    "skin swelling"
+  ],
+  "epididymitis": [
+    "mass in scrotum",
+    "painful urination",
+    "retention of urine",
+    "sharp abdominal pain",
+    "groin pain",
+    "pain in testicles",
+    "swelling of scrotum",
+    "side pain",
+    "lower body pain"
+  ],
+  "premature rupture of amniotic membrane": [
+    "sharp abdominal pain",
+    "uterine contractions",
+    "elbow weakness"
+  ],
+  "molluscum contagiosum": [
+    "acne or pimples",
+    "abnormal appearing skin",
+    "knee lump or mass",
+    "symptoms of bladder",
+    "skin irritation",
+    "skin lesion",
+    "foot or toe cramps or spasms",
+    "hurts to breath",
+    "skin swelling"
+  ],
+  "necrotizing fasciitis": [
+    "leg pain",
+    "hip pain",
+    "elbow weakness"
+  ],
+  "benign vaginal discharge (leukorrhea)": [
+    "painful urination",
+    "suprapubic pain",
+    "vaginal discharge",
+    "vaginal redness",
+    "pain during pregnancy",
+    "vaginal itching",
+    "frequent urination",
+    "problems during pregnancy",
+    "burning abdominal pain",
+    "sharp abdominal pain"
+  ],
+  "bladder obstruction": [
+    "involuntary urination",
+    "frequent urination",
+    "suprapubic pain",
+    "impotence",
+    "mass on vulva",
+    "retention of urine",
+    "eyelid lesion or rash",
+    "hysterical behavior"
+  ],
+  "melanoma": [
+    "swollen lymph nodes",
+    "itchy eyelid",
+    "skin growth",
+    "irregular appearing scalp",
+    "skin lesion",
+    "abnormal appearing skin",
+    "skin moles",
+    "skin swelling"
+  ],
+  "cervical disorder": [
+    "vaginal itching",
+    "pain during intercourse",
+    "sharp abdominal pain",
+    "pelvic pain"
+  ],
+  "laryngitis": [
+    "throat feels tight",
+    "difficulty speaking",
+    "sore throat",
+    "fever",
+    "nasal congestion",
+    "ear pain",
+    "cough",
+    "coryza",
+    "difficulty in swallowing",
+    "hoarse voice"
+  ],
+  "dyshidrosis": [
+    "frequent urination",
+    "abnormal appearing skin",
+    "acne or pimples",
+    "foot or toe cramps or spasms",
+    "skin lesion"
+  ],
+  "poisoning due to opioids": [
+    "dizziness",
+    "difficulty speaking",
+    "depressive or psychotic symptoms",
+    "drug abuse"
+  ],
+  "diaper rash": [
+    "temper problems",
+    "foot or toe cramps or spasms",
+    "diarrhea",
+    "fever",
+    "arm lump or mass",
+    "nasal congestion",
+    "vomiting",
+    "pulling at ears",
+    "blood in stool",
+    "irritable infant",
+    "cough"
+  ],
+  "lichen planus": [
+    "difficulty speaking",
+    "abnormal appearing skin",
+    "skin growth"
+  ],
+  "gastroduodenal ulcer": [
+    "changes in stool appearance",
+    "blood in stool",
+    "vomiting blood",
+    "vomiting",
+    "upper abdominal pain",
+    "sharp abdominal pain",
+    "heartburn",
+    "nausea",
+    "sharp chest pain",
+    "burning abdominal pain"
+  ],
+  "inguinal hernia": [
+    "symptoms of the scrotum and testes",
+    "lower abdominal pain",
+    "groin pain",
+    "groin mass",
+    "ache all over",
+    "swollen abdomen",
+    "sharp abdominal pain",
+    "pain in testicles",
+    "swelling of scrotum",
+    "mass in scrotum"
+  ],
+  "eczema": [
+    "symptoms of bladder",
+    "skin lesion",
+    "acne or pimples",
+    "skin swelling",
+    "foot or toe cramps or spasms",
+    "skin irritation",
+    "irregular appearing scalp",
+    "\"skin dryness",
+    "allergic reaction",
+    "abnormal appearing skin",
+    "hurts to breath",
+    "cough"
+  ],
+  "asperger syndrome": [
+    "excessive anger",
+    "hostile behavior",
+    "lack of growth",
+    "depressive or psychotic symptoms",
+    "disturbance of smell or taste",
+    "depression",
+    "anxiety and nervousness",
+    "fainting"
+  ],
+  "mucositis": [
+    "irritable infant",
+    "difficulty in swallowing",
+    "mouth ulcer",
+    "irregular belly button",
+    "tongue lesions",
+    "sore throat",
+    "decreased appetite",
+    "fever"
+  ],
+  "paronychia": [
+    "sinus congestion",
+    "hand or finger swelling",
+    "abnormal appearing skin",
+    "foot or toe swelling",
+    "foot or toe pain",
+    "skin on leg or foot looks infected",
+    "hand or finger pain",
+    "hand or finger lump or mass",
+    "nailbiting"
+  ],
+  "open wound of the jaw": [
+    "wrist swelling",
+    "lip swelling"
+  ],
+  "white blood cell disease": [
+    "chills",
+    "diarrhea",
+    "heartburn",
+    "fever",
+    "sharp abdominal pain",
+    "nausea",
+    "fatigue",
+    "cough",
+    "vomiting"
+  ],
+  "kaposi sarcoma": [
+    "depression",
+    "elbow weakness"
+  ],
+  "spondylolisthesis": [
+    "leg cramps or spasms",
+    "hip pain",
+    "low back pain",
+    "back pain",
+    "neck pain",
+    "paresthesia",
+    "loss of sensation",
+    "skin oiliness",
+    "leg pain",
+    "problems with movement"
+  ],
+  "pseudotumor cerebri": [
+    "abnormal involuntary movements",
+    "pain in eye",
+    "diminished vision",
+    "dizziness",
+    "headache"
+  ],
+  "conjunctivitis due to virus": [
+    "lacrimation",
+    "diminished vision",
+    "nasal congestion",
+    "pain in eye",
+    "sweating",
+    "white discharge from eye",
+    "eye redness",
+    "itchiness of eye",
+    "fever",
+    "cough"
+  ],
+  "open wound of the nose": [
+    "diminished hearing",
+    "low back cramps or spasms",
+    "facial pain",
+    "headache"
+  ]
+}
