@@ -22,8 +22,13 @@ export async function getSession(): Promise<Session | null> {
 }
 
 const generateRegId = (role: Role) => {
-  if (role !== "doctor") return undefined;
-  return `DOC-${Math.floor(Math.random() * 900000) + 100000}`;
+  if (role === "doctor") {
+    return `DOC-${Math.floor(Math.random() * 900000) + 100000}`;
+  }
+  if (role === "patient") {
+    return `PAT-${Math.floor(Math.random() * 900000) + 100000}`;
+  }
+  return undefined;
 };
 
 export async function signUp(email: string, password: string, role: Role, name: string) {

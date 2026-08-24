@@ -36,6 +36,7 @@ export type PatientProfile = {
   allergies: string[];
   familyHistory: string[];
   avatarUrl?: string;
+  patientId?: string;
 };
 
 const profileSyncChannel = typeof window !== "undefined" && "BroadcastChannel" in window 
@@ -269,60 +270,79 @@ export const patientService = {
    */
   async getPatientProfile(id?: string): Promise<PatientProfile | null> {
     let activeId = id || "p1";
+    let profile: PatientProfile | null = null;
 
     // 1. Try file-backed server API endpoint (syncs across all browsers & devices)
     try {
       const res = await fetch("/api/profile");
       if (res.ok) {
         const data = await res.json();
-        if (data && data.name) return data;
+        if (data && data.name) profile = data;
       }
     } catch (e) {}
 
     // 2. Try TanStack Start Server Function RPC
-    try {
-      const serverProfile = await fetchServerProfile();
-      if (serverProfile && serverProfile.name) {
-        return serverProfile;
-      }
-    } catch (e) {}
-
-    // 3. Try reading shared domain cookie
-    if (typeof document !== "undefined") {
+    if (!profile) {
       try {
-        const match = document.cookie.match(/(?:^|; )coha_patient_profile=([^;]*)/);
-        if (match && match[1]) {
-          const parsed = JSON.parse(decodeURIComponent(match[1]));
-          if (parsed && parsed.name) return parsed;
+        const serverProfile = await fetchServerProfile();
+        if (serverProfile && serverProfile.name) {
+          profile = serverProfile as any;
         }
       } catch (e) {}
     }
 
+    // 3. Try reading shared domain cookie
+    if (!profile) {
+      if (typeof document !== "undefined") {
+        try {
+          const match = document.cookie.match(/(?:^|; )coha_patient_profile=([^;]*)/);
+          if (match && match[1]) {
+            const parsed = JSON.parse(decodeURIComponent(match[1]));
+            if (parsed && parsed.name) profile = parsed;
+          }
+        } catch (e) {}
+      }
+    }
+
     // 4. Try reading local shared storage
-    try {
-      const shared = localStorage.getItem("coha_patient_profile_shared");
-      if (shared) {
-        const parsed = JSON.parse(shared);
-        if (parsed && parsed.name) return parsed;
-      }
-      const local = localStorage.getItem(`mock_patient_profile_${activeId}`);
-      if (local) {
-        const parsed = JSON.parse(local);
-        if (parsed && parsed.name) return parsed;
-      }
-    } catch (e) {}
+    if (!profile) {
+      try {
+        const shared = localStorage.getItem("coha_patient_profile_shared");
+        if (shared) {
+          const parsed = JSON.parse(shared);
+          if (parsed && parsed.name) profile = parsed;
+        }
+        const local = localStorage.getItem(`mock_patient_profile_${activeId}`);
+        if (local && !profile) {
+          const parsed = JSON.parse(local);
+          if (parsed && parsed.name) profile = parsed;
+        }
+      } catch (e) {}
+    }
 
     // 5. Try Supabase table
-    try {
-      const { data, error } = await supabase
-        .from("patient_profiles")
-        .select("*")
-        .eq("id", activeId)
-        .single();
-      if (!error && data) return data;
-    } catch (e) {}
+    if (!profile) {
+      try {
+        const { data, error } = await supabase
+          .from("patient_profiles")
+          .select("*")
+          .eq("id", activeId)
+          .single();
+        if (!error && data) profile = data as any;
+      } catch (e) {}
+    }
 
-    return { id: activeId, ...mockPatientProfile } as PatientProfile;
+    if (!profile) {
+      profile = { id: activeId, ...mockPatientProfile } as PatientProfile;
+    }
+
+    // Ensure we always have a dynamic unique patientId
+    if (profile && !profile.patientId) {
+      profile.patientId = `PAT-${Math.floor(Math.random() * 900000) + 100000}`;
+      void this.updatePatientProfile(profile);
+    }
+
+    return profile;
   },
 
   /**

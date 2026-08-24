@@ -311,9 +311,9 @@ function ProfilePage() {
                 <input type="file" className="hidden" accept="image/*" onChange={handleAvatarChange} />
               </label>
             </div>
-            <span className="text-[10px] text-muted-foreground font-semibold uppercase tracking-wider text-center">
-              {p.gender ? `${p.gender} Avatar` : "Profile Photo"}
-            </span>
+            <div className="mt-1 text-[10px] font-bold bg-primary/10 text-primary px-2.5 py-0.5 rounded-full border border-primary/20 select-all cursor-pointer" title="Click to copy Patient ID">
+              {p.patientId || "Generating ID..."}
+            </div>
           </div>
 
           <dl className="grid gap-5 sm:grid-cols-3 flex-1 w-full pt-1">
