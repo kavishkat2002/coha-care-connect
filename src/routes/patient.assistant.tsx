@@ -14,8 +14,9 @@ import { Textarea } from "@/components/ui/textarea";
 import { Progress } from "@/components/ui/progress";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 
-import { BrainCircuit, RotateCcw } from "lucide-react";
+import { BrainCircuit, RotateCcw, MessageSquarePlus, History } from "lucide-react";
 import { analyseSymptoms, recommendCare, transcribeAudio, type Assessment, type Recommendation, type ChatMessage, type AgenticAction } from "@/services/ai.service";
 import { doctors } from "@/data/mock";
 import { patientService } from "@/services/patient.service";
@@ -40,6 +41,16 @@ export const Route = createFileRoute("/patient/assistant")({
 
 type Message = { id: string; role: "user" | "assistant"; text: string; attachment?: string; imageBase64?: string; reasoning?: string; reasoningDuration?: number; agenticAction?: AgenticAction; loadedCare?: Recommendation | null };
 
+type ChatSession = {
+  id: string;
+  title: string;
+  updatedAt: number;
+  messages: Message[];
+  assessment: Assessment | null;
+  care: Recommendation | null;
+  dynamicSuggestions: string[];
+};
+
 const suggestions = [
   "I have a mouth ulcer that has not healed in three weeks.",
   "I have a skin rash on my forearm.",
@@ -48,7 +59,27 @@ const suggestions = [
 ];
 
 function AssistantPage() {
+  const [sessions, setSessions] = useState<ChatSession[]>(() => {
+    const saved = localStorage.getItem("meddoc_chat_history");
+    if (saved) return JSON.parse(saved);
+    return [];
+  });
+
+  const [activeSessionId, setActiveSessionId] = useState<string>(() => {
+    const saved = localStorage.getItem("meddoc_chat_history");
+    if (saved) {
+      const parsed = JSON.parse(saved);
+      if (parsed.length > 0) return parsed[0].id;
+    }
+    return `sess_${Date.now()}`;
+  });
+
   const [messages, setMessages] = useState<Message[]>(() => {
+    const savedHistory = localStorage.getItem("meddoc_chat_history");
+    if (savedHistory) {
+      const parsed = JSON.parse(savedHistory);
+      if (parsed.length > 0) return parsed[0].messages;
+    }
     const saved = localStorage.getItem("meddoc_messages");
     if (saved) return JSON.parse(saved);
     return [
@@ -64,14 +95,29 @@ function AssistantPage() {
   const [imageBase64, setImageBase64] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [assessment, setAssessment] = useState<Assessment | null>(() => {
+    const savedHistory = localStorage.getItem("meddoc_chat_history");
+    if (savedHistory) {
+      const parsed = JSON.parse(savedHistory);
+      if (parsed.length > 0) return parsed[0].assessment;
+    }
     const saved = localStorage.getItem("meddoc_assessment");
     return saved ? JSON.parse(saved) : null;
   });
   const [care, setCare] = useState<Recommendation | null>(() => {
+    const savedHistory = localStorage.getItem("meddoc_chat_history");
+    if (savedHistory) {
+      const parsed = JSON.parse(savedHistory);
+      if (parsed.length > 0) return parsed[0].care;
+    }
     const saved = localStorage.getItem("meddoc_care");
     return saved ? JSON.parse(saved) : null;
   });
   const [dynamicSuggestions, setDynamicSuggestions] = useState<string[]>(() => {
+    const savedHistory = localStorage.getItem("meddoc_chat_history");
+    if (savedHistory) {
+      const parsed = JSON.parse(savedHistory);
+      if (parsed.length > 0) return parsed[0].dynamicSuggestions;
+    }
     const saved = localStorage.getItem("meddoc_dynamicSuggestions");
     return saved ? JSON.parse(saved) : [];
   });
@@ -113,17 +159,44 @@ function AssistantPage() {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   useEffect(() => {
-    localStorage.setItem("meddoc_messages", JSON.stringify(messages));
-    localStorage.setItem("meddoc_assessment", JSON.stringify(assessment));
-    localStorage.setItem("meddoc_care", JSON.stringify(care));
-    localStorage.setItem("meddoc_dynamicSuggestions", JSON.stringify(dynamicSuggestions));
-  }, [messages, assessment, care, dynamicSuggestions]);
+    setSessions((prev) => {
+      // Only save if there's actually a user message
+      if (messages.length <= 1) return prev;
+      
+      const existingIdx = prev.findIndex(s => s.id === activeSessionId);
+      const titleText = messages.find((m) => m.role === "user")?.text || "New Conversation";
+      const title = titleText.length > 40 ? titleText.slice(0, 40) + "..." : titleText;
+      
+      const newSession: ChatSession = {
+        id: activeSessionId,
+        title,
+        updatedAt: Date.now(),
+        messages,
+        assessment,
+        care,
+        dynamicSuggestions,
+      };
+
+      if (existingIdx >= 0) {
+        const next = [...prev];
+        next[existingIdx] = newSession;
+        return next;
+      } else {
+        return [newSession, ...prev];
+      }
+    });
+  }, [messages, assessment, care, dynamicSuggestions, activeSessionId]);
+
+  useEffect(() => {
+    localStorage.setItem("meddoc_chat_history", JSON.stringify(sessions));
+  }, [sessions]);
 
   useEffect(() => {
     endRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
   }, [messages, busy]);
 
-  const clearHistory = () => {
+  const startNewChat = () => {
+    setActiveSessionId(`sess_${Date.now()}`);
     setMessages([
       {
         id: "m0",
@@ -134,10 +207,14 @@ function AssistantPage() {
     setAssessment(null);
     setCare(null);
     setDynamicSuggestions([]);
-    localStorage.removeItem("meddoc_messages");
-    localStorage.removeItem("meddoc_assessment");
-    localStorage.removeItem("meddoc_care");
-    localStorage.removeItem("meddoc_dynamicSuggestions");
+  };
+
+  const loadChat = (session: ChatSession) => {
+    setActiveSessionId(session.id);
+    setMessages(session.messages);
+    setAssessment(session.assessment);
+    setCare(session.care);
+    setDynamicSuggestions(session.dynamicSuggestions);
   };
 
   const toggleListen = async () => {
@@ -346,9 +423,84 @@ function AssistantPage() {
               </CardTitle>
               <CardDescription>Natural language · attachments supported</CardDescription>
             </div>
-            <Button variant="ghost" size="sm" onClick={clearHistory} className="text-muted-foreground hover:text-foreground">
-              <RotateCcw className="size-4 mr-2" /> Reset
-            </Button>
+            <div className="flex items-center gap-2">
+              <Sheet>
+                <SheetTrigger asChild>
+                  <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-foreground hidden sm:flex">
+                    <History className="size-4 mr-2" /> History
+                  </Button>
+                </SheetTrigger>
+                <SheetContent side="left" className="w-[300px] sm:w-[400px]">
+                  <SheetHeader>
+                    <SheetTitle>Chat History</SheetTitle>
+                    <SheetDescription>
+                      Access your previous AI assistant sessions.
+                    </SheetDescription>
+                  </SheetHeader>
+                  <div className="mt-6 flex flex-col gap-3">
+                    {sessions.length === 0 ? (
+                      <p className="text-sm text-muted-foreground text-center py-8">No previous chats found.</p>
+                    ) : (
+                      sessions.map(s => (
+                        <div 
+                          key={s.id} 
+                          onClick={() => loadChat(s)}
+                          className={cn(
+                            "p-3 rounded-xl border text-sm cursor-pointer transition-colors",
+                            activeSessionId === s.id 
+                              ? "border-primary/50 bg-primary/5 shadow-sm" 
+                              : "border-border/60 hover:bg-muted"
+                          )}
+                        >
+                          <p className="font-medium line-clamp-1">{s.title}</p>
+                          <p className="text-xs text-muted-foreground mt-1">
+                            {new Date(s.updatedAt).toLocaleDateString()} · {s.messages.filter(m => m.role === "user").length} queries
+                          </p>
+                        </div>
+                      ))
+                    )}
+                  </div>
+                </SheetContent>
+              </Sheet>
+              
+              <Button variant="outline" size="sm" onClick={startNewChat} className="hidden sm:flex">
+                <MessageSquarePlus className="size-4 mr-2" /> New Chat
+              </Button>
+              <Button variant="outline" size="icon" onClick={startNewChat} className="sm:hidden" aria-label="New Chat">
+                <MessageSquarePlus className="size-4" />
+              </Button>
+              <Sheet>
+                <SheetTrigger asChild>
+                  <Button variant="ghost" size="icon" className="sm:hidden text-muted-foreground hover:text-foreground">
+                    <History className="size-4" />
+                  </Button>
+                </SheetTrigger>
+                <SheetContent side="left">
+                  <SheetHeader>
+                    <SheetTitle>Chat History</SheetTitle>
+                  </SheetHeader>
+                  <div className="mt-6 flex flex-col gap-3">
+                    {sessions.map(s => (
+                      <div 
+                        key={s.id} 
+                        onClick={() => loadChat(s)}
+                        className={cn(
+                          "p-3 rounded-xl border text-sm cursor-pointer transition-colors",
+                          activeSessionId === s.id 
+                            ? "border-primary/50 bg-primary/5 shadow-sm" 
+                            : "border-border/60 hover:bg-muted"
+                        )}
+                      >
+                        <p className="font-medium line-clamp-1">{s.title}</p>
+                        <p className="text-xs text-muted-foreground mt-1">
+                          {new Date(s.updatedAt).toLocaleDateString()}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+                </SheetContent>
+              </Sheet>
+            </div>
           </CardHeader>
 
           <CardContent className="flex-1 space-y-4 overflow-y-auto py-5">
