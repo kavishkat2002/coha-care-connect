@@ -33,6 +33,7 @@ import {
 import { Sheet, SheetContent, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { getSession, signOut, onAuthStateChange, type Session } from "@/services/auth.service";
 import { cn } from "@/lib/utils";
+import { patientService } from "@/services/patient.service";
 
 export type NavItem = { label: string; to: string; icon: LucideIcon };
 
@@ -104,6 +105,7 @@ export function PortalShell({
   children: ReactNode;
 }) {
   const [session, setSession] = useState<Session | null>(null);
+  const [profile, setProfile] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [open, setOpen] = useState(false);
   const [notifications, setNotifications] = useState<NotificationItem[]>(() => {
@@ -120,16 +122,48 @@ export function PortalShell({
   const pathname = useRouterState({ select: (s) => s.location.pathname });
 
   useEffect(() => {
+    async function loadProfile(s: Session | null) {
+      if (s && s.role === "patient") {
+        const p = await patientService.getPatientProfile();
+        setProfile(p);
+      } else {
+        setProfile(null);
+      }
+    }
+
     getSession().then((s) => {
       setSession(s);
       setIsLoading(false);
+      void loadProfile(s);
     });
+
     const unsubscribe = onAuthStateChange((s) => {
       setSession(s);
       setIsLoading(false);
+      void loadProfile(s);
     });
+
+    const channel = typeof window !== "undefined" && "BroadcastChannel" in window 
+      ? new BroadcastChannel("coha_profile_sync") 
+      : null;
+
+    if (channel) {
+      channel.onmessage = () => {
+        void patientService.getPatientProfile().then(setProfile);
+      };
+    }
+
+    const handleStorage = (e: StorageEvent) => {
+      if (e.key === "coha_patient_profile_shared") {
+        void patientService.getPatientProfile().then(setProfile);
+      }
+    };
+    window.addEventListener("storage", handleStorage);
+
     return () => {
       unsubscribe.unsubscribe();
+      channel?.close();
+      window.removeEventListener("storage", handleStorage);
     };
   }, []);
 
@@ -336,9 +370,20 @@ export function PortalShell({
                 <DropdownMenuTrigger asChild>
                   <Button variant="ghost" className="gap-2 px-2">
                     <Avatar className="size-8">
-                      <AvatarFallback className="bg-accent text-xs text-accent-foreground">
-                        {initials}
-                      </AvatarFallback>
+                      {profile?.avatarUrl || profile?.gender ? (
+                        <img 
+                          src={profile.avatarUrl || (profile.gender?.toLowerCase() === "female" 
+                            ? "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150&auto=format&fit=crop&q=80"
+                            : "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150&auto=format&fit=crop&q=80"
+                          )} 
+                          className="size-full object-cover rounded-full"
+                          alt="User Avatar"
+                        />
+                      ) : (
+                        <AvatarFallback className="bg-accent text-xs text-accent-foreground">
+                          {initials}
+                        </AvatarFallback>
+                      )}
                     </Avatar>
                     <span className="hidden text-sm font-medium sm:inline">
                       {session.name}

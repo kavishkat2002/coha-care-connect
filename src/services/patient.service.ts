@@ -35,6 +35,7 @@ export type PatientProfile = {
   medications: string[];
   allergies: string[];
   familyHistory: string[];
+  avatarUrl?: string;
 };
 
 const profileSyncChannel = typeof window !== "undefined" && "BroadcastChannel" in window 

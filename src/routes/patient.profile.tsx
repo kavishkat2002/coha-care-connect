@@ -222,6 +222,27 @@ function ProfilePage() {
     };
   }, [isEditing]);
 
+  const handleAvatarChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onloadend = async () => {
+      const base64 = reader.result as string;
+      const updated = { ...p, avatarUrl: base64 } as PatientProfile;
+      setP(updated);
+      setEditData((prev) => ({ ...prev, avatarUrl: base64 }));
+      
+      const result = await patientService.updatePatientProfile(updated);
+      if (result) {
+        toast.success("Profile photo uploaded and synced successfully!");
+      } else {
+        toast.error("Failed to sync profile photo");
+      }
+    };
+    reader.readAsDataURL(file);
+  };
+
   const handleSave = async () => {
     if (!p) return;
     setSaving(true);
@@ -272,8 +293,30 @@ function ProfilePage() {
             </div>
           )}
         </CardHeader>
-        <CardContent>
-          <dl className="grid gap-5 sm:grid-cols-3">
+        <CardContent className="flex flex-col md:flex-row gap-6 items-start">
+          {/* Avatar Upload / View Section */}
+          <div className="flex flex-col items-center shrink-0 w-full md:w-44 p-4 border border-border/60 bg-muted/10 rounded-2xl">
+            <div className="relative size-24 mb-3 rounded-full overflow-hidden border border-border group">
+              <img 
+                src={p.avatarUrl || (p.gender?.toLowerCase() === "female" 
+                  ? "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150&auto=format&fit=crop&q=80"
+                  : "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150&auto=format&fit=crop&q=80"
+                )}
+                alt="Profile Avatar"
+                className="size-full object-cover"
+              />
+              <label className="absolute inset-0 bg-black/60 flex flex-col items-center justify-center text-white text-[9px] font-bold cursor-pointer opacity-0 group-hover:opacity-100 transition-opacity">
+                <Upload className="size-4 mb-1" />
+                Upload Photo
+                <input type="file" className="hidden" accept="image/*" onChange={handleAvatarChange} />
+              </label>
+            </div>
+            <span className="text-[10px] text-muted-foreground font-semibold uppercase tracking-wider text-center">
+              {p.gender ? `${p.gender} Avatar` : "Profile Photo"}
+            </span>
+          </div>
+
+          <dl className="grid gap-5 sm:grid-cols-3 flex-1 w-full pt-1">
             {[
               { label: "Name", key: "name", type: "text" },
               { label: "Age", key: "age", type: "number" },
@@ -290,8 +333,8 @@ function ProfilePage() {
                     type={type}
                     value={editData[key as keyof PatientProfile] as string | number || ""}
                     onChange={(e) => setEditData({ 
-                      ...editData, 
-                      [key]: type === "number" ? parseInt(e.target.value) || 0 : e.target.value 
+                       ...editData, 
+                       [key]: type === "number" ? parseInt(e.target.value) || 0 : e.target.value 
                     })}
                     className="h-8 text-sm"
                   />
