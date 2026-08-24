@@ -5,7 +5,7 @@ import {
   FileSpreadsheet, ClipboardList, RefreshCw, BarChart2,
   Building2, CreditCard, Download, Eye, Check, FileText, Lock, Shield
 } from "lucide-react";
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 
 import { PageHeader } from "@/components/shared/PageHeader";
 import { AiDisclaimer } from "@/components/shared/AiDisclaimer";
@@ -135,6 +135,8 @@ function ReportsPage() {
   const [compareModalOpen, setCompareModalOpen] = useState(false);
   const [compareData, setCompareData] = useState<{ report1: ReportAnalysis; report2: ReportAnalysis } | null>(null);
   const [loadingCompare, setLoadingCompare] = useState(false);
+  
+  const isResetRef = useRef(false);
 
   const handleToggleCompare = (title: string, e: React.MouseEvent) => {
     e.stopPropagation();
@@ -445,15 +447,6 @@ ${350 + pdfLength}
         const lastAnalysis = await patientService.getLastReportAnalysis(p.id);
         if (lastAnalysis) {
           setResult(prev => prev || lastAnalysis);
-        } else if (data && data.length > 0) {
-          const lastReport = data[0];
-          if (lastReport) {
-            try {
-              const res = await analyseMedicalReport(lastReport.title);
-              setResult(prev => prev || res);
-              void patientService.saveLastReportAnalysis(p.id, res);
-            } catch (e) {}
-          }
         }
       }
     }
@@ -596,6 +589,7 @@ ${350 + pdfLength}
 
     try {
       const res = await analyseMedicalReport(fileName, imageBase64 || undefined);
+      isResetRef.current = false;
       setResult(res);
       void patientService.saveLastReportAnalysis(patientId, res);
       setPipelineStage(PIPELINE_STAGES.length + 1);
@@ -802,6 +796,7 @@ ${350 + pdfLength}
                                   setBusy(true);
                                   try {
                                     const res = await analyseMedicalReport(rep.title);
+                                    isResetRef.current = false;
                                     setResult(res);
                                     void patientService.saveLastReportAnalysis(patientId, res);
                                   } catch (e) {
@@ -868,6 +863,7 @@ ${350 + pdfLength}
                       setImageBase64(null);
                       setFileName("Uploaded Report");
                       setPipelineStage(0);
+                      isResetRef.current = true;
                       void patientService.saveLastReportAnalysis(patientId, null);
                       setSelectedCompareIds([]);
                       toast.info("Report analysis section reset successfully.");

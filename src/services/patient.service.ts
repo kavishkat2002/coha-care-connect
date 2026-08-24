@@ -811,6 +811,10 @@ export const patientService = {
     } catch (e) {
       console.warn("Supabase saveSentReports notice:", e);
     }
+
+    try {
+      localStorage.setItem("meddoc_sent_reports", JSON.stringify(reports));
+    } catch (e) {}
   },
 
   /**
@@ -823,8 +827,17 @@ export const patientService = {
         .select("reports")
         .eq("patient_id", patientId)
         .single();
-      if (!error && data) return data.reports || [];
+      if (!error && data && data.reports) return data.reports;
     } catch (e) {}
+    
+    // Fallback to local storage if Supabase fails (e.g., table not created)
+    try {
+      const localSent = localStorage.getItem("meddoc_sent_reports");
+      if (localSent) {
+        return JSON.parse(localSent);
+      }
+    } catch (e) {}
+    
     return [];
   }
 };
