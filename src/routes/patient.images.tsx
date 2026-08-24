@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { BrainCircuit, CheckCircle2, ExternalLink, Eye, HeartPulse, MapPin, ScanLine, Search, Star, Stethoscope, Target, Upload, UserPlus, Smile, RefreshCw } from "lucide-react";
+import { BrainCircuit, CheckCircle2, ExternalLink, Eye, Activity, MapPin, ScanLine, Search, Star, Stethoscope, Target, Upload, UserPlus, Smile, RefreshCw } from "lucide-react";
 import { useState, useEffect } from "react";
 
 import { PageHeader } from "@/components/shared/PageHeader";
@@ -35,7 +35,7 @@ export const Route = createFileRoute("/patient/images")({
 const regions = [
   { label: "Oral", icon: Smile },
   { label: "Skin", icon: ScanLine },
-  { label: "Breast", icon: HeartPulse },
+  { label: "Breast", icon: Activity },
   { label: "Eye", icon: Eye },
 ];
 

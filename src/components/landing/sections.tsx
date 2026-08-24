@@ -8,7 +8,6 @@ import {
   CheckCircle2,
   Eye,
   FileText,
-  HeartPulse,
   Image as ImageIcon,
   MapPin,
   Mail,
@@ -229,7 +228,7 @@ const services = [
   { icon: Building2, title: "Hospital & branch search", body: "Compare ratings, facilities, distance and queue length." },
   { icon: FileText, title: "Report analysis", body: "Blood, MRI, CT, biopsy and laboratory reports explained simply." },
   { icon: ImageIcon, title: "Medical image review", body: "Oral, skin, breast and eye images with lesion highlighting." },
-  { icon: HeartPulse, title: "Preventive health reviews", body: "Personalised screening reminders based on your history." },
+  { icon: ShieldCheck, title: "Preventive health reviews", body: "Personalised screening reminders based on your history." },
   { icon: MessageSquare, title: "Care coordination", body: "Referrals, follow-ups and prescriptions in one thread." },
 ];
 
@@ -294,7 +293,7 @@ export function AiFeatures() {
 const screening = [
   { icon: MessageSquare, title: "Oral", body: "Persistent ulcers, white or red patches, mucosal changes." },
   { icon: ScanLine, title: "Skin", body: "Moles, pigmented lesions, non-healing sores." },
-  { icon: HeartPulse, title: "Breast", body: "Lumps, pain, skin or nipple changes." },
+  { icon: Activity, title: "Breast", body: "Lumps, pain, skin or nipple changes." },
   { icon: Eye, title: "Eye", body: "Lesions, persistent redness, vision changes." },
 ];
 

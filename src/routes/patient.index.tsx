@@ -5,7 +5,6 @@ import {
   Bot,
   CalendarCheck,
   FileText,
-  HeartPulse,
   Image as ImageIcon,
   Upload,
 } from "lucide-react";
@@ -51,7 +50,11 @@ const quickActions = [
   { label: "Upload medical image", to: "/patient/images", icon: ImageIcon },
 ];
 
-function getDynamicHealthInsights(profile: PatientProfile | null, reports: ReportItem[]): string[] {
+function getDynamicHealthInsights(
+  profile: PatientProfile | null, 
+  reports: ReportItem[], 
+  timeline: TimelineItem[]
+): string[] {
   const insights: string[] = [];
 
   if (profile) {
@@ -82,7 +85,31 @@ function getDynamicHealthInsights(profile: PatientProfile | null, reports: Repor
     }
   }
 
-  // 6. Report Flagged alert
+  // 6. Timeline-specific insights
+  if (timeline && timeline.length > 0) {
+    // Check if there is an image analysis or mole review in the timeline
+    const imageReviews = timeline.filter(t => t.kind === "image");
+    if (imageReviews.length > 0) {
+      const latestImage = imageReviews[0]!;
+      insights.push(`Skin / Lesion Screening Log: ${latestImage.title} (${latestImage.detail}) — review with clinical dermatologist if changes persist.`);
+    }
+
+    // Check if there is a preventative health insight generated
+    const insightEvents = timeline.filter(t => t.kind === "insight");
+    if (insightEvents.length > 0) {
+      const latestInsight = insightEvents[0]!;
+      insights.push(`Wellness Recommendation: ${latestInsight.detail}`);
+    }
+
+    // Check if there are active prescriptions
+    const prescriptions = timeline.filter(t => t.kind === "prescription");
+    if (prescriptions.length > 0) {
+      const latestPresc = prescriptions[0]!;
+      insights.push(`Prescription management: ${latestPresc.title} (${latestPresc.detail}) — complete the designated treatment course.`);
+    }
+  }
+
+  // 7. Report Flagged alert
   const flaggedReport = reports.find((r) => (r.flagged || 0) > 0);
   if (flaggedReport) {
     insights.push(`Recent report alert: "${flaggedReport.title}" contains ${flaggedReport.flagged} flagged parameter(s) needing physician review.`);
@@ -93,7 +120,9 @@ function getDynamicHealthInsights(profile: PatientProfile | null, reports: Repor
     insights.push("Maintain hydration and daily physical activity for optimal health maintenance.");
   }
 
-  return insights.slice(0, 4);
+  // Deduplicate and slice the top 4
+  const uniqueInsights = Array.from(new Set(insights));
+  return uniqueInsights.slice(0, 4);
 }
 
 function PatientOverview() {
@@ -232,10 +261,10 @@ function PatientOverview() {
       />
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <StatCard icon={HeartPulse} label="Health score" value={`${healthScore} / 100`} hint={healthHint} />
+        <StatCard icon={Activity} label="Health score" value={`${healthScore} / 100`} hint={healthHint} />
         <StatCard icon={CalendarCheck} label="Upcoming visits" value={String(upcoming.length || 10)} hint={nextVisitHint} />
         <StatCard icon={FileText} label="Reports analysed" value={String(reportsAnalysedCount)} hint={`${reports.filter(r => r.flagged > 0).length || 1} flagged value`} />
-        <StatCard icon={Activity} label="AI Interactions" value={String(chatMessagesCount)} hint="Recent collaborations" />
+        <StatCard icon={Bot} label="AI Interactions" value={String(chatMessagesCount)} hint="Recent collaborations" />
       </div>
 
       <div className="grid gap-6 lg:grid-cols-3">
@@ -300,7 +329,7 @@ function PatientOverview() {
             <CardDescription>AI summaries of your uploads</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            {reports.map((r) => (
+            {reports.slice(0, 2).map((r) => (
               <div key={r.id}>
                 <div className="flex items-center justify-between gap-3">
                   <p className="text-sm font-medium">{r.title}</p>
@@ -322,7 +351,7 @@ function PatientOverview() {
             <CardDescription>Generated dynamically from your health profile & medical records</CardDescription>
           </CardHeader>
           <CardContent className="space-y-3">
-            {getDynamicHealthInsights(patientProfile, reports).map((insight, idx) => (
+            {getDynamicHealthInsights(patientProfile, reports, timeline).map((insight, idx) => (
               <div key={idx} className="rounded-xl border border-border bg-muted/40 p-4 text-sm leading-relaxed">
                 {insight}
               </div>

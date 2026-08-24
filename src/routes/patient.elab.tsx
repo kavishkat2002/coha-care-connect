@@ -10,7 +10,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { 
   Building2, Search, MapPin, Phone, ShieldCheck, Check, Clock, Upload, 
-  ChevronRight, ChevronLeft, Calendar, User, FileText, ClipboardCheck, HeartPulse, ScanLine 
+  ChevronRight, ChevronLeft, Calendar, User, FileText, ClipboardCheck, Activity, ScanLine 
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -162,7 +162,7 @@ const LAB_PROVIDERS: LabProvider[] = [
 const getTestIcon = (testName: string) => {
   const name = testName.toLowerCase();
   if (name.includes("blood") || name.includes("fbc") || name.includes("hba1c") || name.includes("sugar")) {
-    return HeartPulse;
+    return Activity;
   }
   if (name.includes("biopsy") || name.includes("pathology") || name.includes("histopathology") || name.includes("lesion")) {
     return FileText;
@@ -366,7 +366,7 @@ function ElabPage() {
               <CardHeader className="border-b border-border/60 bg-muted/30 p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div>
                   <CardTitle className="text-base font-extrabold flex items-center gap-2">
-                    <HeartPulse className="size-5 text-primary" />
+                    <Activity className="size-5 text-primary" />
                     Available Diagnostics Menu
                   </CardTitle>
                 </div>

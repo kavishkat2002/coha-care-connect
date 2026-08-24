@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { 
-  Upload, TrendingDown, Brain, HeartPulse, CheckCircle2, 
+  Upload, TrendingDown, Brain, CheckCircle2, 
   AlertTriangle, HelpCircle, Activity, ArrowRight, ShieldCheck,
   FileSpreadsheet, ClipboardList, RefreshCw, BarChart2,
   Building2, CreditCard, Download, Eye, Check, FileText, Lock, Shield
