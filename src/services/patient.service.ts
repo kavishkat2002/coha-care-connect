@@ -399,6 +399,79 @@ export const patientService = {
   },
 
   /**
+   * Clear all local health data, caches, cookies, and session data upon user logout
+   */
+  clearLocalHealthData() {
+    // 1. Reset in-memory mock objects
+    try {
+      mockPatientProfile.name = "";
+      mockPatientProfile.age = 0;
+      mockPatientProfile.gender = "";
+      mockPatientProfile.bloodGroup = "";
+      mockPatientProfile.city = "";
+      mockPatientProfile.phone = "";
+      mockPatientProfile.email = "";
+      mockPatientProfile.pastDiseases = [];
+      mockPatientProfile.medications = [];
+      mockPatientProfile.allergies = [];
+      mockPatientProfile.familyHistory = [];
+      (mockPatientProfile as any).avatarUrl = undefined;
+      (mockPatientProfile as any).patientId = undefined;
+    } catch (e) {}
+
+    // 2. Clear domain cookie
+    if (typeof document !== "undefined") {
+      try {
+        document.cookie = "coha_patient_profile=; path=/; max-age=0; expires=Thu, 01 Jan 1970 00:00:00 GMT;";
+        if (typeof window !== "undefined") {
+          document.cookie = `coha_patient_profile=; path=/; domain=${window.location.hostname}; max-age=0; expires=Thu, 01 Jan 1970 00:00:00 GMT;`;
+        }
+      } catch (e) {}
+    }
+
+    // 3. Clear LocalStorage health and patient keys
+    if (typeof localStorage !== "undefined") {
+      try {
+        const keysToRemove: string[] = [];
+        for (let i = 0; i < localStorage.length; i++) {
+          const key = localStorage.key(i);
+          if (key) {
+            if (
+              key.startsWith("mock_patient_profile") ||
+              key.startsWith("coha_patient_profile") ||
+              key.startsWith("mock_reports") ||
+              key.startsWith("mock_timeline") ||
+              key.startsWith("mock_appointments") ||
+              key.startsWith("mock_doctor_reviews") ||
+              key.startsWith("mock_hospital_reviews") ||
+              key.startsWith("meddoc_") ||
+              key.startsWith("telemed_") ||
+              key.startsWith("patient_") ||
+              key.startsWith("chat_") ||
+              key.startsWith("coha_")
+            ) {
+              keysToRemove.push(key);
+            }
+          }
+        }
+        keysToRemove.forEach((k) => localStorage.removeItem(k));
+      } catch (e) {}
+    }
+
+    // 4. Clear SessionStorage
+    if (typeof sessionStorage !== "undefined") {
+      try {
+        sessionStorage.clear();
+      } catch (e) {}
+    }
+
+    // 5. Broadcast logout event to other tabs
+    try {
+      profileSyncChannel?.postMessage({ type: "LOGOUT" });
+    } catch (e) {}
+  },
+
+  /**
    * Instantly sync active MedDoc ePass membership & profile details to Supabase
    */
   async syncEPassMembershipToSupabase(membership: {

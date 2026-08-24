@@ -1,5 +1,6 @@
 import type { Role } from "@/data/mock";
 import { supabase, adminAuthClient } from "@/lib/supabase";
+import { patientService } from "@/services/patient.service";
 
 export type Session = { id: string; name: string; email: string; role: Role; registration_id?: string };
 
@@ -91,6 +92,11 @@ export async function signIn(email: string, password: string) {
 }
 
 export async function signOut() {
+  // Clear all health profile data, local caches, and session cookies
+  try {
+    patientService.clearLocalHealthData();
+  } catch (e) {}
+
   const { error } = await supabase.auth.signOut();
   if (error) throw error;
 }

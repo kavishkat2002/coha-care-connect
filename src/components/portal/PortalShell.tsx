@@ -399,9 +399,10 @@ export function PortalShell({
                   </DropdownMenuLabel>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem
+                    className="cursor-pointer text-destructive focus:bg-destructive/10 focus:text-destructive font-medium"
                     onClick={async () => {
-                      localStorage.setItem("meddoc_user_signed_out", "true");
                       await signOut();
+                      toast.success("Signed out successfully. Health profile data cleared.");
                       navigate({ to: "/auth" });
                     }}
                   >

@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useState, useEffect } from "react";
 
 import { PageHeader } from "@/components/shared/PageHeader";
@@ -8,7 +8,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { patientService, type PatientProfile } from "@/services/patient.service";
-import { Pencil, Save, X, Loader2, Plus, Trash2, Paperclip, Upload, Check } from "lucide-react";
+import { signOut } from "@/services/auth.service";
+import { Pencil, Save, X, Loader2, Plus, Trash2, Paperclip, Upload, Check, LogOut } from "lucide-react";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/patient/profile")({
@@ -167,10 +168,17 @@ This document has been archived directly by the patient inside their personal me
 }
 
 function ProfilePage() {
+  const navigate = useNavigate();
   const [p, setP] = useState<PatientProfile | null>(null);
   const [isEditing, setIsEditing] = useState(false);
   const [editData, setEditData] = useState<Partial<PatientProfile>>({});
   const [saving, setSaving] = useState(false);
+
+  const handleSignOut = async () => {
+    await signOut();
+    toast.success("Signed out successfully. Health profile cleared.");
+    navigate({ to: "/auth" });
+  };
 
   useEffect(() => {
     async function load() {
@@ -190,7 +198,10 @@ function ProfilePage() {
 
     if (channel) {
       channel.onmessage = (event) => {
-        if (event.data?.profile && !isEditing) {
+        if (event.data?.type === "LOGOUT") {
+          setP(null);
+          setEditData({});
+        } else if (event.data?.profile && !isEditing) {
           setP(event.data.profile);
           setEditData(event.data.profile);
         }
@@ -198,12 +209,17 @@ function ProfilePage() {
     }
 
     const handleStorage = (e: StorageEvent) => {
-      if (e.key === "coha_patient_profile_shared" && e.newValue && !isEditing) {
-        try {
-          const parsed = JSON.parse(e.newValue);
-          setP(parsed);
-          setEditData(parsed);
-        } catch (err) {}
+      if (e.key === "coha_patient_profile_shared" && !isEditing) {
+        if (!e.newValue) {
+          setP(null);
+          setEditData({});
+        } else {
+          try {
+            const parsed = JSON.parse(e.newValue);
+            setP(parsed);
+            setEditData(parsed);
+          } catch (err) {}
+        }
       }
     };
     window.addEventListener("storage", handleStorage);
@@ -384,7 +400,31 @@ function ProfilePage() {
           }} 
         />
       </div>
-      <Badge variant="secondary">Records are shared only with clinicians you book with</Badge>
+      <div className="flex items-center justify-between flex-wrap gap-4 pt-2">
+        <Badge variant="secondary">Records are shared only with clinicians you book with</Badge>
+      </div>
+
+      {/* Account Sign Out / Privacy Card */}
+      <Card className="shadow-soft border-destructive/20 bg-destructive/[0.02]">
+        <CardContent className="p-4 sm:p-5 flex flex-col sm:flex-row items-center justify-between gap-4">
+          <div className="space-y-1 text-center sm:text-left">
+            <h4 className="text-sm font-bold text-foreground flex items-center justify-center sm:justify-start gap-2">
+              <LogOut className="size-4 text-destructive" />
+              Sign out of account
+            </h4>
+            <p className="text-xs text-muted-foreground">
+              Sign out of your MedDoc profile. All cached health records and session data on this device will be cleared.
+            </p>
+          </div>
+          <Button 
+            variant="outline" 
+            className="w-full sm:w-auto text-destructive hover:bg-destructive/10 hover:text-destructive shrink-0 cursor-pointer font-bold border-destructive/30" 
+            onClick={handleSignOut}
+          >
+            <LogOut className="mr-2 size-4" /> Sign out
+          </Button>
+        </CardContent>
+      </Card>
     </div>
   );
 }
