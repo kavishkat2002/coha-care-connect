@@ -479,7 +479,7 @@ export async function analyseSymptoms(conversationHistory: ChatMessage[]): Promi
               return { role: m.role, content: m.content };
             })
           ],
-          response_format: { type: "json_object" }
+          ...(hasImages ? {} : { response_format: { type: "json_object" } })
         })
       });
 
@@ -645,7 +645,14 @@ export async function analyseSymptoms(conversationHistory: ChatMessage[]): Promi
     let doctorMessage = "I understand you're experiencing some concerning symptoms. Could you describe how severe the discomfort feels right now on a scale of 1-10 and where it is located?";
     let quickReplies: string[] = [];
 
-    if (isKidney) {
+    if (hasImages) {
+      doctorMessage = "I have received your uploaded image/document. Please note that my advanced image analysis systems are currently offline. However, if you describe your symptoms or what the image shows in detail, I can help assess your condition and guide you to the right specialist.";
+      quickReplies = [
+        "Describe symptoms manually",
+        "Upload a different file later",
+        "Book a direct appointment"
+      ];
+    } else if (isKidney) {
       doctorMessage = "I understand. Experiencing pain around your back or side along with changes in your urine is something we need to evaluate carefully. How severe does the pain feel right now on a scale of 1 to 10, and where exactly is it centered?";
       quickReplies = [
         "Pain is 7-10/10 on lower right back/side",
