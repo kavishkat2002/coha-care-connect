@@ -830,11 +830,18 @@ export const patientService = {
       if (!error && data && data.reports) return data.reports;
     } catch (e) {}
     
-    // Fallback to local storage if Supabase fails (e.g., table not created)
+    // Fallback to local storage if Supabase fails or is empty
     try {
       const localSent = localStorage.getItem("meddoc_sent_reports");
       if (localSent) {
-        return JSON.parse(localSent);
+        const parsed = JSON.parse(localSent);
+        if (parsed && parsed.length > 0) {
+          // Force migrate to Supabase
+          if (patientId) {
+             void patientService.saveSentReports(patientId, parsed);
+          }
+          return parsed;
+        }
       }
     } catch (e) {}
     

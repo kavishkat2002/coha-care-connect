@@ -1150,13 +1150,17 @@ ${350 + pdfLength}
               </div>
             )}
 
-            {sentReports.length > 0 && (
-              <div className="pt-4 border-t border-border/60 space-y-3">
-                <h4 className="text-xs font-bold text-foreground uppercase tracking-wider">
-                  Report Endorsement Tracker
-                </h4>
-                <div className="space-y-3">
-                  {sentReports.map((rep) => {
+            <div className="pt-4 border-t border-border/60 space-y-3">
+              <h4 className="text-xs font-bold text-foreground uppercase tracking-wider">
+                Report Endorsement Tracker
+              </h4>
+              <div className="space-y-3">
+                {sentReports.length === 0 ? (
+                  <div className="p-4 text-center border border-dashed border-border/60 rounded-xl bg-background text-xs text-muted-foreground">
+                    No reports have been sent for endorsement yet.
+                  </div>
+                ) : (
+                  sentReports.map((rep) => {
                     const isCompleted = rep.status === "Verified & Signed";
                     const isProcessing = rep.status === "In Process";
                     return (
@@ -1210,10 +1214,10 @@ ${350 + pdfLength}
                         </div>
                       </div>
                     );
-                  })}
-                </div>
+                  })
+                )}
               </div>
-            )}
+            </div>
           </CardContent>
         </Card>
       </div>

@@ -30,6 +30,7 @@ import { Route as PatientBookRouteImport } from './routes/patient.book'
 import { Route as PatientElabRouteImport } from './routes/patient.elab'
 import { Route as PatientEpassRouteImport } from './routes/patient.epass'
 import { Route as PatientImagesRouteImport } from './routes/patient.images'
+import { Route as PatientMedifitRouteImport } from './routes/patient.medifit'
 import { Route as PatientMedmindEcareRouteImport } from './routes/patient.medmind-ecare'
 import { Route as PatientProfileRouteImport } from './routes/patient.profile'
 import { Route as PatientReportsRouteImport } from './routes/patient.reports'
@@ -141,6 +142,11 @@ const PatientImagesRoute = PatientImagesRouteImport.update({
   path: '/images',
   getParentRoute: () => PatientRoute,
 } as any)
+const PatientMedifitRoute = PatientMedifitRouteImport.update({
+  id: '/medifit',
+  path: '/medifit',
+  getParentRoute: () => PatientRoute,
+} as any)
 const PatientMedmindEcareRoute = PatientMedmindEcareRouteImport.update({
   id: '/medmind-ecare',
   path: '/medmind-ecare',
@@ -185,6 +191,7 @@ export interface FileRoutesByFullPath {
   '/patient/elab': typeof PatientElabRoute
   '/patient/epass': typeof PatientEpassRoute
   '/patient/images': typeof PatientImagesRoute
+  '/patient/medifit': typeof PatientMedifitRoute
   '/patient/medmind-ecare': typeof PatientMedmindEcareRoute
   '/patient/profile': typeof PatientProfileRoute
   '/patient/reports': typeof PatientReportsRoute
@@ -209,6 +216,7 @@ export interface FileRoutesByTo {
   '/patient/elab': typeof PatientElabRoute
   '/patient/epass': typeof PatientEpassRoute
   '/patient/images': typeof PatientImagesRoute
+  '/patient/medifit': typeof PatientMedifitRoute
   '/patient/medmind-ecare': typeof PatientMedmindEcareRoute
   '/patient/profile': typeof PatientProfileRoute
   '/patient/reports': typeof PatientReportsRoute
@@ -238,6 +246,7 @@ export interface FileRoutesById {
   '/patient/elab': typeof PatientElabRoute
   '/patient/epass': typeof PatientEpassRoute
   '/patient/images': typeof PatientImagesRoute
+  '/patient/medifit': typeof PatientMedifitRoute
   '/patient/medmind-ecare': typeof PatientMedmindEcareRoute
   '/patient/profile': typeof PatientProfileRoute
   '/patient/reports': typeof PatientReportsRoute
@@ -268,6 +277,7 @@ export interface FileRouteTypes {
     | '/patient/elab'
     | '/patient/epass'
     | '/patient/images'
+    | '/patient/medifit'
     | '/patient/medmind-ecare'
     | '/patient/profile'
     | '/patient/reports'
@@ -292,6 +302,7 @@ export interface FileRouteTypes {
     | '/patient/elab'
     | '/patient/epass'
     | '/patient/images'
+    | '/patient/medifit'
     | '/patient/medmind-ecare'
     | '/patient/profile'
     | '/patient/reports'
@@ -320,6 +331,7 @@ export interface FileRouteTypes {
     | '/patient/elab'
     | '/patient/epass'
     | '/patient/images'
+    | '/patient/medifit'
     | '/patient/medmind-ecare'
     | '/patient/profile'
     | '/patient/reports'
@@ -490,6 +502,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PatientImagesRouteImport
       parentRoute: typeof PatientRoute
     }
+    '/patient/medifit': {
+      id: '/patient/medifit'
+      path: '/medifit'
+      fullPath: '/patient/medifit'
+      preLoaderRoute: typeof PatientMedifitRouteImport
+      parentRoute: typeof PatientRoute
+    }
     '/patient/medmind-ecare': {
       id: '/patient/medmind-ecare'
       path: '/medmind-ecare'
@@ -576,6 +595,7 @@ interface PatientRouteChildren {
   PatientElabRoute: typeof PatientElabRoute
   PatientEpassRoute: typeof PatientEpassRoute
   PatientImagesRoute: typeof PatientImagesRoute
+  PatientMedifitRoute: typeof PatientMedifitRoute
   PatientMedmindEcareRoute: typeof PatientMedmindEcareRoute
   PatientProfileRoute: typeof PatientProfileRoute
   PatientReportsRoute: typeof PatientReportsRoute
@@ -591,6 +611,7 @@ const PatientRouteChildren: PatientRouteChildren = {
   PatientElabRoute: PatientElabRoute,
   PatientEpassRoute: PatientEpassRoute,
   PatientImagesRoute: PatientImagesRoute,
+  PatientMedifitRoute: PatientMedifitRoute,
   PatientMedmindEcareRoute: PatientMedmindEcareRoute,
   PatientProfileRoute: PatientProfileRoute,
   PatientReportsRoute: PatientReportsRoute,

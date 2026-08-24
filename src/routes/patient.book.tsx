@@ -385,6 +385,8 @@ function BookPage() {
                   navigate({ to: "/patient/epass" });
                 } else if (item.id === "skin") {
                   navigate({ to: "/patient/elab" });
+                } else if (item.id === "homeo") {
+                  navigate({ to: "/patient/medifit" });
                 }
               }}
               className="relative p-5 bg-card border border-border shadow-soft rounded-2xl flex flex-col items-center justify-center gap-4 hover:shadow-md transition-shadow cursor-pointer"
