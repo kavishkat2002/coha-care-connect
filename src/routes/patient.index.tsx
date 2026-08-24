@@ -7,6 +7,10 @@ import {
   FileText,
   Image as ImageIcon,
   Upload,
+  Stethoscope,
+  Pill,
+  ClipboardList,
+  AlertTriangle
 } from "lucide-react";
 
 import { PageHeader } from "@/components/shared/PageHeader";
@@ -131,10 +135,11 @@ function PatientOverview() {
   const [reports, setReports] = useState<ReportItem[]>([]);
   const [timeline, setTimeline] = useState<TimelineItem[]>([]);
 
-  const [chatMessagesCount, setChatMessagesCount] = useState(0);
   const [reportsAnalysedCount, setReportsAnalysedCount] = useState(0);
-  const [healthScore, setHealthScore] = useState(82);
-  const [healthHint, setHealthHint] = useState("Stable this month");
+  const [chatMessagesCount, setChatMessagesCount] = useState(0);
+  const [alertsCount, setAlertsCount] = useState(0);
+  const [alertsHint, setAlertsHint] = useState("");
+  const [alertLink, setAlertLink] = useState("/patient/reports");
 
   useEffect(() => {
     async function loadData() {
@@ -165,48 +170,40 @@ function PatientOverview() {
       setReportsAnalysedCount(rpts.length + attachmentsCount);
       setChatMessagesCount(chatCount);
 
-      // Calculate Dynamic Health Score from Profile & Assessment
-      let score = 95;
-      let hint = "Stable health record";
+      // Calculate Critical Alerts / Attention Required
+      let totalAlerts = 0;
+      let hint = "No immediate action needed";
+      let alertLinkUrl = "/patient/reports";
+      
       if (profile) {
-        const diseaseCount = profile.pastDiseases?.length || 0;
-        const medsCount = profile.medications?.length || 0;
-        const allergyCount = profile.allergies?.length || 0;
         const flaggedCount = rpts.reduce((sum, r) => sum + (r.flagged || 0), 0);
-
-        score = Math.max(35, 96 - (diseaseCount * 6) - (medsCount * 2) - (allergyCount * 3) - (flaggedCount * 4));
-        
-        if (score >= 85) hint = "Excellent health profile";
-        else if (score >= 70) hint = "Stable health record";
-        else if (score >= 50) hint = "Needs periodic checkups";
-        else hint = "Requires clinician review";
+        totalAlerts += flaggedCount;
+        if (flaggedCount > 0) {
+          hint = "Review flagged values in reports";
+          const flaggedReport = rpts.find(r => (r.flagged || 0) > 0);
+          if (flaggedReport) {
+            alertLinkUrl = `/patient/reports?reportId=${flaggedReport.id}`;
+          }
+        }
       }
 
       const savedAssessment = localStorage.getItem("meddoc_assessment");
       if (savedAssessment) {
         try {
           const assessment = JSON.parse(savedAssessment);
-          if (assessment.risk === "low") {
-            setHealthScore(94);
-            setHealthHint("Looking great based on assessment");
-          } else if (assessment.risk === "moderate") {
-            setHealthScore(72);
-            setHealthHint("Needs attention soon");
+          if (assessment.risk === "moderate") {
+            totalAlerts += 1;
+            hint = "Moderate risk assessment detected";
           } else if (assessment.risk === "elevated") {
-            setHealthScore(45);
-            setHealthHint("Action required immediately");
-          } else {
-            setHealthScore(score);
-            setHealthHint(hint);
+            totalAlerts += 1;
+            hint = "High risk assessment detected - action required";
           }
-        } catch (e) {
-          setHealthScore(score);
-          setHealthHint(hint);
-        }
-      } else {
-        setHealthScore(score);
-        setHealthHint(hint);
+        } catch (e) {}
       }
+      
+      setAlertsCount(totalAlerts);
+      setAlertsHint(hint);
+      setAlertLink(alertLinkUrl);
     }
     void loadData();
 
@@ -258,8 +255,8 @@ function PatientOverview() {
 
   const nextVisitHint = upcoming[0]?.date ? `Next: ${upcoming[0].date}` : "No upcoming visits";
 
-  const derivedTrends = useMemo(() => {
-    if (!patientProfile) return [];
+  const { derivedTrends, recentActivities } = useMemo(() => {
+    if (!patientProfile) return { derivedTrends: [], recentActivities: [] };
     const list: Array<{ label: string; value: string; colorClass: string; description: string; to: string }> = [];
 
     // 1. Determine Haematology & Iron levels
@@ -337,7 +334,78 @@ function PatientOverview() {
       to: "/patient/appointments" 
     });
 
-    return list;
+    // Generate Recent Health Activity dynamically
+    const activities: Array<{
+      id: string;
+      icon: string;
+      type: string;
+      details: string;
+      status: string;
+      statusVariant: "default" | "secondary" | "outline" | "destructive";
+      statusClass?: string;
+      dateMs: number;
+    }> = [];
+
+    reports.forEach((r) => {
+      activities.push({
+        id: `report-${r.id}`,
+        icon: "file",
+        type: "Medical report",
+        details: `${r.type || r.title} · ${r.date}`,
+        status: r.status,
+        statusVariant: r.status === "Analysed" ? "secondary" : "outline",
+        dateMs: new Date(r.date).getTime()
+      });
+    });
+
+    appointments.forEach((a) => {
+      if (a.status === "Completed") {
+        activities.push({
+          id: `appt-${a.id}`,
+          icon: "stethoscope",
+          type: "Consultation",
+          details: `Visit · ${a.date}`,
+          status: "Completed",
+          statusVariant: "outline",
+          dateMs: new Date(a.date).getTime()
+        });
+      }
+    });
+
+    timeline.forEach((t) => {
+      if (t.kind === "prescription") {
+        activities.push({
+          id: `timeline-${t.id}`,
+          icon: "pill",
+          type: "Medication update",
+          details: `${t.title} · ${t.date}`,
+          status: "Updated",
+          statusVariant: "outline",
+          statusClass: "text-teal-600 border-teal-200 bg-teal-50 dark:bg-teal-950/30",
+          dateMs: new Date(t.date).getTime()
+        });
+      } else if (t.kind === "insight" || t.kind === "image") {
+        activities.push({
+          id: `timeline-${t.id}`,
+          icon: "clipboard",
+          type: "Health record",
+          details: `${t.title} · ${t.date}`,
+          status: "Updated",
+          statusVariant: "outline",
+          statusClass: "text-teal-600 border-teal-200 bg-teal-50 dark:bg-teal-950/30",
+          dateMs: new Date(t.date).getTime()
+        });
+      }
+    });
+
+    const sortedActivities = activities.sort((a, b) => {
+      if (isNaN(a.dateMs) && isNaN(b.dateMs)) return 0;
+      if (isNaN(a.dateMs)) return 1;
+      if (isNaN(b.dateMs)) return -1;
+      return b.dateMs - a.dateMs;
+    }).slice(0, 5);
+
+    return { derivedTrends: list, recentActivities: sortedActivities };
   }, [timeline, reports, appointments, patientProfile]);
 
   if (!patientProfile) {
@@ -352,7 +420,18 @@ function PatientOverview() {
       />
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <StatCard icon={Activity} label="Health score" value={`${healthScore} / 100`} hint={healthHint} />
+        <Link to={alertLink} className={alertsCount > 0 ? "block transition-transform hover:scale-[1.02] active:scale-[0.98]" : "block"}>
+          <StatCard 
+            icon={alertsCount > 0 ? AlertTriangle : Activity} 
+            label="Attention Required" 
+            value={String(alertsCount)} 
+            hint={alertsHint} 
+            className={alertsCount > 0 ? "border-rose-500 bg-rose-50 dark:bg-rose-950/20 shadow-none ring-1 ring-rose-500 cursor-pointer" : "cursor-pointer"}
+            iconClassName={alertsCount > 0 ? "text-rose-600 bg-rose-100 dark:bg-rose-900 dark:text-rose-300" : undefined}
+            valueClassName={alertsCount > 0 ? "text-rose-600 dark:text-rose-400" : undefined}
+            labelClassName={alertsCount > 0 ? "text-rose-600 font-medium dark:text-rose-400" : undefined}
+          />
+        </Link>
         <StatCard icon={CalendarCheck} label="Upcoming visits" value={String(upcoming.length)} hint={nextVisitHint} />
         <StatCard icon={FileText} label="Reports analysed" value={String(reportsAnalysedCount)} hint={`${reports.reduce((sum, r) => sum + (r.flagged || 0), 0)} flagged value(s)`} />
         <StatCard icon={Bot} label="AI Interactions" value={String(chatMessagesCount)} hint="Recent collaborations" />
@@ -436,30 +515,53 @@ function PatientOverview() {
           </CardContent>
         </Card>
 
-        <Card className="shadow-soft rounded-[24px]">
+        <Card className="shadow-soft rounded-[24px] flex-1">
           <CardHeader className="pb-3 border-b border-border/40">
-            <CardTitle className="text-base font-extrabold text-foreground">Health trends</CardTitle>
-            <CardDescription className="text-xs">Built dynamically from your health records & medical history</CardDescription>
+            <CardTitle className="text-base font-extrabold text-foreground">Recent Health Activity</CardTitle>
+            <CardDescription className="text-xs">Your latest reports, consultations and health records</CardDescription>
           </CardHeader>
-          <CardContent className="p-5 space-y-4 pt-4">
-            {derivedTrends.map((row) => (
-              <Link
-                key={row.label}
-                to={row.to}
-                className="block space-y-1 pb-3.5 border-b border-border/40 last:border-0 last:pb-0 hover:bg-slate-50/50 dark:hover:bg-slate-800/10 p-2 -mx-2 rounded-xl transition-all duration-200 cursor-pointer"
-              >
-                <div className="flex items-center justify-between">
-                  <span className="font-semibold text-foreground text-xs">{row.label}</span>
-                  <Badge variant="outline" className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${row.colorClass}`}>
-                    {row.value}
-                  </Badge>
-                </div>
-                <p className="text-[11px] text-muted-foreground leading-relaxed font-normal">
-                  {row.description}
-                </p>
-              </Link>
-            ))}
-            <AiDisclaimer className="pt-1.5" />
+          <CardContent className="p-4 space-y-4">
+            {recentActivities.length > 0 ? (
+              <div className="flex flex-col gap-3">
+                {recentActivities.map((act) => {
+                  let Icon = FileText;
+                  let iconBg = "bg-blue-500/10 text-blue-600 dark:text-blue-400";
+                  
+                  if (act.icon === "stethoscope") {
+                    Icon = Stethoscope;
+                    iconBg = "bg-purple-500/10 text-purple-600 dark:text-purple-400";
+                  } else if (act.icon === "pill") {
+                    Icon = Pill;
+                    iconBg = "bg-rose-500/10 text-rose-600 dark:text-rose-400";
+                  } else if (act.icon === "clipboard") {
+                    Icon = ClipboardList;
+                    iconBg = "bg-amber-500/10 text-amber-600 dark:text-amber-400";
+                  }
+
+                  return (
+                    <div 
+                      key={act.id} 
+                      className="group flex items-center gap-4 rounded-2xl border border-border/40 bg-muted/20 p-3 hover:bg-muted/40 hover:shadow-sm transition-all"
+                    >
+                      <div className={`flex items-center justify-center size-10 rounded-xl shrink-0 ${iconBg}`}>
+                        <Icon className="size-5" strokeWidth={2.5} />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-semibold text-foreground truncate">{act.type}</p>
+                        <p className="text-xs text-muted-foreground truncate mt-0.5">{act.details}</p>
+                      </div>
+                      <Badge variant={act.statusVariant} className={`shrink-0 ${act.statusClass || ''}`}>
+                        {act.status}
+                      </Badge>
+                    </div>
+                  );
+                })}
+              </div>
+            ) : (
+              <div className="py-8 text-center text-muted-foreground text-sm border border-dashed rounded-xl border-border/40">
+                No recent activity found.
+              </div>
+            )}
           </CardContent>
         </Card>
       </div>

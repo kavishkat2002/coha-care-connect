@@ -240,6 +240,21 @@ function ReportsPage() {
   const [activeReportDetails, setActiveReportDetails] = useState<any | null>(null);
 
   useEffect(() => {
+    if (typeof window !== "undefined" && reports.length > 0 && !activeReportDetails) {
+      const params = new URLSearchParams(window.location.search);
+      const targetId = params.get("reportId");
+      if (targetId) {
+        const found = reports.find(r => r.id === targetId);
+        if (found) {
+          setActiveReportDetails(found);
+          // Optional: clear the param from URL to avoid re-opening on refresh
+          window.history.replaceState({}, '', window.location.pathname);
+        }
+      }
+    }
+  }, [reports, activeReportDetails]);
+
+  useEffect(() => {
     const interval = setInterval(() => {
       let changed = false;
       const updated = sentReports.map(rep => {

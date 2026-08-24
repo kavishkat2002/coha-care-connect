@@ -235,7 +235,6 @@ function MedifitComingSoon() {
           <PlatformBadge name="Apple Health" image="/images/apple-health.png" />
           <PlatformBadge name="Google Health Connect" image="/images/google-health-connect.png" />
           <PlatformBadge name="Fitbit" image="/images/fitbit.png" />
-          <PlatformBadge name="Garmin" image="/images/garmin.png" />
           <PlatformBadge name="Samsung Health" image="/images/samsung-health.png" />
         </div>
       </div>
