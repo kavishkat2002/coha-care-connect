@@ -58,11 +58,13 @@ export const patientService = {
     } catch (e) {}
 
     // 2. Try Supabase
-    const { data, error } = await supabase
-      .from("appointments")
-      .select("*");
-    
-    if (!error && data && data.length > 0) return data;
+    try {
+      const { data, error } = await supabase
+        .from("appointments")
+        .select("*");
+      
+      if (!error && data && data.length > 0) return data;
+    } catch (e) {}
 
     // 3. Try LocalStorage
     try {
@@ -77,41 +79,44 @@ export const patientService = {
    * Fetch custom time slots for a doctor on a specific date, or fallback to defaults
    */
   async getDoctorAvailability(doctorId: string, date: string): Promise<string[]> {
-    const { data, error } = await supabase
-      .from("doctor_availability")
-      .select("time_slots")
-      .eq("doctor_id", doctorId)
-      .eq("date", date)
-      .single();
+    try {
+      const { data, error } = await supabase
+        .from("doctor_availability")
+        .select("time_slots")
+        .eq("doctor_id", doctorId)
+        .eq("date", date)
+        .single();
 
-    if (error || !data || !data.time_slots || data.time_slots.length === 0) {
-      // Fallback default slots if doctor hasn't configured manually
-      return ["09:00", "10:30", "12:00", "14:30", "16:30", "18:00"];
-    }
-    return data.time_slots;
+      if (!error && data && data.time_slots && data.time_slots.length > 0) {
+        return data.time_slots;
+      }
+    } catch (e) {}
+
+    // Fallback default slots if doctor hasn't configured manually
+    return ["09:00", "10:30", "12:00", "14:30", "16:30", "18:00"];
   },
 
   /**
    * Fetch how many patients are booked for a specific doctor, date, and time slot
    */
   async getSlotQueueCount(doctorId: string, date: string, time: string): Promise<number> {
-    const { count, error } = await supabase
-      .from("appointments")
-      .select("*", { count: "exact", head: true })
-      .eq("doctor_id", doctorId)
-      .eq("date", date)
-      .eq("time", time);
+    try {
+      const { count, error } = await supabase
+        .from("appointments")
+        .select("*", { count: "exact", head: true })
+        .eq("doctor_id", doctorId)
+        .eq("date", date)
+        .eq("time", time);
 
-    if (error) {
-      console.warn("Supabase count failed, falling back to LocalStorage:", error);
-      try {
-        const localApps = JSON.parse(localStorage.getItem('mock_appointments') || '[]');
-        return localApps.filter((a: any) => a.doctor_id === doctorId && a.date === date && a.time === time).length;
-      } catch (e) {
-        return 0;
-      }
+      if (!error) return count || 0;
+    } catch (e) {}
+
+    try {
+      const localApps = JSON.parse(localStorage.getItem('mock_appointments') || '[]');
+      return localApps.filter((a: any) => a.doctor_id === doctorId && a.date === date && a.time === time).length;
+    } catch (e) {
+      return 0;
     }
-    return count || 0;
   },
 
   /**
@@ -138,25 +143,24 @@ export const patientService = {
       });
     } catch (e) {}
 
-    const { data, error } = await supabase
-      .from("appointments")
-      .insert([{ ...appointment, queue_number: assignedQueueNumber }])
-      .select()
-      .single();
+    try {
+      const { data, error } = await supabase
+        .from("appointments")
+        .insert([{ ...appointment, queue_number: assignedQueueNumber }])
+        .select()
+        .single();
 
-    if (error) {
-      console.warn("Supabase insert failed, falling back to LocalStorage:", error);
-      try {
-        const localApps = JSON.parse(localStorage.getItem('mock_appointments') || '[]');
-        localApps.push(newApp);
-        localStorage.setItem('mock_appointments', JSON.stringify(localApps));
-        return newApp;
-      } catch (e) {
-        return newApp;
-      }
+      if (!error && data) return data;
+    } catch (e) {}
+
+    try {
+      const localApps = JSON.parse(localStorage.getItem('mock_appointments') || '[]');
+      localApps.push(newApp);
+      localStorage.setItem('mock_appointments', JSON.stringify(localApps));
+      return newApp;
+    } catch (e) {
+      return newApp;
     }
-
-    return data || newApp;
   },
 
   /**
@@ -192,6 +196,7 @@ export const patientService = {
           type: report.type,
           date: report.date,
           status: report.status,
+          flagged: report.flagged,
           summary: report.summary,
         })
         .select()
@@ -207,6 +212,7 @@ export const patientService = {
       const localReports = saved ? JSON.parse(saved) : [...mockReports];
       localReports.unshift(report);
       localStorage.setItem("mock_reports", JSON.stringify(localReports));
+      profileSyncChannel?.postMessage({ type: "REPORTS_UPDATED" });
     } catch (e) {}
 
     return report;
@@ -260,6 +266,7 @@ export const patientService = {
       const localTimeline = saved ? JSON.parse(saved) : [...mockTimeline];
       localTimeline.unshift(item);
       localStorage.setItem("mock_timeline", JSON.stringify(localTimeline));
+      profileSyncChannel?.postMessage({ type: "TIMELINE_UPDATED" });
     } catch (e) {}
 
     return item;
@@ -473,17 +480,16 @@ export const patientService = {
    * Fetch doctor reviews
    */
   async getDoctorReviews(doctorId: string) {
-    const { data, error } = await supabase
-      .from("doctor_reviews")
-      .select("*")
-      .eq("doctor_id", doctorId)
-      .order("created_at", { ascending: false });
-    
-    let results = data || [];
-    
-    if (error) {
-      console.warn("Error fetching doctor reviews from Supabase, falling back to local storage:", error);
-    }
+    let results: any[] = [];
+    try {
+      const { data, error } = await supabase
+        .from("doctor_reviews")
+        .select("*")
+        .eq("doctor_id", doctorId)
+        .order("created_at", { ascending: false });
+      
+      if (!error && data) results = data;
+    } catch (e) {}
     
     try {
       const local = JSON.parse(localStorage.getItem('mock_doctor_reviews') || '[]');
@@ -500,97 +506,98 @@ export const patientService = {
    * Add a new doctor review
    */
   async addDoctorReview(review: { doctor_id: string; patient_id: string; patient_name: string; rating: number; comment: string }) {
-    const { data, error } = await supabase
-      .from("doctor_reviews")
-      .insert([review])
-      .select()
-      .single();
+    try {
+      const { data, error } = await supabase
+        .from("doctor_reviews")
+        .insert([review])
+        .select()
+        .single();
+      
+      if (!error && data) return data;
+    } catch (e) {}
     
-    if (error) {
-      console.warn("Supabase insert failed, falling back to LocalStorage:", error);
-      try {
-        const localReviews = JSON.parse(localStorage.getItem('mock_doctor_reviews') || '[]');
-        const newReview = { 
-          ...review, 
-          id: 'local-rev-' + Date.now(),
-          created_at: new Date().toISOString()
-        };
-        localReviews.push(newReview);
-        localStorage.setItem('mock_doctor_reviews', JSON.stringify(localReviews));
-        return newReview;
-      } catch (e) {
-        return null;
-      }
+    try {
+      const localReviews = JSON.parse(localStorage.getItem('mock_doctor_reviews') || '[]');
+      const newReview = { 
+        ...review, 
+        id: 'local-rev-' + Date.now(),
+        created_at: new Date().toISOString()
+      };
+      localReviews.push(newReview);
+      localStorage.setItem('mock_doctor_reviews', JSON.stringify(localReviews));
+      return newReview;
+    } catch (e) {
+      return null;
     }
-    return data;
   },
 
   /**
    * Update an existing doctor review
    */
   async updateDoctorReview(reviewId: string, rating: number, comment: string) {
-    const { data, error } = await supabase
-      .from("doctor_reviews")
-      .update({ rating, comment })
-      .eq("id", reviewId)
-      .select()
-      .single();
+    try {
+      const { data, error } = await supabase
+        .from("doctor_reviews")
+        .update({ rating, comment })
+        .eq("id", reviewId)
+        .select()
+        .single();
+      
+      if (!error && data) return data;
+    } catch (e) {}
     
-    if (error) {
-      console.warn("Supabase update failed, falling back to LocalStorage:", error);
-      try {
-        const localReviews = JSON.parse(localStorage.getItem('mock_doctor_reviews') || '[]');
-        const index = localReviews.findIndex((r: any) => r.id === reviewId);
-        if (index > -1) {
-          localReviews[index] = { ...localReviews[index], rating, comment };
-          localStorage.setItem('mock_doctor_reviews', JSON.stringify(localReviews));
-          return localReviews[index];
-        }
-        return null;
-      } catch (e) {
-        return null;
+    try {
+      const localReviews = JSON.parse(localStorage.getItem('mock_doctor_reviews') || '[]');
+      const index = localReviews.findIndex((r: any) => r.id === reviewId);
+      if (index > -1) {
+        localReviews[index] = { ...localReviews[index], rating, comment };
+        localStorage.setItem('mock_doctor_reviews', JSON.stringify(localReviews));
+        return localReviews[index];
       }
+      return null;
+    } catch (e) {
+      return null;
     }
-    return data;
   },
 
   /**
    * Delete a doctor review
    */
   async deleteDoctorReview(reviewId: string) {
-    const { error } = await supabase
-      .from("doctor_reviews")
-      .delete()
-      .eq("id", reviewId);
+    try {
+      const { error } = await supabase
+        .from("doctor_reviews")
+        .delete()
+        .eq("id", reviewId);
+        
+      if (!error) return true;
+    } catch (e) {}
       
-    if (error) {
-      console.warn("Supabase delete failed, falling back to LocalStorage:", error);
-      try {
-        const localReviews = JSON.parse(localStorage.getItem('mock_doctor_reviews') || '[]');
-        const filtered = localReviews.filter((r: any) => r.id !== reviewId);
-        localStorage.setItem('mock_doctor_reviews', JSON.stringify(filtered));
-        return true;
-      } catch (e) {
-        return false;
-      }
+    try {
+      const localReviews = JSON.parse(localStorage.getItem('mock_doctor_reviews') || '[]');
+      const filtered = localReviews.filter((r: any) => r.id !== reviewId);
+      localStorage.setItem('mock_doctor_reviews', JSON.stringify(filtered));
+      return true;
+    } catch (e) {
+      return false;
     }
-    return true;
   },
 
   /**
    * Check if patient has a previous booking with a doctor
    */
   async hasPreviousBooking(doctorId: string, patientId: string): Promise<boolean> {
-    const { count, error } = await supabase
-      .from("appointments")
-      .select("*", { count: "exact", head: true })
-      .eq("doctor_id", doctorId)
-      .eq("patient_id", patientId)
-      .in("status", ["Completed", "Confirmed"]); // allow Confirmed or Completed to leave a review
-    
-    if (error) {
-      console.warn("Error checking previous bookings in Supabase, falling back to local:", error);
-    }
+    let count = 0;
+    try {
+      const { count: dbCount, error } = await supabase
+        .from("appointments")
+        .select("*", { count: "exact", head: true })
+        .eq("doctor_id", doctorId)
+        .eq("patient_id", patientId)
+        .in("status", ["Completed", "Confirmed"]);
+      
+      if (!error && dbCount !== null) count = dbCount;
+    } catch (e) {}
     
     // Check local storage fallback
     try {
@@ -605,6 +612,6 @@ export const patientService = {
       // Ignore local storage errors
     }
     
-    return count ? count > 0 : false;
+    return count > 0;
   }
 };

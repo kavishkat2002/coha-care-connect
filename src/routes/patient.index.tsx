@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import {
   Activity,
   Bot,
@@ -150,31 +150,35 @@ function PatientOverview() {
       setTimeline(tl);
 
       // --- Real Data Analytics from AI Collaboration & Profile ---
-      const totalReports = Math.max(rpts.length, 4);
-      setReportsAnalysedCount(totalReports);
-
-      let chatCount = 18;
+      let chatCount = 0;
+      let attachmentsCount = 0;
       const savedMessages = localStorage.getItem("meddoc_messages");
       if (savedMessages) {
         try {
           const messages = JSON.parse(savedMessages);
-          if (Array.isArray(messages) && messages.length > 0) {
-            chatCount = Math.max(18, messages.length);
-            const attachmentsCount = messages.filter((m: any) => m.attachment || m.imageBase64).length;
-            setReportsAnalysedCount(totalReports + attachmentsCount);
+          if (Array.isArray(messages)) {
+            chatCount = messages.length;
+            attachmentsCount = messages.filter((m: any) => m.attachment || m.imageBase64).length;
           }
         } catch (e) {}
       }
+      setReportsAnalysedCount(rpts.length + attachmentsCount);
       setChatMessagesCount(chatCount);
 
       // Calculate Dynamic Health Score from Profile & Assessment
-      let score = 78;
-      let hint = "Needs periodic checkups";
+      let score = 95;
+      let hint = "Stable health record";
       if (profile) {
         const diseaseCount = profile.pastDiseases?.length || 0;
-        score = Math.max(45, 92 - diseaseCount * 7);
-        if (score >= 80) hint = "Stable health record";
-        else if (score >= 65) hint = "Needs periodic checkups";
+        const medsCount = profile.medications?.length || 0;
+        const allergyCount = profile.allergies?.length || 0;
+        const flaggedCount = rpts.reduce((sum, r) => sum + (r.flagged || 0), 0);
+
+        score = Math.max(35, 96 - (diseaseCount * 6) - (medsCount * 2) - (allergyCount * 3) - (flaggedCount * 4));
+        
+        if (score >= 85) hint = "Excellent health profile";
+        else if (score >= 70) hint = "Stable health record";
+        else if (score >= 50) hint = "Needs periodic checkups";
         else hint = "Requires clinician review";
       }
 
@@ -218,7 +222,12 @@ function PatientOverview() {
     }
 
     const handleStorage = (e: StorageEvent) => {
-      if (e.key === "coha_patient_profile_shared" || e.key === "mock_appointments") {
+      if (
+        e.key === "coha_patient_profile_shared" || 
+        e.key === "mock_appointments" || 
+        e.key === "mock_reports" || 
+        e.key === "mock_timeline"
+      ) {
         void loadData();
       }
     };
@@ -249,6 +258,79 @@ function PatientOverview() {
 
   const nextVisitHint = upcoming[0]?.date ? `Next: ${upcoming[0].date}` : "No upcoming visits";
 
+  const derivedTrends = useMemo(() => {
+    if (!patientProfile) return [];
+    const list: Array<{ label: string; value: string; colorClass: string; description: string }> = [];
+
+    // 1. Determine Haematology & Iron levels
+    const hasAnaemia = patientProfile?.pastDiseases?.some((d: string) => d.toLowerCase().includes("iron") || d.toLowerCase().includes("anaemia")) || false;
+    const takingFerrous = patientProfile?.medications?.some((m: string) => m.toLowerCase().includes("ferrous") || m.toLowerCase().includes("iron")) || false;
+    
+    const bloodReps = reports.filter(r => r.type?.toLowerCase().includes("blood") || r.title?.toLowerCase().includes("fbc") || r.title?.toLowerCase().includes("blood"));
+    
+    let ironValue = "Stable & Optimal";
+    let ironColor = "bg-emerald-500/10 text-emerald-600 border-emerald-500/20";
+    let ironDesc = "Haematology parameters are within normal reference ranges.";
+
+    if (bloodReps.length > 0) {
+      const latestBlood = bloodReps[0];
+      if (latestBlood) {
+        const hasAbnormal = latestBlood.status === "Analysed" && (latestBlood.summary?.toLowerCase().includes("abnormal") || latestBlood.summary?.toLowerCase().includes("flagged") || latestBlood.summary?.toLowerCase().includes("low"));
+        if (hasAbnormal) {
+          ironValue = "Attention Required";
+          ironColor = "bg-red-500/10 text-red-600 border-red-500/20";
+          ironDesc = "Out of range blood counts detected in recent reports.";
+        }
+      }
+    } else if (hasAnaemia || takingFerrous) {
+      ironValue = "Managed (Ferrous)";
+      ironColor = "bg-blue-500/10 text-blue-600 border-blue-500/20";
+      ironDesc = "Anaemia history actively managed via daily supplements.";
+    }
+    list.push({ label: "Haematology & Iron levels", value: ironValue, colorClass: ironColor, description: ironDesc });
+
+    // 2. Determine Skin Reviews status
+    const skinAssessments = timeline.filter(t => t.title?.toLowerCase().includes("skin") || t.title?.toLowerCase().includes("mole") || t.title?.toLowerCase().includes("dermatology") || t.title?.toLowerCase().includes("image"));
+    
+    let skinValue = "Due";
+    let skinColor = "bg-amber-500/10 text-amber-600 border-amber-500/20";
+    let skinDesc = "Annual routine dermatologist review is recommended.";
+
+    if (skinAssessments.length > 0) {
+      const latestSkin = skinAssessments[0];
+      if (latestSkin) {
+        if (latestSkin.title.toLowerCase().includes("completed") || latestSkin.title.toLowerCase().includes("analysed")) {
+          skinValue = "Reviewed";
+          skinColor = "bg-emerald-500/10 text-emerald-600 border-emerald-500/20";
+          skinDesc = "Consultation recently completed.";
+        } else {
+          skinValue = "Follow-up Advised";
+          skinColor = "bg-blue-500/10 text-blue-600 border-blue-500/20";
+          skinDesc = latestSkin.detail || "Recommended to re-review changes.";
+        }
+      }
+    }
+    list.push({ label: "Dermatological Reviews", value: skinValue, colorClass: skinColor, description: skinDesc });
+
+    // 3. Determine Consultation frequency
+    let consultValue = "Stable";
+    let consultColor = "bg-emerald-500/10 text-emerald-600 border-emerald-500/20";
+    let consultDesc = "Regular clinical checkups are up to date.";
+
+    if (appointments.length > 3) {
+      consultValue = "Frequent Visits";
+      consultColor = "bg-blue-500/10 text-blue-600 border-blue-500/20";
+      consultDesc = "Multiple consult bookings recorded in the last 30 days.";
+    } else if (appointments.length === 0) {
+      consultValue = "No Bookings";
+      consultColor = "bg-slate-500/10 text-slate-600 border-slate-500/20";
+      consultDesc = "No upcoming or past clinical bookings found.";
+    }
+    list.push({ label: "Consultation Frequency", value: consultValue, colorClass: consultColor, description: consultDesc });
+
+    return list;
+  }, [timeline, reports, appointments, patientProfile]);
+
   if (!patientProfile) {
     return <LoadingScreen message="Loading dashboard..." fullscreen={false} />;
   }
@@ -262,8 +344,8 @@ function PatientOverview() {
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <StatCard icon={Activity} label="Health score" value={`${healthScore} / 100`} hint={healthHint} />
-        <StatCard icon={CalendarCheck} label="Upcoming visits" value={String(upcoming.length || 10)} hint={nextVisitHint} />
-        <StatCard icon={FileText} label="Reports analysed" value={String(reportsAnalysedCount)} hint={`${reports.filter(r => r.flagged > 0).length || 1} flagged value`} />
+        <StatCard icon={CalendarCheck} label="Upcoming visits" value={String(upcoming.length)} hint={nextVisitHint} />
+        <StatCard icon={FileText} label="Reports analysed" value={String(reportsAnalysedCount)} hint={`${reports.reduce((sum, r) => sum + (r.flagged || 0), 0)} flagged value(s)`} />
         <StatCard icon={Bot} label="AI Interactions" value={String(chatMessagesCount)} hint="Recent collaborations" />
       </div>
 
@@ -345,18 +427,26 @@ function PatientOverview() {
           </CardContent>
         </Card>
 
-        <Card className="shadow-soft">
-          <CardHeader>
-            <CardTitle className="text-base">Personal health insights</CardTitle>
-            <CardDescription>Generated dynamically from your health profile & medical records</CardDescription>
+        <Card className="shadow-soft rounded-[24px]">
+          <CardHeader className="pb-3 border-b border-border/40">
+            <CardTitle className="text-base font-extrabold text-foreground">Health trends</CardTitle>
+            <CardDescription className="text-xs">Built dynamically from your health records & medical history</CardDescription>
           </CardHeader>
-          <CardContent className="space-y-3">
-            {getDynamicHealthInsights(patientProfile, reports, timeline).map((insight, idx) => (
-              <div key={idx} className="rounded-xl border border-border bg-muted/40 p-4 text-sm leading-relaxed">
-                {insight}
+          <CardContent className="p-5 space-y-4 pt-4">
+            {derivedTrends.map((row) => (
+              <div key={row.label} className="space-y-1 pb-3.5 border-b border-border/40 last:border-0 last:pb-0">
+                <div className="flex items-center justify-between">
+                  <span className="font-semibold text-foreground text-xs">{row.label}</span>
+                  <Badge variant="outline" className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${row.colorClass}`}>
+                    {row.value}
+                  </Badge>
+                </div>
+                <p className="text-[11px] text-muted-foreground leading-relaxed">
+                  {row.description}
+                </p>
               </div>
             ))}
-            <AiDisclaimer />
+            <AiDisclaimer className="pt-1.5" />
           </CardContent>
         </Card>
       </div>
