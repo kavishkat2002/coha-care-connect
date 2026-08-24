@@ -593,7 +593,7 @@ function ImagesPage() {
               </div>
             )}
 
-            <Button className="w-full gap-2" onClick={() => void run()} disabled={busy}>
+            <Button className="w-full gap-2" onClick={() => void run()} disabled={busy || !imageBase64}>
               {busy ? (
                 <>
                   <RefreshCw className="size-4 animate-spin" />

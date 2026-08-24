@@ -11,7 +11,8 @@ import {
   UserCog,
   Lightbulb,
   Send,
-  Activity
+  Activity,
+  ArrowLeft
 } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
@@ -32,7 +33,16 @@ function MedifitComingSoon() {
   };
 
   return (
-    <div className="max-w-5xl mx-auto py-8 px-4 sm:px-6 space-y-16">
+    <div className="max-w-5xl mx-auto py-8 px-4 sm:px-6 space-y-12">
+      {/* Back button */}
+      <button 
+        onClick={() => history.back()}
+        className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors"
+      >
+        <ArrowLeft className="size-5" />
+        <span className="font-medium">Back</span>
+      </button>
+
       {/* Hero Section */}
       <div className="flex flex-col lg:flex-row gap-12 items-center">
         <div className="flex-1 space-y-6">
@@ -51,7 +61,7 @@ function MedifitComingSoon() {
         <div className="flex-1 w-full max-w-2xl relative z-10 lg:translate-x-4">
           <div className="absolute inset-0 bg-gradient-to-tr from-teal-500/20 to-blue-500/20 rounded-[32px] blur-3xl -z-10" />
           
-          <div className="relative bg-background border border-border/60 rounded-3xl shadow-2xl overflow-hidden flex flex-col h-[400px] text-left">
+          <div className="relative bg-background border border-border/60 rounded-3xl shadow-2xl overflow-hidden flex flex-col h-auto min-h-[450px] sm:min-h-[400px] sm:h-[400px] text-left pb-4 sm:pb-0">
             {/* Window Header */}
             <div className="h-10 bg-muted/40 border-b border-border/50 flex items-center px-4 gap-4">
               <div className="flex gap-1.5">
@@ -93,9 +103,9 @@ function MedifitComingSoon() {
                   <p className="text-[10px] text-muted-foreground">Your connected health data and trends</p>
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   {/* Heart Rate Card */}
-                  <div className="col-span-2 sm:col-span-1 border border-border/60 rounded-xl p-3 shadow-sm flex flex-col relative overflow-hidden">
+                  <div className="border border-border/60 rounded-xl p-3 shadow-sm flex flex-col relative overflow-hidden">
                     <div className="flex justify-between items-start mb-2">
                       <span className="text-xs font-semibold text-muted-foreground">Heart rate</span>
                       <span className="text-[9px] font-bold bg-teal-500/10 text-teal-600 px-1.5 py-0.5 rounded flex items-center gap-1">
@@ -115,7 +125,7 @@ function MedifitComingSoon() {
                   </div>
 
                   {/* Steps Card */}
-                  <div className="col-span-2 sm:col-span-1 border border-border/60 rounded-xl p-3 shadow-sm flex flex-col">
+                  <div className="border border-border/60 rounded-xl p-3 shadow-sm flex flex-col">
                     <span className="text-xs font-semibold text-muted-foreground mb-2">Steps</span>
                     <div className="flex items-baseline gap-1">
                       <span className="text-3xl font-extrabold text-foreground">7,842</span>
@@ -222,11 +232,11 @@ function MedifitComingSoon() {
         </div>
         
         <div className="flex flex-wrap items-center justify-center gap-4 sm:gap-8 bg-card border border-border/60 rounded-3xl p-8 shadow-sm">
-          <PlatformBadge name="Apple Health" />
-          <PlatformBadge name="Google Health Connect" />
-          <PlatformBadge name="Fitbit" />
-          <PlatformBadge name="Garmin" />
-          <PlatformBadge name="Samsung Health" />
+          <PlatformBadge name="Apple Health" image="/images/apple-health.png" />
+          <PlatformBadge name="Google Health Connect" image="/images/google-health-connect.png" />
+          <PlatformBadge name="Fitbit" image="/images/fitbit.png" />
+          <PlatformBadge name="Garmin" image="/images/garmin.png" />
+          <PlatformBadge name="Samsung Health" image="/images/samsung-health.png" />
         </div>
       </div>
 
@@ -241,7 +251,7 @@ function MedifitComingSoon() {
             Join the early access list and we'll notify you as soon as your favorite platforms are available.
           </p>
         </div>
-        <form onSubmit={handleJoin} className="flex w-full md:w-auto gap-3">
+        <form onSubmit={handleJoin} className="flex flex-col sm:flex-row w-full md:w-auto gap-3">
           <Input 
             type="email" 
             placeholder="Enter your email" 
@@ -305,11 +315,13 @@ function FeatureCard({ icon: Icon, color, bg, title, desc }: { icon: any, color:
   );
 }
 
-function PlatformBadge({ name }: { name: string }) {
+function PlatformBadge({ name, image }: { name: string; image?: string }) {
   return (
-    <div className="flex flex-col items-center justify-center p-4 border border-border/40 rounded-2xl bg-muted/20 hover:bg-muted/30 transition-colors w-40">
-      <span className="font-bold text-sm text-foreground mb-1 text-center">{name}</span>
-      <span className="text-[10px] font-semibold text-teal-600 uppercase tracking-wider">Coming soon</span>
+    <div className="flex flex-col items-center justify-center p-4 border border-border/40 rounded-2xl bg-muted/20 hover:bg-muted/30 transition-colors w-40 gap-2">
+      {image && <img src={image} alt={name} className="w-8 h-8 object-contain" />}
+      <div className="flex flex-col items-center">
+        <span className="font-bold text-sm text-foreground text-center">{name}</span>
+      </div>
     </div>
   );
 }
