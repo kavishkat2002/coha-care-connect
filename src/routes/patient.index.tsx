@@ -260,7 +260,7 @@ function PatientOverview() {
 
   const derivedTrends = useMemo(() => {
     if (!patientProfile) return [];
-    const list: Array<{ label: string; value: string; colorClass: string; description: string }> = [];
+    const list: Array<{ label: string; value: string; colorClass: string; description: string; to: string }> = [];
 
     // 1. Determine Haematology & Iron levels
     const hasAnaemia = patientProfile?.pastDiseases?.some((d: string) => d.toLowerCase().includes("iron") || d.toLowerCase().includes("anaemia")) || false;
@@ -269,7 +269,6 @@ function PatientOverview() {
     const bloodReps = reports.filter(r => r.type?.toLowerCase().includes("blood") || r.title?.toLowerCase().includes("fbc") || r.title?.toLowerCase().includes("blood"));
     
     let ironValue = "Stable & Optimal";
-    let ironColor = "bg-emerald-500/10 text-emerald-600 border-emerald-500/20";
     let ironDesc = "Haematology parameters are within normal reference ranges.";
 
     if (bloodReps.length > 0) {
@@ -278,22 +277,25 @@ function PatientOverview() {
         const hasAbnormal = latestBlood.status === "Analysed" && (latestBlood.summary?.toLowerCase().includes("abnormal") || latestBlood.summary?.toLowerCase().includes("flagged") || latestBlood.summary?.toLowerCase().includes("low"));
         if (hasAbnormal) {
           ironValue = "Attention Required";
-          ironColor = "bg-red-500/10 text-red-600 border-red-500/20";
           ironDesc = "Out of range blood counts detected in recent reports.";
         }
       }
     } else if (hasAnaemia || takingFerrous) {
       ironValue = "Managed (Ferrous)";
-      ironColor = "bg-blue-500/10 text-blue-600 border-blue-500/20";
       ironDesc = "Anaemia history actively managed via daily supplements.";
     }
-    list.push({ label: "Haematology & Iron levels", value: ironValue, colorClass: ironColor, description: ironDesc });
+    list.push({ 
+      label: "Haematology & Iron levels", 
+      value: ironValue, 
+      colorClass: "bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300 border-slate-200/50", 
+      description: ironDesc, 
+      to: "/patient/reports" 
+    });
 
     // 2. Determine Skin Reviews status
     const skinAssessments = timeline.filter(t => t.title?.toLowerCase().includes("skin") || t.title?.toLowerCase().includes("mole") || t.title?.toLowerCase().includes("dermatology") || t.title?.toLowerCase().includes("image"));
     
     let skinValue = "Due";
-    let skinColor = "bg-amber-500/10 text-amber-600 border-amber-500/20";
     let skinDesc = "Annual routine dermatologist review is recommended.";
 
     if (skinAssessments.length > 0) {
@@ -301,32 +303,39 @@ function PatientOverview() {
       if (latestSkin) {
         if (latestSkin.title.toLowerCase().includes("completed") || latestSkin.title.toLowerCase().includes("analysed")) {
           skinValue = "Reviewed";
-          skinColor = "bg-emerald-500/10 text-emerald-600 border-emerald-500/20";
           skinDesc = "Consultation recently completed.";
         } else {
           skinValue = "Follow-up Advised";
-          skinColor = "bg-blue-500/10 text-blue-600 border-blue-500/20";
           skinDesc = latestSkin.detail || "Recommended to re-review changes.";
         }
       }
     }
-    list.push({ label: "Dermatological Reviews", value: skinValue, colorClass: skinColor, description: skinDesc });
+    list.push({ 
+      label: "Dermatological Reviews", 
+      value: skinValue, 
+      colorClass: "bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300 border-slate-200/50", 
+      description: skinDesc, 
+      to: "/patient/images" 
+    });
 
     // 3. Determine Consultation frequency
     let consultValue = "Stable";
-    let consultColor = "bg-emerald-500/10 text-emerald-600 border-emerald-500/20";
     let consultDesc = "Regular clinical checkups are up to date.";
 
     if (appointments.length > 3) {
       consultValue = "Frequent Visits";
-      consultColor = "bg-blue-500/10 text-blue-600 border-blue-500/20";
       consultDesc = "Multiple consult bookings recorded in the last 30 days.";
     } else if (appointments.length === 0) {
       consultValue = "No Bookings";
-      consultColor = "bg-slate-500/10 text-slate-600 border-slate-500/20";
       consultDesc = "No upcoming or past clinical bookings found.";
     }
-    list.push({ label: "Consultation Frequency", value: consultValue, colorClass: consultColor, description: consultDesc });
+    list.push({ 
+      label: "Consultation Frequency", 
+      value: consultValue, 
+      colorClass: "bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300 border-slate-200/50", 
+      description: consultDesc, 
+      to: "/patient/appointments" 
+    });
 
     return list;
   }, [timeline, reports, appointments, patientProfile]);
@@ -434,17 +443,21 @@ function PatientOverview() {
           </CardHeader>
           <CardContent className="p-5 space-y-4 pt-4">
             {derivedTrends.map((row) => (
-              <div key={row.label} className="space-y-1 pb-3.5 border-b border-border/40 last:border-0 last:pb-0">
+              <Link
+                key={row.label}
+                to={row.to}
+                className="block space-y-1 pb-3.5 border-b border-border/40 last:border-0 last:pb-0 hover:bg-slate-50/50 dark:hover:bg-slate-800/10 p-2 -mx-2 rounded-xl transition-all duration-200 cursor-pointer"
+              >
                 <div className="flex items-center justify-between">
                   <span className="font-semibold text-foreground text-xs">{row.label}</span>
                   <Badge variant="outline" className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${row.colorClass}`}>
                     {row.value}
                   </Badge>
                 </div>
-                <p className="text-[11px] text-muted-foreground leading-relaxed">
+                <p className="text-[11px] text-muted-foreground leading-relaxed font-normal">
                   {row.description}
                 </p>
-              </div>
+              </Link>
             ))}
             <AiDisclaimer className="pt-1.5" />
           </CardContent>

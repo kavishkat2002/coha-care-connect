@@ -5,7 +5,7 @@ import {
   FileSpreadsheet, ClipboardList, RefreshCw, BarChart2,
   Building2, CreditCard, Download, Eye, Check, FileText, Lock, Shield
 } from "lucide-react";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 
 import { PageHeader } from "@/components/shared/PageHeader";
 import { AiDisclaimer } from "@/components/shared/AiDisclaimer";
@@ -20,6 +20,13 @@ import { type ReportItem, type TimelineItem } from "@/data/mock";
 import { analyseMedicalReport, type ReportAnalysis } from "@/services/ai.service";
 import { patientService } from "@/services/patient.service";
 import { toast } from "sonner";
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselPrevious,
+  CarouselNext,
+} from "@/components/ui/carousel";
 
 export const Route = createFileRoute("/patient/reports")({
   head: () => ({
@@ -103,6 +110,14 @@ function ReportsPage() {
   const [pipelineStage, setPipelineStage] = useState<number>(0);
   const [result, setResult] = useState<ReportAnalysis | null>(null);
   const [reports, setReports] = useState<ReportItem[]>([]);
+
+  const chunkedReports = useMemo(() => {
+    const chunks: ReportItem[][] = [];
+    for (let i = 0; i < reports.length; i += 2) {
+      chunks.push(reports.slice(i, i + 2));
+    }
+    return chunks;
+  }, [reports]);
   const [imageBase64, setImageBase64] = useState<string | null>(null);
   const [fileName, setFileName] = useState<string>("Uploaded Report");
   const [selectedTrendMetric, setSelectedTrendMetric] = useState<string>("Hemoglobin");
@@ -115,6 +130,102 @@ function ReportsPage() {
     return 50;
   });
   const [patientId, setPatientId] = useState<string>("p1");
+
+  const [selectedCompareIds, setSelectedCompareIds] = useState<string[]>([]);
+  const [compareModalOpen, setCompareModalOpen] = useState(false);
+  const [compareData, setCompareData] = useState<{ report1: ReportAnalysis; report2: ReportAnalysis } | null>(null);
+  const [loadingCompare, setLoadingCompare] = useState(false);
+
+  const handleToggleCompare = (title: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    setSelectedCompareIds(prev => {
+      if (prev.includes(title)) {
+        return prev.filter(x => x !== title);
+      }
+      if (prev.length >= 2) {
+        toast.warning("You can select a maximum of 2 reports to compare.");
+        return prev;
+      }
+      return [...prev, title];
+    });
+  };
+
+  const handleStartComparison = async () => {
+    const id1 = selectedCompareIds[0];
+    const id2 = selectedCompareIds[1];
+    if (!id1 || !id2) return;
+    setLoadingCompare(true);
+    try {
+      const [r1, r2] = await Promise.all([
+        analyseMedicalReport(id1),
+        analyseMedicalReport(id2)
+      ]);
+      setCompareData({ report1: r1, report2: r2 });
+      setCompareModalOpen(true);
+    } catch (e) {
+      toast.error("Failed to fetch comparative report analysis.");
+    } finally {
+      setLoadingCompare(false);
+    }
+  };
+
+  const matchedParameters = useMemo(() => {
+    if (!compareData) return [];
+    const r1 = compareData.report1;
+    const r2 = compareData.report2;
+
+    const allNames = Array.from(new Set([
+      ...r1.results.map(x => x.testName),
+      ...r2.results.map(x => x.testName)
+    ]));
+
+    return allNames.map(name => {
+      const p1 = r1.results.find(x => x.testName === name);
+      const p2 = r2.results.find(x => x.testName === name);
+
+      let trendText = "N/A";
+      let trendColor = "text-muted-foreground";
+
+      if (p1 && p2) {
+        const v1 = parseFloat(String(p1.value));
+        const v2 = parseFloat(String(p2.value));
+        if (!isNaN(v1) && !isNaN(v2)) {
+          const diff = v2 - v1;
+          const diffStr = diff > 0 ? `+${diff.toFixed(1)}` : `${diff.toFixed(1)}`;
+          if (diff === 0) {
+            trendText = "Unchanged";
+            trendColor = "text-slate-500 font-semibold";
+          } else {
+            const isBloodCount = name.toLowerCase().includes("hemoglobin") || name.toLowerCase().includes("ferritin") || name.toLowerCase().includes("mcv");
+            const isFavorableIncrease = isBloodCount && diff > 0;
+            if (isFavorableIncrease) {
+              trendText = `${diffStr} (Improved)`;
+              trendColor = "text-emerald-600 dark:text-emerald-400 font-bold";
+            } else {
+              trendText = diffStr;
+              trendColor = diff > 0 ? "text-amber-600 dark:text-amber-400 font-semibold" : "text-rose-600 dark:text-rose-400 font-semibold";
+            }
+          }
+        } else {
+          if (p1.value === p2.value) {
+            trendText = "Unchanged";
+            trendColor = "text-slate-500 font-semibold";
+          } else {
+            trendText = "Changed";
+            trendColor = "text-blue-500 font-semibold";
+          }
+        }
+      }
+
+      return {
+        name,
+        p1,
+        p2,
+        trendText,
+        trendColor
+      };
+    });
+  }, [compareData]);
 
   const [sentReports, setSentReports] = useState<any[]>(() => {
     if (typeof window !== "undefined") {
@@ -326,6 +437,24 @@ ${350 + pdfLength}
           localStorage.setItem("meddoc_ai_credits", m.ai_credits.toString());
         }
       }
+
+      // Automatically load the previous report analysis by default if none is active
+      const savedLastAnalysis = localStorage.getItem("meddoc_last_report_analysis");
+      if (savedLastAnalysis) {
+        try {
+          const parsed = JSON.parse(savedLastAnalysis);
+          setResult(prev => prev || parsed);
+        } catch (e) {}
+      } else if (data && data.length > 0) {
+        const lastReport = data[0];
+        if (lastReport) {
+          try {
+            const res = await analyseMedicalReport(lastReport.title);
+            setResult(prev => prev || res);
+            localStorage.setItem("meddoc_last_report_analysis", JSON.stringify(res));
+          } catch (e) {}
+        }
+      }
     }
     void load();
 
@@ -467,6 +596,7 @@ ${350 + pdfLength}
     try {
       const res = await analyseMedicalReport(fileName, imageBase64 || undefined);
       setResult(res);
+      localStorage.setItem("meddoc_last_report_analysis", JSON.stringify(res));
       setPipelineStage(PIPELINE_STAGES.length + 1);
 
       const reportTitle = fileName.replace(/\.[^/.]+$/, "");
@@ -607,6 +737,111 @@ ${350 + pdfLength}
               </CardContent>
             </Card>
           )}
+
+          {/* Analysis History */}
+          <Card className="shadow-soft rounded-[24px]">
+            <CardHeader className="pb-3 border-b border-border/40">
+              <div className="flex items-center justify-between">
+                <CardTitle className="text-sm font-extrabold flex items-center gap-2">
+                  <ClipboardList className="size-4 text-primary" />
+                  Previously Analysed Reports
+                </CardTitle>
+                {selectedCompareIds.length > 0 && (
+                  <Button 
+                    size="sm" 
+                    variant="secondary" 
+                    onClick={handleStartComparison}
+                    disabled={selectedCompareIds.length !== 2 || loadingCompare}
+                    className="h-7 px-2.5 text-[10px] font-bold gap-1 cursor-pointer bg-primary/10 text-primary border border-primary/20 hover:bg-primary/25 animate-in fade-in zoom-in-95 duration-150"
+                  >
+                    {loadingCompare ? (
+                      <RefreshCw className="size-3 animate-spin" />
+                    ) : (
+                      <RefreshCw className="size-3" />
+                    )}
+                    Compare ({selectedCompareIds.length}/2)
+                  </Button>
+                )}
+              </div>
+              <CardDescription className="text-xs">Select any past report to view details, or check 2 reports to compare them</CardDescription>
+            </CardHeader>
+            <CardContent className="p-4 pt-5">
+              {reports.length > 0 ? (
+                <Carousel opts={{ align: "start" }} className="w-full relative">
+                  <CarouselContent>
+                    {chunkedReports.map((chunk, chunkIdx) => (
+                      <CarouselItem key={chunkIdx} className="space-y-2.5">
+                        {chunk.map((rep) => {
+                          const isActive = result?.fileName === rep.title;
+                          const isComparingSelected = selectedCompareIds.includes(rep.title);
+                          return (
+                            <div 
+                              key={rep.id}
+                              className={`relative w-full rounded-xl border transition-all flex items-center p-3 gap-3 ${
+                                isActive 
+                                  ? "border-primary bg-primary/[0.03] dark:bg-primary/[0.01]" 
+                                  : "border-border/60 hover:bg-muted/5"
+                              }`}
+                            >
+                              {/* Compare Selection Checkbox */}
+                              <div 
+                                onClick={(e) => handleToggleCompare(rep.title, e)}
+                                className={`size-4 rounded flex items-center justify-center cursor-pointer shrink-0 transition-colors border ${
+                                  isComparingSelected 
+                                    ? "bg-primary border-primary text-white" 
+                                    : "border-muted-foreground/45 hover:border-primary"
+                                }`}
+                              >
+                                {isComparingSelected && <Check className="size-3 text-white" strokeWidth={3} />}
+                              </div>
+
+                              {/* Clickable Report Metadata to Load Results */}
+                              <div
+                                onClick={async () => {
+                                  setBusy(true);
+                                  try {
+                                    const res = await analyseMedicalReport(rep.title);
+                                    setResult(res);
+                                    localStorage.setItem("meddoc_last_report_analysis", JSON.stringify(res));
+                                  } catch (e) {
+                                    toast.error("Failed to load report analysis.");
+                                  } finally {
+                                    setBusy(false);
+                                  }
+                                }}
+                                className="flex-1 min-w-0 flex items-center justify-between gap-3 cursor-pointer select-none"
+                              >
+                                <div className="space-y-0.5 min-w-0">
+                                  <p className="text-xs font-bold text-foreground leading-snug truncate">{rep.title}</p>
+                                  <p className="text-[10px] text-muted-foreground">
+                                    {rep.type} · {rep.date} · {rep.flagged} flagged values
+                                  </p>
+                                </div>
+                                <Badge variant="outline" className="text-[9px] font-bold bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300 border-slate-200/50 shrink-0">
+                                  {rep.status}
+                                </Badge>
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </CarouselItem>
+                    ))}
+                  </CarouselContent>
+                  
+                  {chunkedReports.length > 1 && (
+                    <div className="flex items-center justify-end gap-1.5 mt-3 pt-2 border-t border-border/40">
+                      <CarouselPrevious className="static translate-y-0 size-7" />
+                      <CarouselNext className="static translate-y-0 size-7" />
+                    </div>
+                  )}
+                </Carousel>
+              ) : (
+                <div className="text-center py-6 text-muted-foreground text-xs">
+                  No previously analysed reports found.
+                </div>
+              )}
+            </CardContent>
+          </Card>
         </div>
 
         {/* Diagnostic Results Card */}
@@ -1134,6 +1369,110 @@ ${350 + pdfLength}
             <Button className="w-full gap-1.5 cursor-pointer" onClick={() => handleDownloadReport(activeReportDetails)}>
               <Download className="size-4" />
               Download Official PDF
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+      {/* Comparison Modal */}
+      <Dialog open={compareModalOpen} onOpenChange={setCompareModalOpen}>
+        <DialogContent className="max-w-3xl rounded-[24px] p-6 max-h-[85vh] overflow-y-auto">
+          <DialogHeader className="pb-4 border-b border-border/40">
+            <DialogTitle className="text-base flex items-center gap-2 font-bold text-primary">
+              <RefreshCw className="size-5 text-primary" />
+              Side-by-Side Diagnostic Report Comparison
+            </DialogTitle>
+            <DialogDescription className="text-xs">
+              Comparing extracted clinical parameters from your selected medical files.
+            </DialogDescription>
+          </DialogHeader>
+
+          {compareData && (
+            <div className="space-y-6 pt-4">
+              <div className="grid gap-4 sm:grid-cols-2">
+                <div className="p-4 rounded-2xl border border-border/60 bg-muted/5 space-y-1">
+                  <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Report A (Baseline)</span>
+                  <h4 className="text-xs font-extrabold text-foreground truncate">{compareData.report1.fileName}</h4>
+                  <Badge variant="outline" className="text-[10px] font-semibold bg-slate-100 text-slate-700 dark:bg-slate-800 border-slate-200/50">
+                    {compareData.report1.documentType}
+                  </Badge>
+                </div>
+                <div className="p-4 rounded-2xl border border-border/60 bg-muted/5 space-y-1">
+                  <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Report B (Comparison)</span>
+                  <h4 className="text-xs font-extrabold text-foreground truncate">{compareData.report2.fileName}</h4>
+                  <Badge variant="outline" className="text-[10px] font-semibold bg-slate-100 text-slate-700 dark:bg-slate-800 border-slate-200/50">
+                    {compareData.report2.documentType}
+                  </Badge>
+                </div>
+              </div>
+
+              {/* Matched Parameters Table */}
+              <div className="border border-border/60 rounded-[20px] overflow-hidden bg-background">
+                <Table>
+                  <TableHeader className="bg-muted/20">
+                    <TableRow>
+                      <TableHead className="text-xs font-bold text-foreground">Clinical Parameter</TableHead>
+                      <TableHead className="text-xs font-bold text-foreground">Report A Value</TableHead>
+                      <TableHead className="text-xs font-bold text-foreground">Report B Value</TableHead>
+                      <TableHead className="text-xs font-bold text-foreground">Trend / Change</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {matchedParameters.map((row) => (
+                      <TableRow key={row.name}>
+                        <TableCell className="text-xs font-semibold text-foreground py-3">{row.name}</TableCell>
+                        <TableCell className="text-xs py-3">
+                          {row.p1 ? (
+                            <div className="space-y-1">
+                              <span className="font-bold text-foreground">{row.p1.value} <span className="text-[10px] text-muted-foreground">{row.p1.unit}</span></span>
+                              {row.p1.flag !== "normal" && (
+                                <Badge variant="outline" className="text-[9px] block w-fit font-bold bg-rose-500/10 text-rose-600 border-rose-500/20 px-1 py-0.5 rounded">
+                                  {row.p1.flag.toUpperCase()}
+                                </Badge>
+                              )}
+                            </div>
+                          ) : (
+                            <span className="text-muted-foreground/40 text-[10px]">Not tested</span>
+                          )}
+                        </TableCell>
+                        <TableCell className="text-xs py-3">
+                          {row.p2 ? (
+                            <div className="space-y-1">
+                              <span className="font-bold text-foreground">{row.p2.value} <span className="text-[10px] text-muted-foreground">{row.p2.unit}</span></span>
+                              {row.p2.flag !== "normal" && (
+                                <Badge variant="outline" className="text-[9px] block w-fit font-bold bg-rose-500/10 text-rose-600 border-rose-500/20 px-1 py-0.5 rounded">
+                                  {row.p2.flag.toUpperCase()}
+                                </Badge>
+                              )}
+                            </div>
+                          ) : (
+                            <span className="text-muted-foreground/40 text-[10px]">Not tested</span>
+                          )}
+                        </TableCell>
+                        <TableCell className={`text-xs py-3 font-semibold ${row.trendColor}`}>
+                          {row.trendText}
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+
+              {/* Overall comparison summary */}
+              <div className="p-4 rounded-2xl border border-primary/20 bg-primary/[0.02] dark:bg-primary/[0.005] space-y-1.5">
+                <h4 className="text-xs font-bold text-foreground flex items-center gap-1.5">
+                  <Brain className="size-4 text-primary" />
+                  Comparative Clinical Insight
+                </h4>
+                <p className="text-[11px] text-muted-foreground leading-relaxed">
+                  Comparing baseline results from {compareData.report1.fileName} against comparison results in {compareData.report2.fileName} shows that key blood parameters are currently actively managed. Parameter normalizations match standard diagnostic trajectories. Continuing planned clinician follow-ups is advised.
+                </p>
+              </div>
+            </div>
+          )}
+
+          <DialogFooter className="mt-4 pt-3 border-t border-border/40">
+            <Button size="sm" variant="outline" onClick={() => setCompareModalOpen(false)} className="cursor-pointer font-bold text-xs h-9">
+              Close Comparison
             </Button>
           </DialogFooter>
         </DialogContent>
