@@ -936,9 +936,10 @@ ${350 + pdfLength}
                       </TableHeader>
                       <TableBody>
                         {result.results.map((r, i) => {
-                          const isHigh = r.flag === "high";
-                          const isLow = r.flag === "low";
-                          const isCritical = r.flag === "critical";
+                          const flagStr = r.flag.toLowerCase();
+                          const isHigh = flagStr === "high";
+                          const isLow = flagStr === "low";
+                          const isCritical = flagStr === "critical";
                           
                           return (
                             <TableRow key={i} className="hover:bg-muted/10">
@@ -1276,8 +1277,9 @@ ${350 + pdfLength}
                 </div>
                 <div className="space-y-3">
                   {mockTrends[selectedTrendMetric as keyof typeof mockTrends]?.map((t, idx) => {
-                    const isLow = t.status === "low";
-                    const isHigh = t.status === "high";
+                    const statusStr = t.status.toLowerCase();
+                    const isLow = statusStr === "low";
+                    const isHigh = statusStr === "high";
                     return (
                       <div key={idx} className="flex items-center justify-between p-3 rounded-lg border border-border/40 hover:bg-muted/10">
                         <span className="text-xs font-medium text-foreground">{t.date}</span>

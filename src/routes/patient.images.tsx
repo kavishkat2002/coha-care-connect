@@ -35,7 +35,6 @@ export const Route = createFileRoute("/patient/images")({
 const regions = [
   { label: "Oral", icon: Smile },
   { label: "Skin", icon: ScanLine },
-  { label: "Breast", icon: Activity },
   { label: "Eye", icon: Eye },
 ];
 

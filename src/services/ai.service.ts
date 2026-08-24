@@ -359,9 +359,9 @@ DYNAMIC CLINICAL INTERVIEW PROTOCOL (Symptom-Aware & Intent-Driven):
    - NEVER use robotic script templates (DO NOT say "Thank you for describing your symptoms", "To help evaluate all of these symptoms accurately...").
    - NEVER refer to irrelevant disease categories (e.g., NEVER mention asthma/cough if the patient complains about kidney, abdominal, or skin issues). ALWAYS respond directly to what the patient described.
 4. FILE UPLOADS (IMAGES, PDFS, X-RAYS, LAB REPORTS):
-   - IF the user provides an image or document, YOUR ABSOLUTE FIRST PRIORITY must be to thoroughly analyze that specific file.
-   - You MUST provide a detailed interpretation, observation, and clinical analysis of the uploaded file in "plainLanguageSummary" BEFORE asking any follow-up questions.
-   - Explain what you see in the image/PDF clearly to the user, and base your assessment on that visual/document evidence. Only ask follow-up questions if absolutely necessary after giving your analysis.
+   - IF the user provides an image or document alongside a text message (e.g., "explain me for this"), YOUR ABSOLUTE FIRST PRIORITY is to address their specific text question using the document as evidence.
+   - You MUST provide a detailed interpretation, observation, and clinical analysis of the uploaded file in "plainLanguageSummary" that directly answers their question, BEFORE asking any follow-up questions.
+   - Explain what you see in the image/document clearly to the user, and base your assessment on that visual/document evidence. Only ask follow-up questions if absolutely necessary after giving your analysis.
 
 RESPONSE FORMAT:
 Return ONLY a valid JSON object matching this exact structure (no other text, no markdown):
@@ -463,7 +463,7 @@ export async function analyseSymptoms(conversationHistory: ChatMessage[]): Promi
           "Authorization": `Bearer ${apiKey}`
         },
         body: JSON.stringify({
-          model: hasImages ? "llama-3.2-11b-vision-preview" : "llama-3.3-70b-versatile",
+          model: hasImages ? "qwen/qwen3.6-27b" : "llama-3.3-70b-versatile",
           messages: [
             { role: "system", content: finalSystemPrompt },
             ...conversationHistory.map((m) => {
