@@ -90,6 +90,10 @@ function ImagesPage() {
           setAiCredits(m.ai_credits);
           localStorage.setItem("meddoc_ai_credits", m.ai_credits.toString());
         }
+        const lastImageAnalysis = await patientService.getLastImageAnalysis(p.id);
+        if (lastImageAnalysis) {
+          setResult(lastImageAnalysis);
+        }
       }
     }
     void load();
@@ -336,6 +340,7 @@ function ImagesPage() {
       const res = await analyseMedicalImage(region, imageBase64 || undefined, pixelMetrics || undefined, metadata);
       setStageProgress(4);
       setResult(res);
+      void patientService.saveLastImageAnalysis(patientId, res);
       if (res.suggestedSpecialty) {
         const doctors = await doctorService.getDoctorsBySpecialty(res.suggestedSpecialty);
         setRecommendedDoctors(doctors);

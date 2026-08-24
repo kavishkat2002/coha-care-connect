@@ -227,13 +227,7 @@ function ReportsPage() {
     });
   }, [compareData]);
 
-  const [sentReports, setSentReports] = useState<any[]>(() => {
-    if (typeof window !== "undefined") {
-      const saved = localStorage.getItem("meddoc_sent_reports");
-      return saved ? JSON.parse(saved) : [];
-    }
-    return [];
-  });
+  const [sentReports, setSentReports] = useState<any[]>([]);
   const [selectedPartnerId, setSelectedPartnerId] = useState("nawaloka");
   const [selectedServiceId, setSelectedServiceId] = useState("endorse");
   const [cardHolder, setCardHolder] = useState("");
@@ -266,11 +260,13 @@ function ReportsPage() {
       });
       if (changed) {
         setSentReports(updated);
-        localStorage.setItem("meddoc_sent_reports", JSON.stringify(updated));
+        if (patientId) {
+          void patientService.saveSentReports(patientId, updated);
+        }
       }
     }, 8000);
     return () => clearInterval(interval);
-  }, [sentReports]);
+  }, [sentReports, patientId]);
 
   const handleSendToLab = () => {
     if (!result) return;
@@ -305,7 +301,9 @@ function ReportsPage() {
 
       const updated = [newSubmission, ...sentReports];
       setSentReports(updated);
-      localStorage.setItem("meddoc_sent_reports", JSON.stringify(updated));
+      if (patientId) {
+        void patientService.saveSentReports(patientId, updated);
+      }
 
       toast.success("Payment authorized and report sent directly to laboratory!", {
         description: `Successfully transmitted to ${selectedPartner.name} for ${selectedService.name}.`
@@ -436,27 +434,26 @@ ${350 + pdfLength}
           setAiCredits(m.ai_credits);
           localStorage.setItem("meddoc_ai_credits", m.ai_credits.toString());
         }
-      }
+        
+        // Fetch sent reports
+        const sent = await patientService.getSentReports(p.id);
+        if (sent && sent.length > 0) {
+          setSentReports(sent);
+        }
 
-      // Automatically load the previous report analysis by default if none is active
-      const isReset = localStorage.getItem("meddoc_reports_reset_by_user") === "true";
-      if (isReset) {
-        return;
-      }
-      const savedLastAnalysis = localStorage.getItem("meddoc_last_report_analysis");
-      if (savedLastAnalysis) {
-        try {
-          const parsed = JSON.parse(savedLastAnalysis);
-          setResult(prev => prev || parsed);
-        } catch (e) {}
-      } else if (data && data.length > 0) {
-        const lastReport = data[0];
-        if (lastReport) {
-          try {
-            const res = await analyseMedicalReport(lastReport.title);
-            setResult(prev => prev || res);
-            localStorage.setItem("meddoc_last_report_analysis", JSON.stringify(res));
-          } catch (e) {}
+        // Fetch last report analysis
+        const lastAnalysis = await patientService.getLastReportAnalysis(p.id);
+        if (lastAnalysis) {
+          setResult(prev => prev || lastAnalysis);
+        } else if (data && data.length > 0) {
+          const lastReport = data[0];
+          if (lastReport) {
+            try {
+              const res = await analyseMedicalReport(lastReport.title);
+              setResult(prev => prev || res);
+              void patientService.saveLastReportAnalysis(p.id, res);
+            } catch (e) {}
+          }
         }
       }
     }
@@ -600,8 +597,7 @@ ${350 + pdfLength}
     try {
       const res = await analyseMedicalReport(fileName, imageBase64 || undefined);
       setResult(res);
-      localStorage.removeItem("meddoc_reports_reset_by_user");
-      localStorage.setItem("meddoc_last_report_analysis", JSON.stringify(res));
+      void patientService.saveLastReportAnalysis(patientId, res);
       setPipelineStage(PIPELINE_STAGES.length + 1);
 
       const reportTitle = fileName.replace(/\.[^/.]+$/, "");
@@ -807,8 +803,7 @@ ${350 + pdfLength}
                                   try {
                                     const res = await analyseMedicalReport(rep.title);
                                     setResult(res);
-                                    localStorage.removeItem("meddoc_reports_reset_by_user");
-                                    localStorage.setItem("meddoc_last_report_analysis", JSON.stringify(res));
+                                    void patientService.saveLastReportAnalysis(patientId, res);
                                   } catch (e) {
                                     toast.error("Failed to load report analysis.");
                                   } finally {
@@ -873,8 +868,7 @@ ${350 + pdfLength}
                       setImageBase64(null);
                       setFileName("Uploaded Report");
                       setPipelineStage(0);
-                      localStorage.removeItem("meddoc_last_report_analysis");
-                      localStorage.setItem("meddoc_reports_reset_by_user", "true");
+                      void patientService.saveLastReportAnalysis(patientId, null);
                       setSelectedCompareIds([]);
                       toast.info("Report analysis section reset successfully.");
                     }}

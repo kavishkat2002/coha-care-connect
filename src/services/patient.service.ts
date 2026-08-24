@@ -726,5 +726,105 @@ export const patientService = {
     } catch (e) {
       console.warn("Supabase saveChatSession notice:", e);
     }
+  },
+
+  /**
+   * Save the last image analysis result to Supabase
+   */
+  async saveLastImageAnalysis(patientId: string, result: any): Promise<void> {
+    try {
+      await supabase
+        .from("health_analyses")
+        .upsert({
+          patient_id: patientId,
+          type: "image",
+          result: result,
+          updated_at: new Date().toISOString(),
+        }, { onConflict: "patient_id,type" });
+    } catch (e) {
+      console.warn("Supabase saveLastImageAnalysis notice:", e);
+    }
+  },
+
+  /**
+   * Get the last image analysis result from Supabase
+   */
+  async getLastImageAnalysis(patientId: string): Promise<any> {
+    try {
+      const { data, error } = await supabase
+        .from("health_analyses")
+        .select("result")
+        .eq("patient_id", patientId)
+        .eq("type", "image")
+        .single();
+      if (!error && data) return data.result;
+    } catch (e) {}
+    return null;
+  },
+
+  /**
+   * Save the last report analysis result to Supabase
+   */
+  async saveLastReportAnalysis(patientId: string, result: any): Promise<void> {
+    try {
+      await supabase
+        .from("health_analyses")
+        .upsert({
+          patient_id: patientId,
+          type: "report",
+          result: result,
+          updated_at: new Date().toISOString(),
+        }, { onConflict: "patient_id,type" });
+    } catch (e) {
+      console.warn("Supabase saveLastReportAnalysis notice:", e);
+    }
+  },
+
+  /**
+   * Get the last report analysis result from Supabase
+   */
+  async getLastReportAnalysis(patientId: string): Promise<any> {
+    try {
+      const { data, error } = await supabase
+        .from("health_analyses")
+        .select("result")
+        .eq("patient_id", patientId)
+        .eq("type", "report")
+        .single();
+      if (!error && data) return data.result;
+    } catch (e) {}
+    return null;
+  },
+
+  /**
+   * Save eLAB sent reports to Supabase
+   */
+  async saveSentReports(patientId: string, reports: any[]): Promise<void> {
+    try {
+      await supabase
+        .from("sent_reports")
+        .upsert({
+          patient_id: patientId,
+          reports: reports,
+          updated_at: new Date().toISOString(),
+        }, { onConflict: "patient_id" });
+    } catch (e) {
+      console.warn("Supabase saveSentReports notice:", e);
+    }
+  },
+
+  /**
+   * Get eLAB sent reports from Supabase
+   */
+  async getSentReports(patientId: string): Promise<any[]> {
+    try {
+      const { data, error } = await supabase
+        .from("sent_reports")
+        .select("reports")
+        .eq("patient_id", patientId)
+        .single();
+      if (!error && data) return data.reports || [];
+    } catch (e) {}
+    return [];
   }
 };
