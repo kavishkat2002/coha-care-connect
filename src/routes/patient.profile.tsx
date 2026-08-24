@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { patientService, type PatientProfile } from "@/services/patient.service";
-import { Pencil, Save, X, Loader2 } from "lucide-react";
+import { Pencil, Save, X, Loader2, Plus, Trash2, Paperclip, Upload, Check } from "lucide-react";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/patient/profile")({
@@ -26,19 +26,141 @@ export const Route = createFileRoute("/patient/profile")({
   component: ProfilePage,
 });
 
-function List({ title, items }: { title: string; items: string[] }) {
-  if (!items || items.length === 0) return null;
+function List({ 
+  title, 
+  items = [], 
+  onUpdate 
+}: { 
+  title: string; 
+  items: string[]; 
+  onUpdate: (newItems: string[]) => void;
+}) {
+  const [isAdding, setIsAdding] = useState(false);
+  const [newItem, setNewItem] = useState("");
+
+  const handleAdd = () => {
+    if (!newItem.trim()) return;
+    onUpdate([...items, newItem.trim()]);
+    setNewItem("");
+    setIsAdding(false);
+    toast.success(`Successfully added record to "${title}"`);
+  };
+
+  const handleDelete = (index: number) => {
+    const updated = items.filter((_, idx) => idx !== index);
+    onUpdate(updated);
+    toast.success("Record removed from health profile");
+  };
+
+  const handleFileChange = (index: number, e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    
+    const cleanText = (items[index] || "").replace(/\s*\[Attached:\s*.*\]$/, "");
+    const updatedItemText = `${cleanText} [Attached: ${file.name}]`;
+    
+    const updated = [...items];
+    updated[index] = updatedItemText;
+    onUpdate(updated);
+    toast.success(`Document "${file.name}" uploaded successfully for this record!`);
+  };
+
+  const handleDownloadAttachment = (filename: string) => {
+    const docContent = `MEDDOC HEALTH RECORD ATTACHMENT
+-----------------------------------
+File Reference: ${filename}
+Category: ${title}
+Verification Code: MD-ARC-${Math.random().toString(36).substring(7).toUpperCase()}
+
+[MedDoc Certified Digital Health Record]
+This document has been archived directly by the patient inside their personal medical profile.
+`;
+
+    const blob = new Blob([docContent], { type: "text/plain" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = filename;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+
+    toast.success(`Initiated download for health record document: ${filename}`);
+  };
+
   return (
-    <Card className="shadow-soft">
-      <CardHeader>
-        <CardTitle className="text-base">{title}</CardTitle>
+    <Card className="shadow-soft rounded-[24px]">
+      <CardHeader className="flex flex-row items-center justify-between pb-3 border-b border-border/40">
+        <CardTitle className="text-sm font-extrabold text-foreground">{title}</CardTitle>
+        <Button 
+          variant="outline" 
+          size="sm" 
+          className="h-7 px-2.5 text-[11px] gap-1 cursor-pointer" 
+          onClick={() => setIsAdding(!isAdding)}
+        >
+          {isAdding ? <X className="size-3" /> : <Plus className="size-3" />}
+          {isAdding ? "Cancel" : "Add manually"}
+        </Button>
       </CardHeader>
-      <CardContent className="space-y-2">
-        {items.map((i) => (
-          <p key={i} className="rounded-xl border border-border bg-muted/40 p-3 text-sm">
-            {i}
-          </p>
-        ))}
+      <CardContent className="p-4 space-y-3.5">
+        {isAdding && (
+          <div className="flex gap-2 pb-2">
+            <Input
+              placeholder={`Enter new ${title.toLowerCase()}...`}
+              value={newItem}
+              onChange={(e) => setNewItem(e.target.value)}
+              className="h-8 text-xs flex-1"
+              onKeyDown={(e) => e.key === "Enter" && handleAdd()}
+            />
+            <Button size="sm" className="h-8 text-xs font-bold gap-1 cursor-pointer" onClick={handleAdd}>
+              <Check className="size-3" /> Add
+            </Button>
+          </div>
+        )}
+
+        {(!items || items.length === 0) ? (
+          <p className="text-xs text-muted-foreground italic text-center py-4">No records listed in this category.</p>
+        ) : (
+          <div className="space-y-3">
+            {items.map((i, index) => {
+              const attachmentMatch = i ? i.match(/(.*)\s*\[Attached:\s*(.*)\]$/) : null;
+              const text = (attachmentMatch && attachmentMatch[1]) ? attachmentMatch[1].trim() : i;
+              const attachment = (attachmentMatch && attachmentMatch[2]) ? attachmentMatch[2].trim() : null;
+
+              return (
+                <div key={index} className="p-3 border border-border/80 rounded-xl bg-muted/5 flex flex-col justify-between relative group/item hover:border-border transition-all">
+                  <div className="flex items-start justify-between gap-3 text-xs">
+                    <span className="font-semibold text-foreground leading-relaxed">{text}</span>
+                    <button 
+                      onClick={() => handleDelete(index)}
+                      className="text-muted-foreground hover:text-red-600 transition-colors shrink-0 cursor-pointer p-0.5"
+                      title="Remove record"
+                    >
+                      <Trash2 className="size-3.5" />
+                    </button>
+                  </div>
+
+                  {attachment ? (
+                    <div 
+                      className="flex items-center gap-1.5 mt-2 bg-blue-500/10 hover:bg-blue-500/20 text-blue-600 dark:text-blue-400 text-[10px] font-bold px-2 py-0.5 rounded-md border border-blue-500/20 cursor-pointer w-fit transition-all" 
+                      onClick={() => handleDownloadAttachment(attachment)}
+                    >
+                      <Paperclip className="size-3 shrink-0" />
+                      <span className="underline truncate max-w-[180px]">{attachment}</span>
+                    </div>
+                  ) : (
+                    <label className="flex items-center gap-1 mt-2 text-[9px] font-semibold text-muted-foreground hover:text-primary cursor-pointer w-fit border border-dashed border-border px-2 py-0.5 rounded-md hover:bg-muted/10 transition-all">
+                      <Upload className="size-2.5 shrink-0" />
+                      <span>Upload Medical Doc</span>
+                      <input type="file" className="hidden" onChange={(e) => handleFileChange(index, e)} />
+                    </label>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        )}
       </CardContent>
     </Card>
   );
@@ -182,10 +304,42 @@ function ProfilePage() {
         </CardContent>
       </Card>
       <div className="grid gap-6 md:grid-cols-2">
-        <List title="Past diseases" items={p.pastDiseases} />
-        <List title="Current medications" items={p.medications} />
-        <List title="Allergies" items={p.allergies} />
-        <List title="Family history" items={p.familyHistory} />
+        <List 
+          title="Past diseases" 
+          items={p.pastDiseases} 
+          onUpdate={(newItems) => {
+            const updated = { ...p, pastDiseases: newItems };
+            setP(updated);
+            void patientService.updatePatientProfile(updated);
+          }} 
+        />
+        <List 
+          title="Current medications" 
+          items={p.medications} 
+          onUpdate={(newItems) => {
+            const updated = { ...p, medications: newItems };
+            setP(updated);
+            void patientService.updatePatientProfile(updated);
+          }} 
+        />
+        <List 
+          title="Allergies" 
+          items={p.allergies} 
+          onUpdate={(newItems) => {
+            const updated = { ...p, allergies: newItems };
+            setP(updated);
+            void patientService.updatePatientProfile(updated);
+          }} 
+        />
+        <List 
+          title="Family history" 
+          items={p.familyHistory} 
+          onUpdate={(newItems) => {
+            const updated = { ...p, familyHistory: newItems };
+            setP(updated);
+            void patientService.updatePatientProfile(updated);
+          }} 
+        />
       </div>
       <Badge variant="secondary">Records are shared only with clinicians you book with</Badge>
     </div>

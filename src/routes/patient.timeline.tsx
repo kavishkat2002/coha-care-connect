@@ -40,19 +40,47 @@ function TimelinePage() {
 
   useEffect(() => {
     async function load() {
-      const data = await patientService.getTimeline();
+      const [data, reps, apps, prof] = await Promise.all([
+        patientService.getTimeline(),
+        patientService.getReports(),
+        patientService.getAppointments(),
+        patientService.getPatientProfile()
+      ]);
       setTimeline(data);
-
-      const reps = await patientService.getReports();
       setReports(reps);
-
-      const apps = await patientService.getAppointments();
       setAppointments(apps);
-
-      const prof = await patientService.getPatientProfile();
       setProfile(prof);
     }
-    load();
+    void load();
+
+    // Listen for live profile & timeline sync updates
+    const channel = typeof window !== "undefined" && "BroadcastChannel" in window 
+      ? new BroadcastChannel("coha_profile_sync") 
+      : null;
+
+    if (channel) {
+      channel.onmessage = () => {
+        void load();
+      };
+    }
+
+    const handleStorage = (e: StorageEvent) => {
+      if (e.key === "coha_patient_profile_shared" || e.key?.startsWith("mock_reports") || e.key?.startsWith("mock_timeline")) {
+        void load();
+      }
+    };
+    window.addEventListener("storage", handleStorage);
+
+    // Background polling every 3 seconds
+    const pollInterval = setInterval(() => {
+      void load();
+    }, 3000);
+
+    return () => {
+      channel?.close();
+      window.removeEventListener("storage", handleStorage);
+      clearInterval(pollInterval);
+    };
   }, []);
 
   const derivedTrends = useMemo(() => {

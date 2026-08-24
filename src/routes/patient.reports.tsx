@@ -327,7 +327,36 @@ ${350 + pdfLength}
         }
       }
     }
-    load();
+    void load();
+
+    // Listen for live profile updates
+    const channel = typeof window !== "undefined" && "BroadcastChannel" in window 
+      ? new BroadcastChannel("coha_profile_sync") 
+      : null;
+
+    if (channel) {
+      channel.onmessage = () => {
+        void load();
+      };
+    }
+
+    const handleStorage = (e: StorageEvent) => {
+      if (e.key === "coha_patient_profile_shared" || e.key === "meddoc_ai_credits" || e.key?.startsWith("mock_reports")) {
+        void load();
+      }
+    };
+    window.addEventListener("storage", handleStorage);
+
+    // Background polling every 3 seconds
+    const pollInterval = setInterval(() => {
+      void load();
+    }, 3000);
+
+    return () => {
+      channel?.close();
+      window.removeEventListener("storage", handleStorage);
+      clearInterval(pollInterval);
+    };
   }, []);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {

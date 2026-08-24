@@ -81,17 +81,47 @@ function ImagesPage() {
   const [patientId, setPatientId] = useState<string>("p1");
 
   useEffect(() => {
-    patientService.getPatientProfile().then((p) => {
+    async function load() {
+      const p = await patientService.getPatientProfile();
       if (p?.id) {
         setPatientId(p.id);
-        patientService.getEPassMembership(p.id).then((m) => {
-          if (m && typeof m.ai_credits === "number") {
-            setAiCredits(m.ai_credits);
-            localStorage.setItem("meddoc_ai_credits", m.ai_credits.toString());
-          }
-        });
+        const m = await patientService.getEPassMembership(p.id);
+        if (m && typeof m.ai_credits === "number") {
+          setAiCredits(m.ai_credits);
+          localStorage.setItem("meddoc_ai_credits", m.ai_credits.toString());
+        }
       }
-    });
+    }
+    void load();
+
+    // Listen for live profile & credit updates
+    const channel = typeof window !== "undefined" && "BroadcastChannel" in window 
+      ? new BroadcastChannel("coha_profile_sync") 
+      : null;
+
+    if (channel) {
+      channel.onmessage = () => {
+        void load();
+      };
+    }
+
+    const handleStorage = (e: StorageEvent) => {
+      if (e.key === "coha_patient_profile_shared" || e.key === "meddoc_ai_credits") {
+        void load();
+      }
+    };
+    window.addEventListener("storage", handleStorage);
+
+    // Background polling every 3 seconds
+    const pollInterval = setInterval(() => {
+      void load();
+    }, 3000);
+
+    return () => {
+      channel?.close();
+      window.removeEventListener("storage", handleStorage);
+      clearInterval(pollInterval);
+    };
   }, []);
 
   // MedDoc Skin-Cancer Multimodal Metadata Toggles
