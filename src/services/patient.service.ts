@@ -686,5 +686,45 @@ export const patientService = {
     }
     
     return count > 0;
+  },
+
+  /**
+   * Fetch chat history from Supabase
+   */
+  async getChatHistory(patientId: string): Promise<any[]> {
+    try {
+      const { data, error } = await supabase
+        .from("chat_sessions")
+        .select("*")
+        .eq("patient_id", patientId)
+        .order("updatedAt", { ascending: false });
+      
+      if (!error && data) return data;
+    } catch (e) {
+      console.warn("Supabase getChatHistory notice:", e);
+    }
+    return [];
+  },
+
+  /**
+   * Save a chat session to Supabase
+   */
+  async saveChatSession(patientId: string, session: any): Promise<void> {
+    try {
+      await supabase
+        .from("chat_sessions")
+        .upsert({
+          id: session.id,
+          patient_id: patientId,
+          title: session.title,
+          updatedAt: session.updatedAt,
+          messages: session.messages,
+          assessment: session.assessment,
+          care: session.care,
+          dynamicSuggestions: session.dynamicSuggestions
+        });
+    } catch (e) {
+      console.warn("Supabase saveChatSession notice:", e);
+    }
   }
 };

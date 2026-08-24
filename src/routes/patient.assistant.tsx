@@ -59,68 +59,22 @@ const suggestions = [
 ];
 
 function AssistantPage() {
-  const [sessions, setSessions] = useState<ChatSession[]>(() => {
-    const saved = localStorage.getItem("meddoc_chat_history");
-    if (saved) return JSON.parse(saved);
-    return [];
-  });
-
-  const [activeSessionId, setActiveSessionId] = useState<string>(() => {
-    const saved = localStorage.getItem("meddoc_chat_history");
-    if (saved) {
-      const parsed = JSON.parse(saved);
-      if (parsed.length > 0) return parsed[0].id;
-    }
-    return `sess_${Date.now()}`;
-  });
-
-  const [messages, setMessages] = useState<Message[]>(() => {
-    const savedHistory = localStorage.getItem("meddoc_chat_history");
-    if (savedHistory) {
-      const parsed = JSON.parse(savedHistory);
-      if (parsed.length > 0) return parsed[0].messages;
-    }
-    const saved = localStorage.getItem("meddoc_messages");
-    if (saved) return JSON.parse(saved);
-    return [
-      {
-        id: "m0",
-        role: "assistant",
-        text: "Hello, I am MedDoc. Tell me what you are experiencing in your own words. You can also attach a photo of the affected area, a prescription, or a lab report.",
-      },
-    ];
-  });
+  const [sessions, setSessions] = useState<ChatSession[]>([]);
+  const [activeSessionId, setActiveSessionId] = useState<string>(`sess_${Date.now()}`);
+  const [messages, setMessages] = useState<Message[]>([
+    {
+      id: "m0",
+      role: "assistant",
+      text: "Hello, I am MedDoc. Tell me what you are experiencing in your own words. You can also attach a photo of the affected area, a prescription, or a lab report.",
+    },
+  ]);
   const [input, setInput] = useState("");
   const [attachment, setAttachment] = useState<string | null>(null);
   const [imageBase64, setImageBase64] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
-  const [assessment, setAssessment] = useState<Assessment | null>(() => {
-    const savedHistory = localStorage.getItem("meddoc_chat_history");
-    if (savedHistory) {
-      const parsed = JSON.parse(savedHistory);
-      if (parsed.length > 0) return parsed[0].assessment;
-    }
-    const saved = localStorage.getItem("meddoc_assessment");
-    return saved ? JSON.parse(saved) : null;
-  });
-  const [care, setCare] = useState<Recommendation | null>(() => {
-    const savedHistory = localStorage.getItem("meddoc_chat_history");
-    if (savedHistory) {
-      const parsed = JSON.parse(savedHistory);
-      if (parsed.length > 0) return parsed[0].care;
-    }
-    const saved = localStorage.getItem("meddoc_care");
-    return saved ? JSON.parse(saved) : null;
-  });
-  const [dynamicSuggestions, setDynamicSuggestions] = useState<string[]>(() => {
-    const savedHistory = localStorage.getItem("meddoc_chat_history");
-    if (savedHistory) {
-      const parsed = JSON.parse(savedHistory);
-      if (parsed.length > 0) return parsed[0].dynamicSuggestions;
-    }
-    const saved = localStorage.getItem("meddoc_dynamicSuggestions");
-    return saved ? JSON.parse(saved) : [];
-  });
+  const [assessment, setAssessment] = useState<Assessment | null>(null);
+  const [care, setCare] = useState<Recommendation | null>(null);
+  const [dynamicSuggestions, setDynamicSuggestions] = useState<string[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(true);
   const [activePlanId, setActivePlanId] = useState<string | null>(() => {
     return localStorage.getItem("meddoc_active_epass");
@@ -146,6 +100,17 @@ function AssistantPage() {
             localStorage.setItem("meddoc_ai_credits", m.ai_credits.toString());
           }
         });
+        patientService.getChatHistory(p.id).then(hist => {
+          if (hist && hist.length > 0) {
+            setSessions(hist);
+            const latest = hist[0];
+            setActiveSessionId(latest.id);
+            setMessages(latest.messages);
+            setAssessment(latest.assessment);
+            setCare(latest.care);
+            setDynamicSuggestions(latest.dynamicSuggestions || []);
+          }
+        });
       }
     });
   }, []);
@@ -160,7 +125,6 @@ function AssistantPage() {
 
   useEffect(() => {
     setSessions((prev) => {
-      // Only save if there's actually a user message
       if (messages.length <= 1) return prev;
       
       const existingIdx = prev.findIndex(s => s.id === activeSessionId);
@@ -177,6 +141,15 @@ function AssistantPage() {
         dynamicSuggestions,
       };
 
+      const existing = prev[existingIdx];
+      if (existing && JSON.stringify(existing) === JSON.stringify(newSession)) {
+        return prev;
+      }
+
+      if (patientId) {
+        void patientService.saveChatSession(patientId, newSession);
+      }
+
       if (existingIdx >= 0) {
         const next = [...prev];
         next[existingIdx] = newSession;
@@ -185,11 +158,7 @@ function AssistantPage() {
         return [newSession, ...prev];
       }
     });
-  }, [messages, assessment, care, dynamicSuggestions, activeSessionId]);
-
-  useEffect(() => {
-    localStorage.setItem("meddoc_chat_history", JSON.stringify(sessions));
-  }, [sessions]);
+  }, [messages, assessment, care, dynamicSuggestions, activeSessionId, patientId]);
 
   useEffect(() => {
     endRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
