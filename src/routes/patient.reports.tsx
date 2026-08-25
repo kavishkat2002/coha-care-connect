@@ -9,6 +9,7 @@ import { useState, useEffect, useMemo, useRef } from "react";
 
 import { PageHeader } from "@/components/shared/PageHeader";
 import { AiDisclaimer } from "@/components/shared/AiDisclaimer";
+import { GuestCreditBanner } from "@/components/shared/GuestCreditBanner";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -127,8 +128,9 @@ function ReportsPage() {
       const saved = localStorage.getItem("meddoc_ai_credits");
       if (saved) return parseInt(saved, 10);
     }
-    return 50;
+    return 450; // Guest default
   });
+  const [isGuest, setIsGuest] = useState<boolean>(false);
   const [patientId, setPatientId] = useState<string>("p1");
 
   const [selectedCompareIds, setSelectedCompareIds] = useState<string[]>([]);
@@ -583,6 +585,7 @@ ${350 + pdfLength}
       const p = await patientService.getPatientProfile();
       if (p?.id) {
         setPatientId(p.id);
+        setIsGuest(false);
         const m = await patientService.getEPassMembership(p.id);
         if (m && typeof m.ai_credits === "number") {
           setAiCredits(m.ai_credits);
@@ -599,6 +602,14 @@ ${350 + pdfLength}
         const lastAnalysis = await patientService.getLastReportAnalysis(p.id);
         if (lastAnalysis) {
           setResult(prev => prev || lastAnalysis);
+        }
+      } else {
+        // No profile = guest user
+        setIsGuest(true);
+        const saved = localStorage.getItem("meddoc_ai_credits");
+        if (!saved) {
+          setAiCredits(450);
+          localStorage.setItem("meddoc_ai_credits", "450");
         }
       }
     }
@@ -826,12 +837,22 @@ ${350 + pdfLength}
 
               <Button
                 className="w-full"
-                disabled={busy || (!imageBase64 && !result)}
+                disabled={busy || (!imageBase64 && !result) || (isGuest && aiCredits <= 0)}
                 onClick={() => void run()}
               >
                 {busy ? `Running Pipeline (Stage ${pipelineStage}/${PIPELINE_STAGES.length})…` : "Analyze report"}
               </Button>
               <AiDisclaimer />
+              {isGuest && aiCredits <= 0 && (
+                <div className="mt-3">
+                  <GuestCreditBanner creditsLeft={aiCredits} feature="Medical Report Analysis" variant="exhausted" />
+                </div>
+              )}
+              {isGuest && aiCredits > 0 && aiCredits <= 150 && (
+                <div className="mt-3">
+                  <GuestCreditBanner creditsLeft={aiCredits} feature="Medical Report Analysis" variant="warning" />
+                </div>
+              )}
             </CardContent>
           </Card>
 

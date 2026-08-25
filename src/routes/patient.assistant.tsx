@@ -815,11 +815,21 @@ function AssistantPage() {
                 className="min-h-[44px] max-h-[200px] resize-none py-3 overflow-y-auto"
                 rows={1}
               />
-              <Button type="submit" size="icon" aria-label="Send message" disabled={busy} className="size-10 shrink-0">
+              <Button type="submit" size="icon" aria-label="Send message" disabled={busy || (isGuest && aiCredits <= 0)} className="size-10 shrink-0">
                 <Send className="size-4" />
               </Button>
             </form>
             <AiDisclaimer className="mt-3" />
+            {isGuest && aiCredits <= 0 && (
+              <div className="mt-3">
+                <GuestCreditBanner creditsLeft={aiCredits} feature="AI Health Assistant" variant="exhausted" />
+              </div>
+            )}
+            {isGuest && aiCredits > 0 && aiCredits <= 150 && (
+              <div className="mt-3">
+                <GuestCreditBanner creditsLeft={aiCredits} feature="AI Health Assistant" variant="warning" />
+              </div>
+            )}
           </div>
         </Card>
 

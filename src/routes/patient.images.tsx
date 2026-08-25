@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 
 import { PageHeader } from "@/components/shared/PageHeader";
 import { AiDisclaimer } from "@/components/shared/AiDisclaimer";
+import { GuestCreditBanner } from "@/components/shared/GuestCreditBanner";
 import { RiskBadge } from "@/components/shared/RiskBadge";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -75,8 +76,9 @@ function ImagesPage() {
       const saved = localStorage.getItem("meddoc_ai_credits");
       if (saved) return parseInt(saved, 10);
     }
-    return 50;
+    return 450; // Guest default
   });
+  const [isGuest, setIsGuest] = useState<boolean>(false);
   const [patientId, setPatientId] = useState<string>("p1");
 
   useEffect(() => {
@@ -84,6 +86,7 @@ function ImagesPage() {
       const p = await patientService.getPatientProfile();
       if (p?.id) {
         setPatientId(p.id);
+        setIsGuest(false);
         const m = await patientService.getEPassMembership(p.id);
         if (m && typeof m.ai_credits === "number") {
           setAiCredits(m.ai_credits);
@@ -592,7 +595,7 @@ function ImagesPage() {
               </div>
             )}
 
-            <Button className="w-full gap-2" onClick={() => void run()} disabled={busy || !imageBase64}>
+            <Button className="w-full gap-2" onClick={() => void run()} disabled={busy || !imageBase64 || (isGuest && aiCredits <= 0)}>
               {busy ? (
                 <>
                   <RefreshCw className="size-4 animate-spin" />
@@ -603,6 +606,16 @@ function ImagesPage() {
               )}
             </Button>
             <AiDisclaimer />
+            {isGuest && aiCredits <= 0 && (
+              <div className="mt-3">
+                <GuestCreditBanner creditsLeft={aiCredits} feature="Medical Image Analysis" variant="exhausted" />
+              </div>
+            )}
+            {isGuest && aiCredits > 0 && aiCredits <= 150 && (
+              <div className="mt-3">
+                <GuestCreditBanner creditsLeft={aiCredits} feature="Medical Image Analysis" variant="warning" />
+              </div>
+            )}
           </CardContent>
         </Card>
 
