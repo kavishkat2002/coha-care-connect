@@ -8,7 +8,7 @@ import { RiskBadge } from "@/components/shared/RiskBadge";
 import { DoctorCard } from "@/components/shared/DoctorCard";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Progress } from "@/components/ui/progress";
@@ -16,9 +16,9 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 
-import { BrainCircuit, RotateCcw, MessageSquarePlus, History } from "lucide-react";
+import { BrainCircuit, RotateCcw, MessageSquarePlus, History, Loader2 } from "lucide-react";
 import { analyseSymptoms, recommendCare, transcribeAudio, type Assessment, type Recommendation, type ChatMessage, type AgenticAction } from "@/services/ai.service";
-import { doctors } from "@/data/mock";
+import { doctors, type Doctor } from "@/data/mock";
 import { patientService } from "@/services/patient.service";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
@@ -58,6 +58,26 @@ const suggestions = [
   "My joints ache continuously. Find an Orthopaedic Surgeon.",
 ];
 
+const CITY_COORDS: Record<string, { lat: number, lng: number }> = {
+  "Colombo": { lat: 6.9271, lng: 79.8612 },
+  "Kandy": { lat: 7.2906, lng: 80.6337 },
+  "Galle": { lat: 6.0535, lng: 80.2210 },
+  "Horana": { lat: 6.7145, lng: 80.0636 },
+  "Wattala": { lat: 6.9889, lng: 79.8913 },
+  "Panadura": { lat: 6.7130, lng: 79.9073 }
+};
+
+function calculateDistance(lat1: number, lon1: number, lat2: number, lon2: number) {
+  const R = 6371; 
+  const dLat = (lat2 - lat1) * Math.PI / 180;
+  const dLon = (lon2 - lon1) * Math.PI / 180;
+  const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+            Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+            Math.sin(dLon/2) * Math.sin(dLon/2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+  return R * c;
+}
+
 function AssistantPage() {
   const [sessions, setSessions] = useState<ChatSession[]>([]);
   const [activeSessionId, setActiveSessionId] = useState<string>(`sess_${Date.now()}`);
@@ -73,7 +93,14 @@ function AssistantPage() {
   const [imageBase64, setImageBase64] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [assessment, setAssessment] = useState<Assessment | null>(null);
-  const [care, setCare] = useState<Recommendation | null>(null);
+  const [care, setCare] = useState<null | {
+    topRated: Doctor[];
+    nearest: Doctor[];
+    mostAvailable: Doctor[];
+    originalNearest?: Doctor[]; 
+  }>(null);
+  
+  const [isLocating, setIsLocating] = useState(false);
   const [dynamicSuggestions, setDynamicSuggestions] = useState<string[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(true);
   const [activePlanId, setActivePlanId] = useState<string | null>(() => {
@@ -348,9 +375,9 @@ function AssistantPage() {
       }
     }
 
-    // Show specialists if conditions were identified OR if the interview is complete (no follow-up questions)
     if (result.possibleConditions.length > 0 || (result.followUpQuestions && result.followUpQuestions.length === 0)) {
-      setCare(await recommendCare(result.suggestedSpecialty || ""));
+      const newCare = await recommendCare(result.suggestedSpecialty || "");
+      setCare({ ...newCare, originalNearest: [...newCare.nearest] });
     } else {
       setCare(null);
     }
@@ -375,6 +402,44 @@ function AssistantPage() {
 
   // Combine static suggestions with dynamic follow-up questions
   const activeSuggestions = dynamicSuggestions.length > 0 ? dynamicSuggestions : suggestions;
+
+  const handleTabChange = (val: string) => {
+    if (val === "nearest" && care) {
+      if ("geolocation" in navigator) {
+        setIsLocating(true);
+        toast.info("Requesting live location to find nearest doctors...", { id: "geo-toast" });
+        navigator.geolocation.getCurrentPosition(
+          (position) => {
+            const userLat = position.coords.latitude;
+            const userLng = position.coords.longitude;
+            
+            // Recalculate distances based on mock city coords
+            const updatedNearest = (care.originalNearest || care.nearest).map(doc => {
+              const coords = CITY_COORDS[doc.city] || { lat: 6.9271, lng: 79.8612 };
+              // Add a bit of random variance based on branch so they aren't all same distance
+              const varLat = coords.lat + (doc.branch.length * 0.001);
+              const varLng = coords.lng + (doc.branch.length * 0.001);
+              
+              const actualDist = calculateDistance(userLat, userLng, varLat, varLng);
+              return { ...doc, distanceKm: Number(actualDist.toFixed(1)) };
+            }).sort((a, b) => a.distanceKm - b.distanceKm);
+            
+            setCare({ ...care, nearest: updatedNearest });
+            setIsLocating(false);
+            toast.success("Doctors sorted by your live location!", { id: "geo-toast" });
+          },
+          (error) => {
+            console.warn("Geolocation error:", error);
+            setIsLocating(false);
+            toast.error("Could not access location. Using default estimates.", { id: "geo-toast" });
+          },
+          { timeout: 10000, maximumAge: 60000 }
+        );
+      } else {
+        toast.error("Geolocation is not supported by your browser");
+      }
+    }
+  };
 
   return (
     <div className="space-y-6">
@@ -817,10 +882,13 @@ function AssistantPage() {
                 <CardDescription>Ranked by rating, distance and availability</CardDescription>
               </CardHeader>
               <CardContent>
-                <Tabs defaultValue="topRated">
-                  <TabsList className="grid w-full grid-cols-3">
+                <Tabs defaultValue="topRated" onValueChange={handleTabChange}>
+                  <TabsList className="grid w-full grid-cols-3 relative">
                     <TabsTrigger value="topRated">Top rated</TabsTrigger>
-                    <TabsTrigger value="nearest">Nearest</TabsTrigger>
+                    <TabsTrigger value="nearest" className="flex items-center gap-1">
+                      {isLocating && <Loader2 className="size-3 animate-spin" />}
+                      Nearest
+                    </TabsTrigger>
                     <TabsTrigger value="mostAvailable">Available</TabsTrigger>
                   </TabsList>
                   {(["topRated", "nearest", "mostAvailable"] as const).map((key) => (

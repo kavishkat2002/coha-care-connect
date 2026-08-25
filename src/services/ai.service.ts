@@ -463,7 +463,7 @@ export async function analyseSymptoms(conversationHistory: ChatMessage[]): Promi
           "Authorization": `Bearer ${apiKey}`
         },
         body: JSON.stringify({
-          model: hasImages ? "qwen/qwen3.6-27b" : "llama-3.3-70b-versatile",
+          model: "qwen/qwen3.6-27b",
           messages: [
             { role: "system", content: finalSystemPrompt },
             ...conversationHistory.map((m) => {
@@ -478,8 +478,7 @@ export async function analyseSymptoms(conversationHistory: ChatMessage[]): Promi
               }
               return { role: m.role, content: m.content };
             })
-          ],
-          ...(hasImages ? {} : { response_format: { type: "json_object" } })
+          ]
         })
       });
 
