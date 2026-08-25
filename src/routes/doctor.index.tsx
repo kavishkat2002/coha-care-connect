@@ -18,6 +18,7 @@ import {
   Paperclip,
   Download,
   Video,
+  Banknote,
 } from "lucide-react";
 import { useEffect, useState, useRef } from "react";
 import { toast } from "sonner";
@@ -39,7 +40,11 @@ import {
   DialogTitle,
   DialogFooter,
 } from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
 import { patientService, type DbAppointment, type PatientProfile } from "@/services/patient.service";
+import { getSession, type Session } from "@/services/auth.service";
+import { doctorService } from "@/services/doctor.service";
+import { type Doctor } from "@/data/mock";
 import { supabase } from "@/lib/supabase";
 import { useWebRTC } from "@/hooks/use-webrtc";
 
@@ -73,6 +78,59 @@ function DoctorDashboard() {
   const [appointments, setAppointments] = useState<DbAppointment[]>([]);
   const [selectedPatientProfile, setSelectedPatientProfile] = useState<PatientProfile | null>(null);
   const [viewingAppt, setViewingAppt] = useState<DbAppointment | null>(null);
+
+  // Availability Schedule State
+  const [session, setSession] = useState<Session | null>(null);
+  const today = new Date().toISOString().split('T')[0] as string;
+  const [schedDate, setSchedDate] = useState<string>(today);
+  const [schedStatus, setSchedStatus] = useState<boolean>(true);
+
+  useEffect(() => {
+    getSession().then(setSession);
+  }, []);
+
+  useEffect(() => {
+    if (!session) return;
+    const fetchStatus = async () => {
+      const data = await doctorService.getAllDoctors();
+      const id = session.registration_id || `DOC-${session.id.substring(0, 6).toUpperCase()}`;
+      const doc = data.find((d: any) => d.id === id || d.name === session.name);
+      
+      if (doc) {
+        const isAvailable = doc.availability && doc.availability[schedDate] !== undefined 
+          ? doc.availability[schedDate] 
+          : doc.online;
+        setSchedStatus(isAvailable);
+      }
+    };
+    fetchStatus();
+  }, [schedDate, session]);
+
+  const handleUpdateScheduleStatus = async (newStatus: boolean) => {
+    if (!session) return;
+    const data = await doctorService.getAllDoctors();
+    const id = session.registration_id || `DOC-${session.id.substring(0, 6).toUpperCase()}`;
+    const docIndex = data.findIndex((d: any) => d.id === id || d.name === session.name);
+    
+    if (docIndex > -1) {
+      const currentDoc = data[docIndex] as Doctor;
+      const updatedDoc: Doctor = {
+        ...currentDoc,
+        availability: {
+          ...(currentDoc.availability || {}),
+          [schedDate]: newStatus
+        }
+      };
+      
+      const success = await doctorService.saveDoctor(updatedDoc);
+      if (success) {
+        setSchedStatus(newStatus);
+        toast.success(`Marked as ${newStatus ? 'Available' : 'Offline'} for ${schedDate}`);
+      } else {
+        toast.error("Failed to update status");
+      }
+    }
+  };
 
   // Doctor Chat Follow-back Modal State
   const [chatAppt, setChatAppt] = useState<DbAppointment | null>(null);
@@ -332,16 +390,67 @@ function DoctorDashboard() {
     reader.readAsDataURL(file);
   };
 
+  const myAppointments = session 
+    ? appointments.filter(a => a.doctor_id === (session.registration_id || `DOC-${session.id.substring(0, 6).toUpperCase()}`))
+    : appointments;
+
+  const totalRevenue = myAppointments
+    .filter(a => a.status === "Completed")
+    .reduce((sum, appt) => sum + Number(appt.fee || 0), 0);
+
   return (
     <div className="space-y-8 max-w-6xl mx-auto pb-12">
       <PageHeader title="Doctor Clinical Dashboard" description="Review patient health backgrounds, approve telemedicine requests, and launch instant video calls." />
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <StatCard icon={CalendarCheck} label="Appointments today" value={appointments.length.toString()} hint="Live from booking system" />
+        <StatCard icon={CalendarCheck} label="Appointments today" value={myAppointments.length.toString()} hint="Live from booking system" />
+        <StatCard icon={Banknote} label="Total Revenue" value={`LKR ${totalRevenue.toLocaleString()}`} hint="From completed sessions" />
         <StatCard icon={Users} label="Waiting now" value="3" hint="Average wait 12 min" />
-        <StatCard icon={Bot} label="AI assessments to review" value="6" hint="2 flagged moderate" />
         <StatCard icon={Stethoscope} label="Follow-ups due" value="5" hint="This week" />
       </div>
+
+      <Card className="shadow-soft border border-border">
+        <CardHeader>
+          <CardTitle className="text-lg flex items-center gap-2">
+            <CalendarCheck className="size-5 text-primary" />
+            Availability Schedule
+          </CardTitle>
+          <CardDescription>
+            Set your availability for specific dates. Patients will see this status when booking telemedicine or in-person sessions.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="flex flex-col sm:flex-row gap-4 items-end bg-muted/20 p-4 rounded-xl border border-border/50">
+            <div className="space-y-2 w-full sm:w-auto flex-1">
+              <Label htmlFor="schedule-date">Select Date</Label>
+              <Input 
+                id="schedule-date" 
+                type="date" 
+                value={schedDate} 
+                onChange={(e) => setSchedDate(e.target.value)} 
+                min={today}
+              />
+            </div>
+            <div className="flex gap-2 w-full sm:w-auto">
+              <Button 
+                type="button" 
+                variant={schedStatus ? "default" : "outline"} 
+                className={schedStatus ? "bg-green-600 hover:bg-green-700" : ""}
+                onClick={() => handleUpdateScheduleStatus(true)}
+              >
+                Available
+              </Button>
+              <Button 
+                type="button" 
+                variant={!schedStatus ? "destructive" : "outline"}
+                onClick={() => handleUpdateScheduleStatus(false)}
+              >
+                Offline
+              </Button>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
 
       <Card className="shadow-soft border border-border">
         <CardHeader>
@@ -367,8 +476,8 @@ function DoctorDashboard() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {appointments.filter((a) => a.status !== "Declined").length > 0 ? (
-                appointments.filter((a) => a.status !== "Declined").map((a) => (
+              {myAppointments.filter((a) => a.status !== "Declined").length > 0 ? (
+                myAppointments.filter((a) => a.status !== "Declined").map((a) => (
                   <TableRow key={a.id}>
                     <TableCell className="font-medium">
                       <div className="font-bold text-slate-900 dark:text-white">

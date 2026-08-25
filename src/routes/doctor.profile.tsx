@@ -32,6 +32,83 @@ function DoctorProfile() {
   const [isSaving, setIsSaving] = useState(false);
   const navigate = useNavigate();
 
+  // Look up the doctor's real-time hospital and branch from the global roster
+  const [rosterDetails, setRosterDetails] = useState<any>(null);
+  
+  useEffect(() => {
+    if (!session) return;
+    const fetchDetails = async () => {
+      const data = await doctorService.getAllDoctors();
+      const id = session.registration_id || `DOC-${session.id.substring(0, 6).toUpperCase()}`;
+      const match = data.find((d: any) => d.id === id || d.name === session.name);
+      if (match) setRosterDetails(match);
+    };
+    fetchDetails();
+  }, [session]);
+
+  const today = new Date().toISOString().split('T')[0] as string;
+  const [date, setDate] = useState<string>(today);
+  const [status, setStatus] = useState<boolean>(true);
+  const [appointments, setAppointments] = useState<any[]>([]);
+  const [loadingAppts, setLoadingAppts] = useState<boolean>(false);
+
+  useEffect(() => {
+    if (!session) return;
+    const fetchStatus = async () => {
+      const data = await doctorService.getAllDoctors();
+      const id = session.registration_id || `DOC-${session.id.substring(0, 6).toUpperCase()}`;
+      const doc = data.find((d: any) => d.id === id || d.name === session.name);
+      
+      if (doc) {
+        const isAvailable = doc.availability && doc.availability[date] !== undefined 
+          ? doc.availability[date] 
+          : doc.online;
+        setStatus(isAvailable);
+      }
+    };
+    
+    const fetchAppts = async () => {
+      setLoadingAppts(true);
+      const data = await patientService.getAppointments();
+      const id = session.registration_id || `DOC-${session.id.substring(0, 6).toUpperCase()}`;
+      const filtered = data.filter((a: any) => 
+        (a.doctor_id === id || a.doctor === session.name) && 
+        a.date === date
+      );
+      setAppointments(filtered);
+      setLoadingAppts(false);
+    };
+
+    fetchStatus();
+    fetchAppts();
+  }, [date, session]);
+
+  const handleUpdateStatus = async (newStatus: boolean) => {
+    if (!session) return;
+    const data = await doctorService.getAllDoctors();
+    const id = session.registration_id || `DOC-${session.id.substring(0, 6).toUpperCase()}`;
+    const docIndex = data.findIndex((d: any) => d.id === id || d.name === session.name);
+    
+    if (docIndex > -1) {
+      const currentDoc = data[docIndex] as Doctor;
+      const updatedDoc: Doctor = {
+        ...currentDoc,
+        availability: {
+          ...(currentDoc.availability || {}),
+          [date]: newStatus
+        }
+      };
+      
+      const success = await doctorService.saveDoctor(updatedDoc);
+      if (success) {
+        setStatus(newStatus);
+        toast.success(`Marked as ${newStatus ? 'Available' : 'Offline'} for ${date}`);
+      } else {
+        toast.error("Failed to update status");
+      }
+    }
+  };
+
   useEffect(() => {
     getSession().then(setSession);
   }, []);
@@ -142,51 +219,33 @@ function DoctorProfile() {
                     </div>
                   </div>
 
-                  {(() => {
-                    // Look up the doctor's real-time hospital and branch from the global roster
-                    const [rosterDetails, setRosterDetails] = useState<any>(null);
+                  <>
+                    <div className="space-y-2">
+                      <Label htmlFor="prof-hospital">Affiliated Hospital</Label>
+                      <div className="relative">
+                        <Building2 className="absolute left-3 top-2.5 size-4 text-muted-foreground" />
+                        <Input 
+                          id="prof-hospital" 
+                          value={rosterDetails?.hospital || "Not Affiliated"} 
+                          disabled
+                          className="pl-9 bg-muted/50" 
+                        />
+                      </div>
+                    </div>
                     
-                    useEffect(() => {
-                      if (!session) return;
-                      const fetchDetails = async () => {
-                        const data = await doctorService.getAllDoctors();
-                        const id = session.registration_id || `DOC-${session.id.substring(0, 6).toUpperCase()}`;
-                        const match = data.find((d: any) => d.id === id || d.name === session.name);
-                        if (match) setRosterDetails(match);
-                      };
-                      fetchDetails();
-                    }, [session]);
-                    
-                    return (
-                      <>
-                        <div className="space-y-2">
-                          <Label htmlFor="prof-hospital">Affiliated Hospital</Label>
-                          <div className="relative">
-                            <Building2 className="absolute left-3 top-2.5 size-4 text-muted-foreground" />
-                            <Input 
-                              id="prof-hospital" 
-                              value={rosterDetails?.hospital || "Not Affiliated"} 
-                              disabled
-                              className="pl-9 bg-muted/50" 
-                            />
-                          </div>
-                        </div>
-                        
-                        <div className="space-y-2">
-                          <Label htmlFor="prof-branch">Assigned Branch</Label>
-                          <div className="relative">
-                            <Building2 className="absolute left-3 top-2.5 size-4 text-muted-foreground" />
-                            <Input 
-                              id="prof-branch" 
-                              value={rosterDetails?.branch || "N/A"} 
-                              disabled
-                              className="pl-9 bg-muted/50" 
-                            />
-                          </div>
-                        </div>
-                      </>
-                    );
-                  })()}
+                    <div className="space-y-2">
+                      <Label htmlFor="prof-branch">Assigned Branch</Label>
+                      <div className="relative">
+                        <Building2 className="absolute left-3 top-2.5 size-4 text-muted-foreground" />
+                        <Input 
+                          id="prof-branch" 
+                          value={rosterDetails?.branch || "N/A"} 
+                          disabled
+                          className="pl-9 bg-muted/50" 
+                        />
+                      </div>
+                    </div>
+                  </>
 
                   <div className="space-y-2">
                     <Label htmlFor="prof-fee">Consultation Fee (LKR)</Label>
@@ -243,131 +302,83 @@ function DoctorProfile() {
                 Set your availability for specific dates. Hospitals will see this status for your assigned branch.
               </CardDescription>
             </CardHeader>
-            <CardContent>
-              <div className="flex flex-col sm:flex-row gap-4 items-end">
-                {(() => {
-                  const today = new Date().toISOString().split('T')[0] as string;
-                  const [date, setDate] = useState<string>(today);
-                  const [status, setStatus] = useState<boolean>(true);
-                  const [appointments, setAppointments] = useState<any[]>([]);
-                  const [loadingAppts, setLoadingAppts] = useState<boolean>(false);
-
-                  useEffect(() => {
-                    if (!session) return;
-                    const fetchStatus = async () => {
-                      const data = await doctorService.getAllDoctors();
-                      const id = session.registration_id || `DOC-${session.id.substring(0, 6).toUpperCase()}`;
-                      const doc = data.find((d: any) => d.id === id || d.name === session.name);
-                      
-                      if (doc) {
-                        const isAvailable = doc.availability && doc.availability[date] !== undefined 
-                          ? doc.availability[date] 
-                          : doc.online;
-                        setStatus(isAvailable);
-                      }
-                    };
-                    
-                    const fetchAppts = async () => {
-                      setLoadingAppts(true);
-                      const data = await patientService.getAppointments();
-                      const id = session.registration_id || `DOC-${session.id.substring(0, 6).toUpperCase()}`;
-                      const filtered = data.filter((a: any) => 
-                        (a.doctor_id === id || a.doctor === session.name) && 
-                        a.date === date && 
-                        a.mode === "In-person"
-                      );
-                      setAppointments(filtered);
-                      setLoadingAppts(false);
-                    };
-
-                    fetchStatus();
-                    fetchAppts();
-                  }, [date, session]);
-
-                  const handleUpdateStatus = async (newStatus: boolean) => {
-                    if (!session) return;
-                    const data = await doctorService.getAllDoctors();
-                    const id = session.registration_id || `DOC-${session.id.substring(0, 6).toUpperCase()}`;
-                    const docIndex = data.findIndex((d: any) => d.id === id || d.name === session.name);
-                    
-                    if (docIndex > -1) {
-                      const currentDoc = data[docIndex] as Doctor;
-                      const updatedDoc: Doctor = {
-                        ...currentDoc,
-                        availability: {
-                          ...(currentDoc.availability || {}),
-                          [date]: newStatus
-                        }
-                      };
-                      
-                      const success = await doctorService.saveDoctor(updatedDoc);
-                      if (success) {
-                        setStatus(newStatus);
-                        toast.success(`Marked as ${newStatus ? 'Available' : 'Offline'} for ${date}`);
-                      } else {
-                        toast.error("Failed to update status");
-                      }
-                    }
-                  };
-
-                  return (
-                    <>
-                      <div className="space-y-2 w-full sm:w-auto flex-1">
-                        <Label htmlFor="schedule-date">Select Date</Label>
-                        <Input 
-                          id="schedule-date" 
-                          type="date" 
-                          value={date} 
-                          onChange={(e) => setDate(e.target.value)} 
-                          min={today}
-                        />
-                      </div>
-                      <div className="flex gap-2 w-full sm:w-auto">
-                        <Button 
-                          type="button" 
-                          variant={status ? "default" : "outline"} 
-                          className={status ? "bg-green-600 hover:bg-green-700" : ""}
-                          onClick={() => handleUpdateStatus(true)}
-                        >
-                          Available
-                        </Button>
-                        <Button 
-                          type="button" 
-                          variant={!status ? "destructive" : "outline"}
-                          onClick={() => handleUpdateStatus(false)}
-                        >
-                          Offline
-                        </Button>
-                      </div>
-                      
-                      <div className="w-full mt-6 space-y-4">
-                        <h4 className="text-sm font-semibold border-b border-border pb-2">In-Person Appointments for {date}</h4>
-                        {loadingAppts ? (
-                          <p className="text-sm text-muted-foreground text-center py-4">Loading appointments...</p>
-                        ) : appointments.length > 0 ? (
-                          <div className="grid gap-3 sm:grid-cols-2">
-                            {appointments.map(a => (
-                              <div key={a.id} className="p-3 border border-border rounded-lg bg-card text-card-foreground shadow-sm flex flex-col gap-1">
-                                <div className="flex justify-between items-start gap-2">
-                                  <span className="font-semibold line-clamp-1">{a.patient_name || a.patient || "Patient"}</span>
-                                  <Badge variant="outline" className="text-xs shrink-0 bg-primary/10 text-primary border-primary/20">{a.time}</Badge>
-                                </div>
-                                <div className="text-xs text-muted-foreground flex justify-between mt-2">
-                                  <span>Queue: #{a.queue_number || '-'}</span>
-                                  <span className="font-medium text-foreground">{a.status}</span>
-                                </div>
-                              </div>
-                            ))}
+            <CardContent className="space-y-6">
+              <div className="flex flex-col sm:flex-row gap-4 items-end bg-muted/20 p-4 rounded-xl border border-border/50">
+                <div className="space-y-2 w-full sm:w-auto flex-1">
+                  <Label htmlFor="schedule-date">Select Date</Label>
+                  <Input 
+                    id="schedule-date" 
+                    type="date" 
+                    value={date} 
+                    onChange={(e) => setDate(e.target.value)} 
+                    min={today}
+                  />
+                </div>
+                <div className="flex gap-2 w-full sm:w-auto">
+                  <Button 
+                    type="button" 
+                    variant={status ? "default" : "outline"} 
+                    className={status ? "bg-green-600 hover:bg-green-700" : ""}
+                    onClick={() => handleUpdateStatus(true)}
+                  >
+                    Available
+                  </Button>
+                  <Button 
+                    type="button" 
+                    variant={!status ? "destructive" : "outline"}
+                    onClick={() => handleUpdateStatus(false)}
+                  >
+                    Offline
+                  </Button>
+                </div>
+              </div>
+              
+              <div className="w-full space-y-4">
+                <h4 className="text-sm font-semibold border-b border-border pb-2">In-Person Appointments for {date}</h4>
+                {loadingAppts ? (
+                  <p className="text-sm text-muted-foreground text-center py-4">Loading appointments...</p>
+                ) : appointments.length > 0 ? (
+                  <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                    {appointments.map(a => (
+                      <div key={a.id} className="p-4 border border-border rounded-xl bg-card text-card-foreground shadow-sm hover:shadow-md transition-shadow flex flex-col gap-3">
+                        <div className="flex justify-between items-start gap-3">
+                          <div className="flex-1 min-w-0">
+                            <h5 className="font-semibold text-base truncate">{a.patient_name || a.patient || "Patient"}</h5>
+                            {(a.patient_mobile || a.patient_email) && (
+                              <p className="text-sm text-muted-foreground truncate mt-0.5">{a.patient_mobile || a.patient_email}</p>
+                            )}
                           </div>
-                        ) : (
-                          <p className="text-sm text-muted-foreground text-center py-6 bg-muted/30 rounded-lg border border-dashed border-border">
-                            No in-person appointments booked for this date.
-                          </p>
-                        )}
+                          <Badge variant="secondary" className="shrink-0 font-medium capitalize">{a.status}</Badge>
+                        </div>
+                        
+                        <div className="bg-muted/30 rounded-lg p-3 space-y-2 text-sm border border-border/50">
+                          <div className="flex items-center gap-2 text-muted-foreground">
+                            <Building2 className="size-4 shrink-0 text-primary/70" />
+                            <span className="truncate">{rosterDetails?.hospital || "Hospital"} • {rosterDetails?.branch || "Branch"}</span>
+                          </div>
+                          <div className="flex items-center gap-2 text-muted-foreground">
+                            <BookOpen className="size-4 shrink-0 text-primary/70" />
+                            <span className="truncate">{a.date} at <span className="font-medium text-foreground">{a.time}</span></span>
+                          </div>
+                        </div>
+
+                        <div className="flex justify-between items-center mt-1 pt-2 border-t border-border/40">
+                          <div className="text-sm">
+                            <span className="text-muted-foreground">Queue: </span>
+                            <span className="font-bold text-foreground">#{a.queue_number || '-'}</span>
+                          </div>
+                          <Badge variant="outline" className="bg-primary/5 border-primary/20 text-primary">
+                            LKR {a.fee || "2500"}
+                          </Badge>
+                        </div>
                       </div>
-                    </>
-                  );
-                })()}
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-sm text-muted-foreground text-center py-6 bg-muted/30 rounded-lg border border-dashed border-border">
+                    No in-person appointments booked for this date.
+                  </p>
+                )}
               </div>
             </CardContent>
           </Card>
