@@ -30,6 +30,7 @@ import {
   SPECIALTIES
 } from "@/data/mock";
 import { patientService, type DbAppointment, type PatientProfile } from "@/services/patient.service";
+import { supabase } from "@/lib/supabase";
 
 export const Route = createFileRoute("/patient/")({
   head: () => ({
@@ -154,6 +155,11 @@ function PatientOverview() {
       setReports(rpts);
       setTimeline(tl);
 
+      if (profile && profile.id) {
+        // Automatically sync the local data to Supabase in the background
+        void patientService.syncLocalDataToSupabase(profile.id);
+      }
+
       // --- Real Data Analytics from AI Collaboration & Profile ---
       let chatCount = 0;
       let attachmentsCount = 0;
@@ -218,6 +224,13 @@ function PatientOverview() {
       };
     }
 
+    const realtimeSub = supabase
+      .channel('public:patient_profiles')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'patient_profiles' }, () => {
+        void loadData();
+      })
+      .subscribe();
+
     const handleStorage = (e: StorageEvent) => {
       if (
         e.key === "coha_patient_profile_shared" || 
@@ -237,6 +250,7 @@ function PatientOverview() {
 
     return () => {
       channel?.close();
+      supabase.removeChannel(realtimeSub);
       window.removeEventListener("storage", handleStorage);
       clearInterval(pollInterval);
     };

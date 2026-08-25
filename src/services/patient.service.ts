@@ -399,6 +399,40 @@ export const patientService = {
   },
 
   /**
+   * Migrate all local mock data to Supabase for a given patient ID
+   */
+  async syncLocalDataToSupabase(patientId: string): Promise<void> {
+    try {
+      const profile = await this.getPatientProfile(patientId);
+      if (profile) {
+        await supabase.from("patient_profiles").upsert(profile).select().single();
+      }
+      
+      const reports = await this.getReports();
+      if (reports && reports.length > 0) {
+        // Upsert reports assuming the table exists, add patient_id if missing
+        const formattedReports = reports.map(r => ({
+          ...r,
+          patient_id: patientId,
+          created_at: r.date
+        }));
+        await supabase.from("patient_reports").upsert(formattedReports, { onConflict: "id" }).select();
+      }
+
+      const timeline = await this.getTimeline();
+      if (timeline && timeline.length > 0) {
+        const formattedTimeline = timeline.map(t => ({
+          ...t,
+          patient_id: patientId
+        }));
+        await supabase.from("patient_timeline").upsert(formattedTimeline, { onConflict: "id" }).select();
+      }
+    } catch (e) {
+      console.warn("Failed to sync local data to Supabase:", e);
+    }
+  },
+
+  /**
    * Clear all local health data, caches, cookies, and session data upon user logout
    */
   clearLocalHealthData() {
