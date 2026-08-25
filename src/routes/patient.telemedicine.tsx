@@ -27,7 +27,7 @@ import { useState, useMemo, useEffect, useRef } from "react";
 import { toast } from "sonner";
 
 import { PageHeader } from "@/components/shared/PageHeader";
-import { AiDisclaimer } from "@/components/shared/AiDisclaimer";
+
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -1181,8 +1181,6 @@ function TelemedicinePage() {
           )}
         </DialogContent>
       </Dialog>
-
-      <AiDisclaimer className="max-w-2xl mx-auto" />
     </div>
   );
 }

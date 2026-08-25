@@ -309,7 +309,7 @@ export function PortalShell({
         {links}
       </aside>
 
-      <div className="lg:pl-64">
+      <div className="flex min-h-screen flex-col lg:pl-64">
         <header className="sticky top-0 z-30 flex h-16 items-center justify-between gap-3 border-b border-border bg-card/95 px-4 backdrop-blur sm:px-6">
           <div className="flex items-center gap-2">
             <Sheet open={open} onOpenChange={setOpen}>
@@ -475,7 +475,13 @@ export function PortalShell({
           </div>
         </header>
 
-        <main className="mx-auto w-full max-w-6xl px-4 py-6 sm:px-6 sm:py-8 lg:py-10 pb-safe">{children}</main>
+        <main className="flex-1 mx-auto w-full max-w-6xl px-4 py-6 sm:px-6 sm:py-8 lg:py-10 pb-safe">
+          {children}
+        </main>
+
+        <footer className="mt-auto border-t border-border bg-card/50 px-4 py-6 text-center text-sm text-muted-foreground sm:px-6">
+          <p>&copy; {new Date().getFullYear()} MedDoc. All rights reserved.</p>
+        </footer>
       </div>
     </div>
   );
