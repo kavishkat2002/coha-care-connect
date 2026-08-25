@@ -283,7 +283,7 @@ export function PortalShell({
                   )}
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-80 sm:w-96 p-0 rounded-2xl border border-border shadow-2xl overflow-hidden">
+              <DropdownMenuContent align="end" className="w-[calc(100vw-2rem)] sm:w-80 max-w-sm p-0 rounded-2xl border border-border shadow-2xl overflow-hidden">
                 <div className="p-3.5 bg-gradient-to-r from-blue-50/80 via-white to-indigo-50/60 dark:from-slate-900 dark:via-slate-900 dark:to-slate-950 border-b border-border flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <Bell className="size-4 text-blue-600 dark:text-blue-400" />
@@ -418,7 +418,7 @@ export function PortalShell({
           </div>
         </header>
 
-        <main className="mx-auto w-full max-w-6xl px-4 py-8 sm:px-6 lg:py-10">{children}</main>
+        <main className="mx-auto w-full max-w-6xl px-4 py-6 sm:px-6 sm:py-8 lg:py-10 pb-safe">{children}</main>
       </div>
     </div>
   );

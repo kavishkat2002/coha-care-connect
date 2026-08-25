@@ -438,13 +438,13 @@ function PatientOverview() {
   }
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6 sm:space-y-8">
       <PageHeader
         title={`Good day, ${patientProfile.name.split(" ")[0]}`}
         description="Here is your current health picture and what needs attention next."
       />
 
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-3 grid-cols-2 sm:gap-4 lg:grid-cols-4">
         <Link to={alertLink} className={alertsCount > 0 ? "block transition-transform hover:scale-[1.02] active:scale-[0.98]" : "block"}>
           <StatCard 
             icon={alertsCount > 0 ? AlertTriangle : Activity} 
@@ -478,13 +478,13 @@ function PatientOverview() {
                   key={a.id}
                   className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-border p-4"
                 >
-                  <div>
-                    <p className="text-sm font-medium">{doc ? doc.name : a.doctor_id}</p>
+                <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium truncate">{doc ? doc.name : a.doctor_id}</p>
                     <p className="text-xs text-muted-foreground">
                       {doc ? doc.specialty : "General"} · {hosp ? hosp.name : a.hospital_id}
                     </p>
                   </div>
-                  <div className="text-right">
+                  <div className="text-right shrink-0">
                     <p className="text-sm font-medium">
                       {a.date} · {a.time}
                     </p>
@@ -505,7 +505,7 @@ function PatientOverview() {
           <CardHeader>
             <CardTitle className="text-base">Quick actions</CardTitle>
           </CardHeader>
-          <CardContent className="grid gap-2">
+          <CardContent className="grid grid-cols-2 gap-2 sm:grid-cols-1">
             {quickActions.map((qa) => (
               <Button key={qa.to} asChild variant="outline" className="justify-start">
                 <Link to={qa.to}>

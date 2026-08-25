@@ -449,7 +449,7 @@ function AssistantPage() {
       />
 
       <div className="grid gap-6 lg:grid-cols-5">
-        <Card className="flex h-[38rem] flex-col shadow-soft lg:col-span-3">
+        <Card className="flex h-[32rem] sm:h-[38rem] flex-col shadow-soft lg:col-span-3">
           <CardHeader className="border-b border-border flex-row items-center justify-between py-4">
             <div>
               <CardTitle className="flex items-center gap-2 text-base">
@@ -550,7 +550,7 @@ function AssistantPage() {
                 ) : null}
                 <div
                   className={cn(
-                    "max-w-[80%] rounded-2xl px-4 py-3 text-sm flex flex-col gap-2",
+                    "max-w-[88%] sm:max-w-[80%] rounded-2xl px-3 sm:px-4 py-3 text-sm flex flex-col gap-2",
                     m.role === "user"
                       ? "bg-primary text-primary-foreground"
                       : "bg-muted text-foreground",
@@ -748,7 +748,7 @@ function AssistantPage() {
             )}
 
             <form
-              className="flex items-center gap-2"
+              className="flex items-end gap-2"
               onSubmit={(e) => {
                 e.preventDefault();
                 void send(input);
@@ -761,26 +761,29 @@ function AssistantPage() {
                 ref={fileInputRef}
                 onChange={handleFileChange}
               />
-              <Button
-                type="button"
-                variant="outline"
-                size="icon"
-                aria-label="Attach a file"
-                onClick={() => fileInputRef.current?.click()}
-              >
-                <Paperclip className="size-4" />
-              </Button>
-              <Button
-                type="button"
-                variant={isListening ? "default" : "outline"}
-                size="icon"
-                aria-label={isListening ? "Stop recording" : "Start voice input"}
-                onClick={toggleListen}
-                className={isListening ? "bg-red-500 hover:bg-red-600 animate-pulse text-white" : ""}
-                disabled={isTranscribing}
-              >
-                <Mic className="size-4" />
-              </Button>
+              <div className="flex gap-1.5 shrink-0">
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="icon"
+                  aria-label="Attach a file"
+                  onClick={() => fileInputRef.current?.click()}
+                  className="size-10"
+                >
+                  <Paperclip className="size-4" />
+                </Button>
+                <Button
+                  type="button"
+                  variant={isListening ? "default" : "outline"}
+                  size="icon"
+                  aria-label={isListening ? "Stop recording" : "Start voice input"}
+                  onClick={toggleListen}
+                  className={`size-10 ${isListening ? "bg-red-500 hover:bg-red-600 animate-pulse text-white" : ""}`}
+                  disabled={isTranscribing}
+                >
+                  <Mic className="size-4" />
+                </Button>
+              </div>
               <Textarea
                 ref={textareaRef}
                 value={input}
@@ -800,7 +803,7 @@ function AssistantPage() {
                 className="min-h-[44px] max-h-[200px] resize-none py-3 overflow-y-auto"
                 rows={1}
               />
-              <Button type="submit" size="icon" aria-label="Send message" disabled={busy}>
+              <Button type="submit" size="icon" aria-label="Send message" disabled={busy} className="size-10 shrink-0">
                 <Send className="size-4" />
               </Button>
             </form>
@@ -883,13 +886,13 @@ function AssistantPage() {
               </CardHeader>
               <CardContent>
                 <Tabs defaultValue="topRated" onValueChange={handleTabChange}>
-                  <TabsList className="grid w-full grid-cols-3 relative">
-                    <TabsTrigger value="topRated">Top rated</TabsTrigger>
-                    <TabsTrigger value="nearest" className="flex items-center gap-1">
+                  <TabsList className="flex w-full overflow-x-auto gap-1 h-auto p-1">
+                    <TabsTrigger value="topRated" className="flex-1 min-w-[80px] text-xs sm:text-sm">Top rated</TabsTrigger>
+                    <TabsTrigger value="nearest" className="flex items-center gap-1 flex-1 min-w-[80px] text-xs sm:text-sm">
                       {isLocating && <Loader2 className="size-3 animate-spin" />}
                       Nearest
                     </TabsTrigger>
-                    <TabsTrigger value="mostAvailable">Available</TabsTrigger>
+                    <TabsTrigger value="mostAvailable" className="flex-1 min-w-[80px] text-xs sm:text-sm">Available</TabsTrigger>
                   </TabsList>
                   {(["topRated", "nearest", "mostAvailable"] as const).map((key) => (
                     <TabsContent key={key} value={key} className="mt-4 space-y-3">

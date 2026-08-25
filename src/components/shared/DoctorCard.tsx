@@ -50,9 +50,9 @@ export function DoctorCard({ doctor, compact = false, onProfileClick }: { doctor
 
   return (
     <Card className="shadow-soft">
-      <CardContent className="flex flex-col gap-4 p-5 sm:flex-row sm:items-center">
+      <CardContent className="flex flex-col gap-4 p-4 sm:p-5 sm:flex-row sm:items-center">
         <Avatar 
-          className={`size-12 ${onProfileClick ? "cursor-pointer hover:opacity-80" : ""}`}
+          className={`size-11 sm:size-12 ${onProfileClick ? "cursor-pointer hover:opacity-80" : ""}`}
           onClick={(e) => {
             if (onProfileClick) {
               e.preventDefault();
@@ -88,7 +88,7 @@ export function DoctorCard({ doctor, compact = false, onProfileClick }: { doctor
             {doctor.hospital} · {doctor.branch}
           </p>
           {!compact ? (
-            <div className="mt-3 flex flex-wrap gap-x-5 gap-y-1.5 text-xs text-muted-foreground">
+            <div className="mt-3 flex flex-wrap gap-x-4 gap-y-1.5 text-xs text-muted-foreground">
               <span className="flex items-center gap-1.5">
                 <span 
                   className={onProfileClick ? "cursor-pointer hover:underline" : ""} 
@@ -120,9 +120,9 @@ export function DoctorCard({ doctor, compact = false, onProfileClick }: { doctor
           ) : null}
         </div>
 
-        <div className="flex shrink-0 flex-col items-start gap-2 sm:items-end">
+        <div className="flex shrink-0 items-center justify-between gap-3 sm:flex-col sm:items-end sm:gap-2">
           <p className="text-sm font-semibold">LKR {doctor.fee.toLocaleString()}</p>
-          <Button asChild size="sm">
+          <Button asChild size="sm" className="sm:w-auto">
             <Link to="/patient/book">Book</Link>
           </Button>
         </div>

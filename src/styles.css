@@ -155,11 +155,17 @@
     border-color: var(--color-border);
   }
 
+  html {
+    -webkit-tap-highlight-color: transparent;
+    scroll-behavior: smooth;
+  }
+
   body {
     background-color: var(--color-background);
     color: var(--color-foreground);
     font-family: var(--font-sans);
     -webkit-font-smoothing: antialiased;
+    overflow-x: hidden;
   }
 
   h1,
@@ -168,6 +174,15 @@
   h4 {
     letter-spacing: -0.02em;
   }
+
+  /* Better touch targets on mobile */
+  @media (max-width: 640px) {
+    button,
+    [role="button"],
+    a {
+      min-height: 36px;
+    }
+  }
 }
 
 @utility card-soft {
@@ -175,4 +190,12 @@
   border: 1px solid var(--color-border);
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-soft);
+}
+
+@utility pb-safe {
+  padding-bottom: max(1.5rem, env(safe-area-inset-bottom));
+}
+
+@utility pt-safe {
+  padding-top: max(0px, env(safe-area-inset-top));
 }
