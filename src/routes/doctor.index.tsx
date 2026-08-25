@@ -170,7 +170,6 @@ function DoctorDashboard() {
       prev.map((a) => (a.id === apptId ? { ...a, status: "Completed" } : a))
     );
     await supabase.from("appointments").update({ status: "Completed" }).eq("id", apptId);
-    // Persist completed status in localStorage
     const savedAppts = localStorage.getItem("meddoc_appointments");
     if (savedAppts) {
       try {
@@ -181,6 +180,14 @@ function DoctorDashboard() {
         localStorage.setItem("meddoc_appointments", JSON.stringify(updated));
       } catch (e) {}
     }
+
+    // Broadcast session_ended event so the patient's chat instantly shows the payment UI
+    supabase.channel(`chat_${apptId}`).send({
+      type: "broadcast",
+      event: "session_ended",
+      payload: { apptId },
+    });
+
     toast.info("Telemedicine consultation session ended.", {
       description: "Appointment marked as completed and archived.",
     });
@@ -598,12 +605,12 @@ function DoctorDashboard() {
       {/* Doctor - Patient Live Follow-back Messaging Dialog */}
       <Dialog open={!!chatAppt} onOpenChange={() => setChatAppt(null)}>
         <DialogContent className="sm:max-w-md rounded-2xl flex flex-col h-[540px]">
-          <DialogHeader className="pb-2 border-b border-border">
-            <DialogTitle className="flex items-center justify-between text-sm font-bold">
+          <DialogHeader className="pb-2 border-b border-border bg-slate-50 dark:bg-slate-900 px-5 pt-5">
+            <DialogTitle className="flex items-center justify-between text-sm font-medium">
               <div>
                 <p className="leading-none text-slate-900 dark:text-white">Patient Consultation: {chatAppt?.patient_name || "Patient"}</p>
-                <p className="text-[11px] text-emerald-600 dark:text-emerald-400 font-normal mt-0.5 flex items-center gap-1">
-                  <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                <p className="text-[11px] text-slate-500 dark:text-slate-400 font-normal mt-1 flex items-center gap-1.5">
+                  <span className="w-1.5 h-1.5 rounded-full bg-slate-500" />
                   Photos & PDF Sharing Enabled
                 </p>
               </div>
@@ -616,9 +623,9 @@ function DoctorDashboard() {
                   setChatAppt(null);
                   setActiveDoctorVideoAppt(targetAppt);
                 }}
-                className="bg-emerald-600 hover:bg-emerald-700 text-white text-xs h-8 rounded-xl font-bold gap-1 px-3 shrink-0"
+                className="bg-blue-600 hover:bg-blue-700 text-white text-xs h-8 rounded-md font-medium gap-1 px-3 shrink-0"
               >
-                <Video className="size-3.5 animate-pulse" />
+                <Video className="size-3.5" />
                 <span>Video Call</span>
               </Button>
             </DialogTitle>
@@ -632,7 +639,7 @@ function DoctorDashboard() {
                 className={`flex flex-col ${msg.sender === "doctor" ? "items-end" : "items-start"}`}
               >
                 <div
-                  className={`max-w-[85%] p-3 rounded-2xl leading-relaxed ${
+                  className={`max-w-[85%] p-3 rounded-xl leading-relaxed ${
                     msg.sender === "doctor"
                       ? "bg-blue-600 text-white rounded-br-none"
                       : "bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-slate-100 rounded-bl-none border border-slate-200 dark:border-slate-700"
@@ -661,8 +668,8 @@ function DoctorDashboard() {
                       rel="noopener noreferrer"
                       className={`flex items-center gap-2.5 p-2.5 rounded-xl border mt-1 font-medium transition-all ${
                         msg.sender === "doctor"
-                          ? "bg-blue-700 border-blue-500 text-white hover:bg-blue-800"
-                          : "bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white hover:bg-slate-50"
+                          ? "bg-blue-700 border-blue-600 text-white hover:bg-blue-800"
+                          : "bg-slate-50 dark:bg-slate-900 border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white hover:bg-slate-100"
                       }`}
                     >
                       <FileText className="size-5 text-rose-500 shrink-0" />
@@ -696,7 +703,7 @@ function DoctorDashboard() {
               size="icon"
               onClick={() => doctorFileInputRef.current?.click()}
               title="Attach Photo or PDF document"
-              className="rounded-full size-10 text-slate-500 hover:text-blue-600 hover:bg-blue-50 shrink-0"
+              className="rounded-full size-10 text-slate-500 hover:text-blue-600 hover:bg-blue-50 shrink-0 border-slate-200"
             >
               <Paperclip className="size-4" />
             </Button>
@@ -706,13 +713,13 @@ function DoctorDashboard() {
               value={replyInput}
               onChange={(e) => setReplyInput(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && handleSendDoctorReply()}
-              className="text-xs h-10 rounded-full flex-1"
+              className="text-xs h-10 rounded-md flex-1 bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-700"
             />
 
             <Button
               size="sm"
               onClick={handleSendDoctorReply}
-              className="bg-blue-600 hover:bg-blue-700 text-white rounded-full size-10 p-0 shrink-0 flex items-center justify-center"
+              className="bg-blue-600 hover:bg-blue-700 text-white rounded-md size-10 p-0 shrink-0 flex items-center justify-center shadow-sm"
             >
               <Send className="size-4" />
             </Button>
@@ -722,11 +729,11 @@ function DoctorDashboard() {
 
       {/* Interactive HD Telemedicine Live Video Meeting Room for Doctor */}
       <Dialog open={!!activeDoctorVideoAppt} onOpenChange={() => setActiveDoctorVideoAppt(null)}>
-        <DialogContent className="sm:max-w-2xl rounded-3xl p-0 overflow-hidden bg-slate-950 text-white border-slate-800 shadow-2xl">
+        <DialogContent className="sm:max-w-2xl rounded-2xl p-0 overflow-hidden bg-zinc-950 text-zinc-100 border-zinc-800 shadow-xl">
           {activeDoctorVideoAppt && (
-            <div className="relative h-[480px] flex flex-col justify-between p-5 bg-gradient-to-b from-slate-900 via-slate-950 to-slate-950">
+            <div className="relative h-[480px] flex flex-col justify-between p-5 bg-zinc-950">
               {/* Patient Video Stream Area (Remote WebRTC) */}
-              <div className="absolute inset-0 flex items-center justify-center bg-slate-900/90 overflow-hidden">
+              <div className="absolute inset-0 flex items-center justify-center bg-zinc-900 overflow-hidden">
                 <video
                   ref={remoteVideoRef}
                   autoPlay
@@ -734,17 +741,17 @@ function DoctorDashboard() {
                   className="w-full h-full object-cover"
                 />
                 {!remoteStream && (
-                  <div className="absolute inset-0 flex items-center justify-center bg-radial from-slate-800 to-slate-950">
+                  <div className="absolute inset-0 flex items-center justify-center bg-zinc-900/50">
                     <div className="text-center space-y-3 z-10">
-                      <Avatar className="size-28 border-4 border-emerald-500/80 shadow-2xl mx-auto ring-4 ring-emerald-500/20 animate-pulse">
-                        <AvatarFallback className="bg-blue-700 text-white font-bold text-2xl">
+                      <Avatar className="size-24 border border-zinc-700/50 shadow-md mx-auto">
+                        <AvatarFallback className="bg-zinc-800 text-zinc-300 font-medium text-xl">
                           {activeDoctorVideoAppt.patient_name?.substring(0, 2).toUpperCase() || "MR"}
                         </AvatarFallback>
                       </Avatar>
                       <div>
-                        <h4 className="text-lg font-bold text-white">{activeDoctorVideoAppt.patient_name || "Mahinda Rajapaksha"}</h4>
-                        <p className="text-xs text-emerald-400 font-semibold flex items-center justify-center gap-1.5 mt-1">
-                          <span className="size-2 rounded-full bg-emerald-400 animate-ping" />
+                        <h4 className="text-base font-medium text-zinc-100">{activeDoctorVideoAppt.patient_name || "Mahinda Rajapaksha"}</h4>
+                        <p className="text-xs text-zinc-400 flex items-center justify-center gap-1.5 mt-1">
+                          <span className="size-1.5 rounded-full bg-zinc-500" />
                           Waiting for patient to join...
                         </p>
                       </div>
@@ -753,7 +760,7 @@ function DoctorDashboard() {
                 )}
 
                 {/* Self Doctor Camera Thumbnail (Picture in Picture) */}
-                <div className="absolute bottom-20 right-4 w-36 h-24 rounded-2xl bg-slate-800 border-2 border-slate-700 shadow-xl overflow-hidden flex items-center justify-center">
+                <div className="absolute bottom-20 right-4 w-36 h-24 rounded-lg bg-zinc-800 border border-zinc-700/50 shadow-lg overflow-hidden flex items-center justify-center">
                   <video 
                     ref={localVideoRef} 
                     autoPlay 
@@ -761,38 +768,38 @@ function DoctorDashboard() {
                     muted 
                     className="w-full h-full object-cover transform -scale-x-100" 
                   />
-                  {!localStream && <span className="text-[10px] font-bold text-slate-300">Doctor Camera Feed</span>}
+                  {!localStream && <span className="text-[10px] font-medium text-zinc-500">Camera off</span>}
                 </div>
               </div>
 
               {/* Top Header Controls & Live Timer */}
-              <div className="relative z-20 flex items-center justify-between bg-slate-900/60 backdrop-blur-md p-3 rounded-2xl border border-slate-800">
+              <div className="relative z-20 flex items-center justify-between bg-zinc-950/80 p-3 rounded-lg border border-zinc-800/50">
                 <div className="flex items-center gap-3">
-                  <Badge className="bg-emerald-500 text-slate-950 font-extrabold text-[10px] uppercase px-2 py-0.5">
-                    LIVE CONSULTATION
+                  <Badge className="bg-zinc-800 text-zinc-100 border border-zinc-700 font-medium text-[10px] px-2 py-0.5">
+                    Live Session
                   </Badge>
                   <div>
-                    <p className="text-xs font-bold text-white">{activeDoctorVideoAppt.patient_name || "Mahinda Rajapaksha"}</p>
-                    <p className="text-[10px] text-slate-400">Scheduled: {activeDoctorVideoAppt.time}</p>
+                    <p className="text-xs font-medium text-zinc-100">{activeDoctorVideoAppt.patient_name || "Mahinda Rajapaksha"}</p>
+                    <p className="text-[10px] text-zinc-500">Scheduled: {activeDoctorVideoAppt.time}</p>
                   </div>
                 </div>
 
                 <div className="flex items-center gap-2">
-                  <Badge variant="outline" className="border-slate-700 text-slate-300 text-xs font-mono font-bold px-3 py-1">
+                  <Badge variant="outline" className="border-zinc-800 text-zinc-400 text-xs font-mono px-3 py-1 bg-zinc-900">
                     {formatCallTime(callDurationSeconds)}
                   </Badge>
                 </div>
               </div>
 
               {/* Bottom Doctor Meeting Action Bar */}
-              <div className="relative z-20 flex items-center justify-center gap-4 bg-slate-900/80 backdrop-blur-lg p-3 rounded-2xl border border-slate-800 max-w-md mx-auto">
+              <div className="relative z-20 flex items-center justify-center gap-3 p-3 max-w-md mx-auto">
                 <Button
                   type="button"
                   variant="outline"
                   size="icon"
-                  className="size-11 rounded-full border bg-slate-800 border-slate-700 text-slate-200 hover:bg-slate-700"
+                  className="size-10 rounded-full border-zinc-700 bg-zinc-800 text-zinc-300 hover:bg-zinc-700 hover:text-white"
                 >
-                  <Video className="size-5" />
+                  <Video className="size-4" />
                 </Button>
 
                 <Button
@@ -801,9 +808,9 @@ function DoctorDashboard() {
                     setActiveDoctorVideoAppt(null);
                     toast.info("Doctor video call session ended.");
                   }}
-                  className="bg-rose-600 hover:bg-rose-700 text-white size-11 rounded-full font-bold shadow-lg p-0 flex items-center justify-center shrink-0"
+                  className="bg-red-600 hover:bg-red-700 text-white size-10 rounded-full flex items-center justify-center shrink-0 shadow-sm"
                 >
-                  <Video className="size-5" />
+                  <XCircle className="size-4" />
                 </Button>
               </div>
             </div>

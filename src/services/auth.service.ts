@@ -113,4 +113,6 @@ export const portalHome: Record<Role, string> = {
   doctor: "/doctor",
   hospital: "/hospital",
   admin: "/admin",
+  elab: "/patient/elab",
+  pharmacy: "/patient/pharmacy",
 };

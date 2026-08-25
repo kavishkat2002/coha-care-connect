@@ -17,6 +17,11 @@ import {
   Image as ImageIcon,
   Download,
   File,
+  Mic,
+  MicOff,
+  XCircle,
+  VideoOff,
+  CreditCard,
 } from "lucide-react";
 import { useState, useMemo, useEffect, useRef } from "react";
 import { toast } from "sonner";
@@ -121,6 +126,7 @@ function TelemedicinePage() {
   const [activeChatAppt, setActiveChatAppt] = useState<DbAppointment | null>(null);
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
   const [newMessageInput, setNewMessageInput] = useState("");
+  const [isProcessingRebook, setIsProcessingRebook] = useState(false);
 
   // File Upload Ref
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -260,14 +266,20 @@ function TelemedicinePage() {
     
     // Listen for remote messages via Supabase
     const channel = supabase.channel(`chat_${activeChatAppt.id}`);
-    channel.on("broadcast", { event: "new_message" }, ({ payload }) => {
-      setChatMessages((prev) => {
-        if (prev.some(m => m.id === payload.id)) return prev;
-        const newArray = [...prev, payload];
-        localStorage.setItem(`meddoc_chat_${activeChatAppt.id}`, JSON.stringify(newArray));
-        return newArray;
-      });
-    }).subscribe();
+    channel
+      .on("broadcast", { event: "new_message" }, ({ payload }) => {
+        setChatMessages((prev) => {
+          if (prev.some(m => m.id === payload.id)) return prev;
+          const newArray = [...prev, payload];
+          localStorage.setItem(`meddoc_chat_${activeChatAppt.id}`, JSON.stringify(newArray));
+          return newArray;
+        });
+      })
+      .on("broadcast", { event: "session_ended" }, () => {
+        setActiveChatAppt((prev) => prev ? { ...prev, status: "Completed" } : null);
+        toast.info("The doctor has ended the consultation session.");
+      })
+      .subscribe();
 
     return () => {
       window.removeEventListener("storage", handleStorage);
@@ -307,6 +319,33 @@ function TelemedicinePage() {
       event: "new_message",
       payload: userMsg,
     });
+  };
+
+  const handleRebookSession = async () => {
+    if (!activeChatAppt?.id) return;
+    
+    setIsProcessingRebook(true);
+    // Simulate payment processing delay
+    await new Promise(resolve => setTimeout(resolve, 1500));
+    
+    try {
+      const { error } = await supabase
+        .from("appointments")
+        .update({ status: "Scheduled" })
+        .eq("id", activeChatAppt.id);
+        
+      if (error) throw error;
+      
+      toast.success("Payment successful! Session reactivated.");
+      setActiveChatAppt({ ...activeChatAppt, status: "Scheduled" });
+      
+      // Refresh local list silently
+      patientService.getAppointments().then(setMyAppointments).catch(() => {});
+    } catch (e) {
+      toast.error("Failed to rebook session.");
+    } finally {
+      setIsProcessingRebook(false);
+    }
   };
 
   // Handle Photo & PDF File Upload from Patient
@@ -850,15 +889,15 @@ function TelemedicinePage() {
       <Dialog open={!!activeChatAppt} onOpenChange={() => setActiveChatAppt(null)}>
         <DialogContent className="sm:max-w-md rounded-3xl flex flex-col h-[560px] p-0 overflow-hidden border border-slate-200 dark:border-slate-800 shadow-2xl">
           {/* Enhanced Premium Header */}
-          <div className="px-5 py-3.5 border-b border-border bg-gradient-to-r from-blue-50/70 via-white to-emerald-50/50 dark:from-slate-900 dark:via-slate-900 dark:to-slate-950 flex items-center justify-between gap-3 pr-12">
+          <div className="px-5 py-3.5 border-b border-border bg-slate-50 dark:bg-slate-900 flex items-center justify-between gap-3 pr-12">
             <div className="flex items-center gap-3 min-w-0">
-              <Avatar className="size-10 border border-blue-200 shadow-xs shrink-0">
-                <AvatarFallback className="bg-gradient-to-br from-blue-600 to-indigo-600 text-white font-bold text-xs">
+              <Avatar className="size-10 border border-slate-200 dark:border-slate-700 shadow-sm shrink-0">
+                <AvatarFallback className="bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-medium text-xs">
                   MD
                 </AvatarFallback>
               </Avatar>
               <div className="min-w-0">
-                <p className="font-bold text-sm text-slate-900 dark:text-white truncate">
+                <p className="font-medium text-sm text-slate-900 dark:text-white truncate">
                   {(() => {
                     const docObj = (rosterDoctors.length > 0 ? rosterDoctors : doctors).find(
                       (d) => d.id === activeChatAppt?.doctor_id
@@ -866,7 +905,7 @@ function TelemedicinePage() {
                     return docObj?.name || "Dr. Menaka De Alwis";
                   })()}
                 </p>
-                <p className="text-[11px] text-emerald-600 dark:text-emerald-400 font-medium mt-0.5">
+                <p className="text-[11px] text-slate-500 dark:text-slate-400 font-medium mt-0.5">
                   Photos & PDF Enabled
                 </p>
               </div>
@@ -889,7 +928,7 @@ function TelemedicinePage() {
                   setActiveChatAppt(null);
                   setActiveVideoDoctor(docObj as Doctor);
                 }}
-                className="bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white text-xs h-8.5 rounded-full font-bold gap-1.5 px-3.5 shadow-sm shrink-0 transition-transform active:scale-95"
+                className="bg-blue-600 hover:bg-blue-700 text-white text-xs h-8.5 rounded-md font-medium gap-1.5 px-3.5 shadow-sm shrink-0 transition-transform active:scale-95"
               >
                 <Video className="size-3.5" />
                 <span>Video Call</span>
@@ -915,7 +954,7 @@ function TelemedicinePage() {
                 className={`flex flex-col ${msg.sender === "patient" ? "items-end" : "items-start"}`}
               >
                 <div
-                  className={`max-w-[85%] p-3 rounded-2xl leading-relaxed ${
+                  className={`max-w-[85%] p-3 rounded-xl leading-relaxed ${
                     msg.sender === "patient"
                       ? "bg-blue-600 text-white rounded-br-none"
                       : "bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-slate-100 rounded-bl-none border border-slate-200 dark:border-slate-700"
@@ -944,8 +983,8 @@ function TelemedicinePage() {
                       rel="noopener noreferrer"
                       className={`flex items-center gap-2.5 p-2.5 rounded-xl border mt-1 font-medium transition-all ${
                         msg.sender === "patient"
-                          ? "bg-blue-700 border-blue-500 text-white hover:bg-blue-800"
-                          : "bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white hover:bg-slate-50"
+                          ? "bg-blue-700 border-blue-600 text-white hover:bg-blue-800"
+                          : "bg-slate-50 dark:bg-slate-900 border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white hover:bg-slate-100"
                       }`}
                     >
                       <FileText className="size-5 text-rose-500 shrink-0" />
@@ -971,45 +1010,68 @@ function TelemedicinePage() {
             className="hidden"
           />
 
-          {/* Input & Send Bar */}
-          <div className="pt-2 border-t border-border flex items-center gap-2">
-            <Button
-              type="button"
-              variant="outline"
-              size="icon"
-              onClick={() => fileInputRef.current?.click()}
-              title="Attach Photo or PDF document"
-              className="rounded-full size-10 text-slate-500 hover:text-blue-600 hover:bg-blue-50 shrink-0"
-            >
-              <Paperclip className="size-4" />
-            </Button>
+          {/* Input & Send Bar or Rebook UI */}
+          {activeChatAppt?.status === "Completed" ? (
+            <div className="p-4 border-t border-border bg-slate-50 dark:bg-slate-900 flex flex-col sm:flex-row items-center justify-between gap-3 text-center sm:text-left">
+              <div>
+                <p className="text-sm font-bold text-slate-900 dark:text-white">Session Ended</p>
+                <p className="text-xs text-slate-500">Book another consultation to continue chatting.</p>
+              </div>
+              <Button 
+                onClick={handleRebookSession}
+                disabled={isProcessingRebook}
+                className="bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg text-xs w-full sm:w-auto shrink-0 shadow-sm transition-all active:scale-95 flex items-center gap-2"
+              >
+                {isProcessingRebook ? (
+                  "Processing..."
+                ) : (
+                  <>
+                    <CreditCard className="size-3.5" />
+                    Pay LKR {activeChatAppt.fee || 5500} & Continue
+                  </>
+                )}
+              </Button>
+            </div>
+          ) : (
+            <div className="pt-2 border-t border-border flex items-center gap-2">
+              <Button
+                type="button"
+                variant="outline"
+                size="icon"
+                onClick={() => fileInputRef.current?.click()}
+                title="Attach Photo or PDF document"
+                className="rounded-full size-10 text-slate-500 hover:text-blue-600 hover:bg-blue-50 shrink-0 border-slate-200"
+              >
+                <Paperclip className="size-4" />
+              </Button>
 
-            <Input
-              placeholder="Type message or attach photo / PDF..."
-              value={newMessageInput}
-              onChange={(e) => setNewMessageInput(e.target.value)}
-              onKeyDown={(e) => e.key === "Enter" && handleSendPatientMessage()}
-              className="text-xs h-10 rounded-full flex-1"
-            />
+              <Input
+                placeholder="Type message or attach photo / PDF..."
+                value={newMessageInput}
+                onChange={(e) => setNewMessageInput(e.target.value)}
+                onKeyDown={(e) => e.key === "Enter" && handleSendPatientMessage()}
+                className="text-xs h-10 rounded-md flex-1 bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-700"
+              />
 
-            <Button
-              size="sm"
-              onClick={handleSendPatientMessage}
-              className="bg-blue-600 hover:bg-blue-700 text-white rounded-full size-10 p-0 shrink-0 flex items-center justify-center"
-            >
-              <Send className="size-4" />
-            </Button>
-          </div>
+              <Button
+                size="sm"
+                onClick={handleSendPatientMessage}
+                className="bg-blue-600 hover:bg-blue-700 text-white rounded-md size-10 p-0 shrink-0 flex items-center justify-center shadow-sm"
+              >
+                <Send className="size-4" />
+              </Button>
+            </div>
+          )}
         </DialogContent>
       </Dialog>
 
       {/* Interactive HD Telemedicine Live Video Meeting Room */}
       <Dialog open={!!activeVideoDoctor} onOpenChange={() => setActiveVideoDoctor(null)}>
-        <DialogContent className="sm:max-w-2xl rounded-3xl p-0 overflow-hidden bg-slate-950 text-white border-slate-800 shadow-2xl">
+        <DialogContent className="sm:max-w-2xl rounded-2xl p-0 overflow-hidden bg-zinc-950 text-zinc-100 border-zinc-800 shadow-xl">
           {activeVideoDoctor && (
-            <div className="relative h-[480px] flex flex-col justify-between p-5 bg-gradient-to-b from-slate-900 via-slate-950 to-slate-950">
+            <div className="relative h-[480px] flex flex-col justify-between p-5 bg-zinc-950">
               {/* Doctor Main Video Stream Area (Remote WebRTC) */}
-              <div className="absolute inset-0 flex items-center justify-center bg-slate-900/90 overflow-hidden">
+              <div className="absolute inset-0 flex items-center justify-center bg-zinc-900 overflow-hidden">
                 {!isVideoOff ? (
                   <>
                     <video
@@ -1019,17 +1081,17 @@ function TelemedicinePage() {
                       className="w-full h-full object-cover"
                     />
                     {!remoteStream && (
-                      <div className="absolute inset-0 flex items-center justify-center bg-radial from-slate-800 to-slate-950">
+                      <div className="absolute inset-0 flex items-center justify-center bg-zinc-900/50">
                         <div className="text-center space-y-3 z-10">
-                          <Avatar className="size-28 border-4 border-emerald-500/80 shadow-2xl mx-auto ring-4 ring-emerald-500/20 animate-pulse">
-                            <AvatarFallback className="bg-blue-700 text-white font-bold text-2xl">
+                          <Avatar className="size-24 border border-zinc-700/50 shadow-md mx-auto">
+                            <AvatarFallback className="bg-zinc-800 text-zinc-300 font-medium text-xl">
                               {activeVideoDoctor.photoInitials || activeVideoDoctor.name.substring(0, 2).toUpperCase()}
                             </AvatarFallback>
                           </Avatar>
                           <div>
-                            <h4 className="text-lg font-bold text-white">{activeVideoDoctor.name}</h4>
-                            <p className="text-xs text-emerald-400 font-semibold flex items-center justify-center gap-1.5 mt-1">
-                              <span className="size-2 rounded-full bg-emerald-400 animate-ping" />
+                            <h4 className="text-base font-medium text-zinc-100">{activeVideoDoctor.name}</h4>
+                            <p className="text-xs text-zinc-400 flex items-center justify-center gap-1.5 mt-1">
+                              <span className="size-1.5 rounded-full bg-zinc-500" />
                               Connecting to doctor...
                             </p>
                           </div>
@@ -1038,11 +1100,11 @@ function TelemedicinePage() {
                     )}
                   </>
                 ) : (
-                  <div className="text-slate-500 text-xs font-semibold">Camera Turned Off</div>
+                  <div className="text-zinc-500 text-xs font-medium">Camera Turned Off</div>
                 )}
 
                 {/* Self Patient Camera Thumbnail (Picture in Picture) */}
-                <div className="absolute bottom-20 right-4 w-36 h-24 rounded-2xl bg-slate-800 border-2 border-slate-700 shadow-xl overflow-hidden flex items-center justify-center">
+                <div className="absolute bottom-20 right-4 w-36 h-24 rounded-lg bg-zinc-800 border border-zinc-700/50 shadow-lg overflow-hidden flex items-center justify-center">
                   <video 
                     ref={localVideoRef} 
                     autoPlay 
@@ -1050,64 +1112,61 @@ function TelemedicinePage() {
                     muted 
                     className="w-full h-full object-cover transform -scale-x-100" 
                   />
-                  {!localStream && <span className="text-[10px] font-bold text-slate-300">You (Patient Feed)</span>}
+                  {!localStream && <span className="text-[10px] font-medium text-zinc-500">Camera off</span>}
                 </div>
               </div>
 
               {/* Top Header Controls & Live Timer */}
-              <div className="relative z-20 flex items-center justify-between bg-slate-900/60 backdrop-blur-md p-3 rounded-2xl border border-slate-800">
+              <div className="relative z-20 flex items-center justify-between bg-zinc-950/80 p-3 rounded-lg border border-zinc-800/50">
                 <div className="flex items-center gap-3">
-                  <Badge className="bg-emerald-500 text-slate-950 font-extrabold text-[10px] uppercase px-2 py-0.5">
-                    LIVE
+                  <Badge className="bg-zinc-800 text-zinc-100 border border-zinc-700 font-medium text-[10px] px-2 py-0.5">
+                    Live Session
                   </Badge>
                   <div>
-                    <p className="text-xs font-bold text-white">{activeVideoDoctor.name}</p>
-                    <p className="text-[10px] text-slate-400">{activeVideoDoctor.specialty}</p>
+                    <p className="text-xs font-medium text-zinc-100">{activeVideoDoctor.name}</p>
+                    <p className="text-[10px] text-zinc-500">{activeVideoDoctor.specialty}</p>
                   </div>
                 </div>
 
                 <div className="flex items-center gap-2">
-                  <Badge variant="outline" className="border-slate-700 text-slate-300 text-xs font-mono font-bold px-3 py-1">
+                  <Badge variant="outline" className="border-zinc-800 text-zinc-400 text-xs font-mono px-3 py-1 bg-zinc-900">
                     {formatCallTime(callDurationSeconds)}
                   </Badge>
                 </div>
               </div>
 
               {/* Bottom Meeting Action Bar */}
-              <div className="relative z-20 flex items-center justify-center gap-4 bg-slate-900/80 backdrop-blur-lg p-3 rounded-2xl border border-slate-800 max-w-md mx-auto">
+              <div className="relative z-20 flex items-center justify-center gap-3 p-3 max-w-md mx-auto">
                 <Button
                   type="button"
                   variant="outline"
                   size="icon"
+                  className="size-10 rounded-full border-zinc-700 bg-zinc-800 text-zinc-300 hover:bg-zinc-700 hover:text-white"
                   onClick={() => setIsMicMuted(!isMicMuted)}
-                  className={`size-11 rounded-full border transition-all ${
-                    isMicMuted ? "bg-rose-600 border-rose-500 text-white" : "bg-slate-800 border-slate-700 text-slate-200 hover:bg-slate-700"
-                  }`}
                 >
-                  <Video className="size-5" />
-                </Button>
-
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="icon"
-                  onClick={() => setIsVideoOff(!isVideoOff)}
-                  className={`size-11 rounded-full border transition-all ${
-                    isVideoOff ? "bg-rose-600 border-rose-500 text-white" : "bg-slate-800 border-slate-700 text-slate-200 hover:bg-slate-700"
-                  }`}
-                >
-                  <Video className="size-5" />
+                  {isMicMuted ? <MicOff className="size-4" /> : <Mic className="size-4" />}
                 </Button>
 
                 <Button
                   type="button"
                   onClick={() => {
                     setActiveVideoDoctor(null);
-                    toast.info("Video meeting ended.");
+                    setCallDurationSeconds(0);
+                    toast.info("Video call ended.");
                   }}
-                  className="bg-rose-600 hover:bg-rose-700 text-white size-11 rounded-full font-bold shadow-lg p-0 flex items-center justify-center shrink-0"
+                  className="bg-red-600 hover:bg-red-700 text-white size-10 rounded-full flex items-center justify-center shrink-0 shadow-sm"
                 >
-                  <Video className="size-5" />
+                  <XCircle className="size-4" />
+                </Button>
+                
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="icon"
+                  className="size-10 rounded-full border-zinc-700 bg-zinc-800 text-zinc-300 hover:bg-zinc-700 hover:text-white"
+                  onClick={() => setIsVideoOff(!isVideoOff)}
+                >
+                  {isVideoOff ? <VideoOff className="size-4" /> : <Video className="size-4" />}
                 </Button>
               </div>
             </div>
