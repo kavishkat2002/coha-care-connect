@@ -445,71 +445,75 @@ function PatientOverview() {
       />
 
       <div className="grid gap-3 grid-cols-2 sm:gap-4 lg:grid-cols-4">
-        <Link to={alertLink} className={alertsCount > 0 ? "block transition-transform hover:scale-[1.02] active:scale-[0.98]" : "block"}>
+        <Link to={alertLink} className={`h-full ${alertsCount > 0 ? "block transition-transform hover:scale-[1.02] active:scale-[0.98]" : "block"}`}>
           <StatCard 
             icon={alertsCount > 0 ? AlertTriangle : Activity} 
-            label="Attention Required" 
+            label="Attention" 
             value={String(alertsCount)} 
-            hint={alertsHint} 
-            className="cursor-pointer"
+            hint={alertsCount > 0 ? "Review reports" : "All clear"} 
+            className="cursor-pointer h-full"
             iconClassName={alertsCount > 0 ? "text-rose-600 dark:text-rose-300" : undefined}
             valueClassName={alertsCount > 0 ? "text-rose-600 dark:text-rose-400" : undefined}
             labelClassName={alertsCount > 0 ? "text-rose-600 font-medium dark:text-rose-400" : undefined}
           />
         </Link>
-        <StatCard icon={CalendarCheck} label="Upcoming visits" value={String(upcoming.length)} hint={nextVisitHint} />
-        <StatCard icon={FileText} label="Reports analysed" value={String(reportsAnalysedCount)} hint={`${reports.reduce((sum, r) => sum + (r.flagged || 0), 0)} flagged value(s)`} />
-        <StatCard icon={Bot} label="AI Interactions" value={String(chatMessagesCount)} hint="Recent collaborations" />
+        <StatCard icon={CalendarCheck} label="Upcoming" value={String(upcoming.length)} hint={upcoming[0]?.date ? `Next: ${upcoming[0].date.slice(5)}` : "None"} className="h-full" />
+        <StatCard icon={FileText} label="Reports" value={String(reportsAnalysedCount)} hint={`${reports.reduce((sum, r) => sum + (r.flagged || 0), 0)} flagged`} className="h-full" />
+        <StatCard icon={Bot} label="AI Chats" value={String(chatMessagesCount)} hint="Collaborations" className="h-full" />
       </div>
 
       <div className="grid gap-6 lg:grid-cols-3">
         <Card className="shadow-soft lg:col-span-2">
-          <CardHeader>
+          <CardHeader className="pb-3">
             <CardTitle className="text-base">Upcoming appointments</CardTitle>
             <CardDescription>Confirmed and pending visits</CardDescription>
           </CardHeader>
-          <CardContent className="space-y-3">
-            {upcoming.map((a) => {
-              const doc = doctors.find(d => d.id === a.doctor_id);
-              const hosp = hospitals.find(h => h.id === a.hospital_id);
-              
-              return (
-                <div
-                  key={a.id}
-                  className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-border p-4"
-                >
-                <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium truncate">{doc ? doc.name : a.doctor_id}</p>
-                    <p className="text-xs text-muted-foreground">
-                      {doc ? doc.specialty : "General"} · {hosp ? hosp.name : a.hospital_id}
-                    </p>
+          <CardContent className="space-y-2.5 px-3 sm:px-6">
+            {upcoming.length === 0 ? (
+              <p className="text-sm text-muted-foreground py-4 text-center">No upcoming appointments</p>
+            ) : (
+              upcoming.map((a) => {
+                const doc = doctors.find(d => d.id === a.doctor_id);
+                const hosp = hospitals.find(h => h.id === a.hospital_id);
+                return (
+                  <div
+                    key={a.id}
+                    className="flex flex-col gap-2 rounded-xl border border-border p-3 sm:flex-row sm:items-center sm:justify-between sm:gap-3 sm:p-4"
+                  >
+                    <div className="min-w-0">
+                      <p className="text-sm font-semibold truncate">{doc ? doc.name : a.doctor_id}</p>
+                      <p className="text-xs text-muted-foreground truncate">
+                        {doc ? doc.specialty : "General"} &middot; {hosp ? hosp.name : a.hospital_id}
+                      </p>
+                    </div>
+                    <div className="flex items-center justify-between gap-2 sm:flex-col sm:items-end">
+                      <p className="text-xs font-medium text-muted-foreground whitespace-nowrap">
+                        {a.date} &middot; {a.time}
+                      </p>
+                      <Badge variant={a.status === "Confirmed" ? "secondary" : "outline"} className="text-xs">
+                        {a.status}
+                      </Badge>
+                    </div>
                   </div>
-                  <div className="text-right shrink-0">
-                    <p className="text-sm font-medium">
-                      {a.date} · {a.time}
-                    </p>
-                    <Badge variant={a.status === "Confirmed" ? "secondary" : "outline"} className="mt-1">
-                      {a.status}
-                    </Badge>
-                  </div>
-                </div>
-              );
-            })}
-            <Button asChild variant="outline" size="sm">
-              <Link to="/patient/appointments">View appointment history</Link>
+                );
+              })
+            )}
+            <Button asChild variant="outline" size="sm" className="w-full mt-1">
+              <Link to="/patient/appointments">View all appointments</Link>
             </Button>
           </CardContent>
         </Card>
 
         <Card className="shadow-soft">
-          <CardHeader>
+          <CardHeader className="pb-3">
             <CardTitle className="text-base">Quick actions</CardTitle>
           </CardHeader>
-          <CardContent className="grid grid-cols-2 gap-2 sm:grid-cols-1">
+          <CardContent className="grid grid-cols-2 gap-2 px-3 sm:px-6 sm:grid-cols-1">
             {quickActions.map((qa) => (
-              <Button key={qa.to} asChild variant="outline" className="justify-start">
+              <Button key={qa.to} asChild variant="outline" className="justify-start h-10 px-3 text-xs sm:text-sm">
                 <Link to={qa.to}>
-                  <qa.icon className="mr-2 size-4" /> {qa.label}
+                  <qa.icon className="mr-1.5 size-4 shrink-0" />
+                  <span className="truncate">{qa.label}</span>
                 </Link>
               </Button>
             ))}
@@ -519,35 +523,35 @@ function PatientOverview() {
 
       <div className="grid gap-6 lg:grid-cols-2">
         <Card className="shadow-soft">
-          <CardHeader>
+          <CardHeader className="pb-3">
             <CardTitle className="text-base">Recent reports</CardTitle>
             <CardDescription>AI summaries of your uploads</CardDescription>
           </CardHeader>
-          <CardContent className="space-y-4">
+          <CardContent className="space-y-4 px-3 sm:px-6">
             {reports.slice(0, 2).map((r) => (
               <div key={r.id}>
-                <div className="flex items-center justify-between gap-3">
-                  <p className="text-sm font-medium">{r.title}</p>
-                  <Badge variant={r.status === "Analysed" ? "secondary" : "outline"}>{r.status}</Badge>
+                <div className="flex items-start justify-between gap-2">
+                  <p className="text-sm font-medium leading-snug">{r.title}</p>
+                  <Badge variant={r.status === "Analysed" ? "secondary" : "outline"} className="shrink-0 text-xs">{r.status}</Badge>
                 </div>
                 <p className="mt-1 text-xs text-muted-foreground">
-                  {r.type} · {r.date} · {r.flagged} flagged value(s)
+                  {r.type} &middot; {r.date} &middot; {r.flagged} flagged
                 </p>
-                <p className="mt-1.5 text-sm text-muted-foreground">{r.summary}</p>
+                <p className="mt-1.5 text-xs sm:text-sm text-muted-foreground line-clamp-2">{r.summary}</p>
                 <Separator className="mt-4" />
               </div>
             ))}
           </CardContent>
         </Card>
 
-        <Card className="shadow-soft rounded-[24px] flex-1">
+        <Card className="shadow-soft">
           <CardHeader className="pb-3 border-b border-border/40">
-            <CardTitle className="text-base font-extrabold text-foreground">Recent Health Activity</CardTitle>
-            <CardDescription className="text-xs">Your latest reports, consultations and health records</CardDescription>
+            <CardTitle className="text-base font-extrabold text-foreground">Health Activity</CardTitle>
+            <CardDescription className="text-xs">Latest reports, consultations &amp; health records</CardDescription>
           </CardHeader>
-          <CardContent className="p-4 space-y-4">
+          <CardContent className="p-3 sm:p-4 space-y-2.5">
             {recentActivities.length > 0 ? (
-              <div className="flex flex-col gap-3">
+              <div className="flex flex-col gap-2.5">
                 {recentActivities.map((act) => {
                   let Icon = FileText;
                   let iconBg = "bg-blue-500/10 text-blue-600 dark:text-blue-400";
@@ -566,16 +570,16 @@ function PatientOverview() {
                   return (
                     <div 
                       key={act.id} 
-                      className="group flex items-center gap-4 rounded-2xl border border-border/40 bg-muted/20 p-3 hover:bg-muted/40 hover:shadow-sm transition-all"
+                      className="group flex items-center gap-3 rounded-xl border border-border/40 bg-muted/20 p-2.5 hover:bg-muted/40 transition-all"
                     >
-                      <div className={`flex items-center justify-center size-10 rounded-xl shrink-0 ${iconBg}`}>
-                        <Icon className="size-5" strokeWidth={2.5} />
+                      <div className={`flex items-center justify-center size-8 sm:size-10 rounded-xl shrink-0 ${iconBg}`}>
+                        <Icon className="size-4 sm:size-5" strokeWidth={2.5} />
                       </div>
                       <div className="flex-1 min-w-0">
-                        <p className="text-sm font-semibold text-foreground truncate">{act.type}</p>
-                        <p className="text-xs text-muted-foreground truncate mt-0.5">{act.details}</p>
+                        <p className="text-xs sm:text-sm font-semibold text-foreground truncate">{act.type}</p>
+                        <p className="text-[11px] sm:text-xs text-muted-foreground truncate mt-0.5">{act.details}</p>
                       </div>
-                      <Badge variant={act.statusVariant} className={`shrink-0 ${act.statusClass || ''}`}>
+                      <Badge variant={act.statusVariant} className={`shrink-0 text-[10px] sm:text-xs ${act.statusClass || ''}`}>
                         {act.status}
                       </Badge>
                     </div>
