@@ -114,7 +114,7 @@ function HospitalDashboard() {
   const confirmedCount = appointments.filter(a => a.status === "Confirmed").length;
   const pendingCount   = appointments.filter(a => a.status === "Pending").length;
   const todayStr       = new Date().toISOString().slice(0, 10);
-  const todayAppts     = appointments.filter(a => a.date === todayStr);
+  const totalRevenue   = appointments.reduce((sum, appt) => sum + (appt.fee || 0), 0);
 
   const statusVariant = (status: string): "default" | "secondary" | "outline" | "destructive" => {
     if (status === "Confirmed") return "default";
@@ -162,9 +162,9 @@ function HospitalDashboard() {
         />
         <StatCard
           icon={CreditCard}
-          label="Today's appointments"
-          value={todayAppts.length.toString()}
-          hint={`As of ${lastRefresh.toLocaleTimeString()}`}
+          label="Total Revenue"
+          value={`Rs. ${totalRevenue.toLocaleString()}`}
+          hint="From all bookings"
         />
         <StatCard
           icon={Star}
@@ -200,64 +200,7 @@ function HospitalDashboard() {
         </Card>
       </div>
 
-      {/* Live appointments table */}
-      <Card className="shadow-soft">
-        <CardHeader>
-          <div className="flex items-center justify-between gap-3">
-            <CardTitle className="text-base">Recent Appointments</CardTitle>
-            <div className="flex items-center gap-2">
 
-              <span className="text-xs text-muted-foreground">
-                Updated {lastRefresh.toLocaleTimeString()}
-              </span>
-            </div>
-          </div>
-        </CardHeader>
-        <CardContent className="p-0">
-          <div className="overflow-x-auto">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Patient</TableHead>
-                  <TableHead>Doctor</TableHead>
-                  <TableHead>Date &amp; Time</TableHead>
-                  <TableHead className="text-right">Status</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {appointments.length > 0 ? (
-                  appointments.slice(0, 15).map((a) => (
-                    <TableRow key={a.id} className="transition-colors hover:bg-muted/30">
-                      <TableCell className="font-medium">
-                        {a.patient_name || a.patient_id || "Guest"}
-                        {a.patient_mobile && (
-                          <div className="text-xs text-muted-foreground">{a.patient_mobile}</div>
-                        )}
-                      </TableCell>
-                      <TableCell className="text-sm text-muted-foreground">
-                        {a.doctor_id}
-                      </TableCell>
-                      <TableCell className="text-sm">
-                        {a.date}
-                        <span className="text-muted-foreground"> · {a.time}</span>
-                      </TableCell>
-                      <TableCell className="text-right">
-                        <Badge variant={statusVariant(a.status)}>{a.status}</Badge>
-                      </TableCell>
-                    </TableRow>
-                  ))
-                ) : (
-                  <TableRow>
-                    <TableCell colSpan={4} className="text-center text-muted-foreground py-8">
-                      No appointments found
-                    </TableCell>
-                  </TableRow>
-                )}
-              </TableBody>
-            </Table>
-          </div>
-        </CardContent>
-      </Card>
     </div>
   );
 }

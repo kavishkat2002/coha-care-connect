@@ -62,6 +62,7 @@ type DoctorRow = {
   specialty?: string;
   hospital?: string;
   online?: boolean;
+  availability?: Record<string, boolean>;
 };
 
 function AdminDashboard() {
@@ -135,7 +136,7 @@ function AdminDashboard() {
     try {
       const { data } = await supabase
         .from("doctors_roster")
-        .select("id, name, specialty, hospital, online")
+        .select("id, name, specialty, hospital, online, availability")
         .limit(20);
       if (data) setDoctors(data as DoctorRow[]);
     } catch (_) {}
@@ -375,18 +376,23 @@ function AdminDashboard() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {doctors.length > 0 ? doctors.map((d) => (
+                  {doctors.length > 0 ? doctors.map((d) => {
+                    const today = new Date().toISOString().split('T')[0] as string;
+                    const isAvailable = d.availability && d.availability[today] !== undefined 
+                      ? d.availability[today] 
+                      : d.online;
+                    return (
                     <TableRow key={d.id} className="hover:bg-muted/30 transition-colors">
                       <TableCell className="font-medium text-sm">{d.name}</TableCell>
                       <TableCell className="text-sm text-muted-foreground">{d.specialty || "—"}</TableCell>
                       <TableCell className="text-sm text-muted-foreground">{d.hospital || "—"}</TableCell>
                       <TableCell className="text-right">
-                        <Badge variant={d.online ? "default" : "outline"} className="text-xs">
-                          {d.online ? "Online" : "Offline"}
+                        <Badge variant={isAvailable ? "default" : "destructive"} className={isAvailable ? "bg-green-600 hover:bg-green-700 text-xs" : "text-xs"}>
+                          {isAvailable ? "Available Today" : "Offline Today"}
                         </Badge>
                       </TableCell>
                     </TableRow>
-                  )) : (
+                  )}) : (
                     <TableRow><TableCell colSpan={4} className="text-center py-8 text-muted-foreground">No doctors found</TableCell></TableRow>
                   )}
                 </TableBody>

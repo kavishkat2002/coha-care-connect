@@ -573,23 +573,39 @@ function BookPage() {
                       </div>
                       <div className="p-4 space-y-3">
                         {branchDoctors.length > 0 ? (
-                          branchDoctors.map((d) => (
-                            <button
-                              key={d.id}
-                              type="button"
-                              onClick={() => {
-                                setSelected(d);
-                                setSlot(null);
-                              }}
-                              aria-pressed={selected?.id === d.id}
-                              className={
-                                "block w-full rounded-2xl text-left transition-shadow " +
-                                (selected?.id === d.id ? "ring-2 ring-primary ring-offset-2" : "")
-                              }
-                            >
-                              <DoctorCard doctor={d} onProfileClick={setViewingDoctor} />
-                            </button>
-                          ))
+                          branchDoctors.map((d) => {
+                            const isAvailable = d.availability && d.availability[date] !== undefined 
+                              ? d.availability[date] 
+                              : d.online;
+                            return (
+                              <button
+                                key={d.id}
+                                type="button"
+                                disabled={!isAvailable}
+                                onClick={() => {
+                                  if (isAvailable) {
+                                    setSelected(d);
+                                    setSlot(null);
+                                  }
+                                }}
+                                aria-pressed={selected?.id === d.id}
+                                className={
+                                  "block w-full rounded-2xl text-left transition-all relative overflow-hidden " +
+                                  (selected?.id === d.id ? "ring-2 ring-primary ring-offset-2" : "") +
+                                  (!isAvailable ? " opacity-60 cursor-not-allowed grayscale-[0.5]" : " hover:shadow-md")
+                                }
+                              >
+                                {!isAvailable && (
+                                  <div className="absolute inset-0 z-10 bg-background/20 backdrop-blur-[1px] flex items-center justify-center">
+                                    <Badge variant="destructive" className="shadow-sm border border-destructive-foreground/20">
+                                      Unavailable on {date}
+                                    </Badge>
+                                  </div>
+                                )}
+                                <DoctorCard doctor={d} onProfileClick={setViewingDoctor} />
+                              </button>
+                            );
+                          })
                         ) : (
                           <p className="text-sm text-muted-foreground text-center py-4">
                             No specialists match your filters at this branch.

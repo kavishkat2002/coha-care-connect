@@ -10,8 +10,10 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
 import { getSession, signOut, type Session } from "@/services/auth.service";
 import { doctorService } from "@/services/doctor.service";
+import { patientService } from "@/services/patient.service";
 import { type Doctor } from "@/data/mock";
 import { useNavigate } from "@tanstack/react-router";
 
@@ -247,6 +249,8 @@ function DoctorProfile() {
                   const today = new Date().toISOString().split('T')[0] as string;
                   const [date, setDate] = useState<string>(today);
                   const [status, setStatus] = useState<boolean>(true);
+                  const [appointments, setAppointments] = useState<any[]>([]);
+                  const [loadingAppts, setLoadingAppts] = useState<boolean>(false);
 
                   useEffect(() => {
                     if (!session) return;
@@ -262,7 +266,22 @@ function DoctorProfile() {
                         setStatus(isAvailable);
                       }
                     };
+                    
+                    const fetchAppts = async () => {
+                      setLoadingAppts(true);
+                      const data = await patientService.getAppointments();
+                      const id = session.registration_id || `DOC-${session.id.substring(0, 6).toUpperCase()}`;
+                      const filtered = data.filter((a: any) => 
+                        (a.doctor_id === id || a.doctor === session.name) && 
+                        a.date === date && 
+                        a.mode === "In-person"
+                      );
+                      setAppointments(filtered);
+                      setLoadingAppts(false);
+                    };
+
                     fetchStatus();
+                    fetchAppts();
                   }, [date, session]);
 
                   const handleUpdateStatus = async (newStatus: boolean) => {
@@ -319,6 +338,32 @@ function DoctorProfile() {
                         >
                           Offline
                         </Button>
+                      </div>
+                      
+                      <div className="w-full mt-6 space-y-4">
+                        <h4 className="text-sm font-semibold border-b border-border pb-2">In-Person Appointments for {date}</h4>
+                        {loadingAppts ? (
+                          <p className="text-sm text-muted-foreground text-center py-4">Loading appointments...</p>
+                        ) : appointments.length > 0 ? (
+                          <div className="grid gap-3 sm:grid-cols-2">
+                            {appointments.map(a => (
+                              <div key={a.id} className="p-3 border border-border rounded-lg bg-card text-card-foreground shadow-sm flex flex-col gap-1">
+                                <div className="flex justify-between items-start gap-2">
+                                  <span className="font-semibold line-clamp-1">{a.patient_name || a.patient || "Patient"}</span>
+                                  <Badge variant="outline" className="text-xs shrink-0 bg-primary/10 text-primary border-primary/20">{a.time}</Badge>
+                                </div>
+                                <div className="text-xs text-muted-foreground flex justify-between mt-2">
+                                  <span>Queue: #{a.queue_number || '-'}</span>
+                                  <span className="font-medium text-foreground">{a.status}</span>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        ) : (
+                          <p className="text-sm text-muted-foreground text-center py-6 bg-muted/30 rounded-lg border border-dashed border-border">
+                            No in-person appointments booked for this date.
+                          </p>
+                        )}
                       </div>
                     </>
                   );

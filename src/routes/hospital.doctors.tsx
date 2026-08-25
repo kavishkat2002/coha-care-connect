@@ -198,6 +198,28 @@ function HospitalDoctors() {
     }
   };
 
+  const handleToggleAvailability = async (id: string, date: string, currentStatus: boolean) => {
+    const newStatus = !currentStatus;
+    const updatedDocs = roster.map(d => {
+      if (d.id === id) {
+        return {
+          ...d,
+          availability: {
+            ...(d.availability || {}),
+            [date]: newStatus
+          }
+        };
+      }
+      return d;
+    });
+    setRoster(updatedDocs);
+    const doc = updatedDocs.find(d => d.id === id);
+    if (doc) {
+      await doctorService.saveDoctor(doc);
+      toast.success(`Marked ${doc.name} as ${newStatus ? 'Available' : 'Offline'} for ${date}`);
+    }
+  };
+
   return (
     <div className="space-y-8">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
@@ -445,6 +467,16 @@ function HospitalDoctors() {
                             </DropdownMenuSubContent>
                           </DropdownMenuPortal>
                         </DropdownMenuSub>
+                        <DropdownMenuItem 
+                          onClick={() => {
+                            const isAvailable = (doc as any).availability?.[filterDate] !== undefined 
+                              ? (doc as any).availability[filterDate] 
+                              : doc.online;
+                            handleToggleAvailability(doc.id, filterDate, isAvailable);
+                          }}
+                        >
+                          Mark as {((doc as any).availability?.[filterDate] !== undefined ? (doc as any).availability[filterDate] : doc.online) ? "Offline" : "Available"}
+                        </DropdownMenuItem>
                         <DropdownMenuItem className="text-destructive focus:bg-destructive/10 focus:text-destructive" onClick={() => handleRemoveDoctor(doc.id)}>
                           Remove from Hospital
                         </DropdownMenuItem>
