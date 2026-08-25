@@ -456,7 +456,7 @@ function DoctorDashboard() {
         <CardHeader>
           <CardTitle className="text-base font-bold flex items-center justify-between">
             <span>Telemedicine Consultation Requests & Queue</span>
-            <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200 text-xs font-semibold">
+            <Badge variant="outline" className="bg-slate-50 text-slate-600 border-slate-200 text-xs font-semibold">
               Live Patient Requests
             </Badge>
           </CardTitle>
@@ -494,7 +494,7 @@ function DoctorDashboard() {
                         size="sm"
                         variant="outline"
                         onClick={() => setViewingAppt(a)}
-                        className="text-xs h-8 gap-1.5 rounded-lg border-blue-200 text-blue-700 dark:text-blue-300 dark:border-blue-800 hover:bg-blue-50"
+                        className="text-xs h-8 gap-1.5 rounded-lg border-slate-300 text-slate-700 hover:bg-slate-50 hover:text-slate-900"
                       >
                         <Eye className="size-3.5" />
                         View Health Background
@@ -505,10 +505,10 @@ function DoctorDashboard() {
                         variant="outline"
                         className={
                           a.status === "Completed"
-                            ? "bg-slate-100 text-slate-700 border-slate-200 dark:bg-slate-800 dark:text-slate-300 font-semibold"
+                            ? "bg-slate-50 text-slate-600 border-slate-200 font-semibold"
                             : a.status === "Approved"
-                            ? "bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950 dark:text-emerald-300 font-semibold"
-                            : "bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-950 dark:text-amber-300 font-semibold"
+                            ? "bg-teal-50 text-teal-700 border-teal-200 font-semibold"
+                            : "bg-stone-50 text-stone-700 border-stone-200 font-semibold"
                         }
                       >
                         {a.status || "Pending Approval"}
@@ -521,9 +521,9 @@ function DoctorDashboard() {
                           <Button
                             size="sm"
                             onClick={() => setActiveDoctorVideoAppt(a)}
-                            className="bg-emerald-600 hover:bg-emerald-700 text-white text-xs h-8 rounded-lg font-bold gap-1 shadow-xs"
+                            className="bg-[#438787] hover:bg-[#346a6f] text-white text-xs h-8 rounded-lg font-bold gap-1 shadow-sm"
                           >
-                            <Video className="size-3.5 animate-pulse" />
+                            <Video className="size-3.5" />
                             <span>Start Video Call</span>
                           </Button>
 
@@ -543,7 +543,7 @@ function DoctorDashboard() {
                             variant="outline"
                             onClick={() => handleEndSession(a.id || "")}
                             title="Complete and end consultation session"
-                            className="text-xs h-8 text-rose-600 border-rose-200 hover:bg-rose-50 dark:border-rose-900/60 dark:hover:bg-rose-950/40 rounded-lg gap-1 font-medium"
+                            className="text-xs h-8 text-slate-600 border-slate-300 hover:bg-slate-100 rounded-lg gap-1 font-medium"
                           >
                             <CheckCircle2 className="size-3.5" />
                             <span>End Session</span>
@@ -551,7 +551,7 @@ function DoctorDashboard() {
                         </div>
                       ) : a.status === "Completed" ? (
                         <div className="flex items-center justify-end gap-1.5">
-                          <Badge className="bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300 font-semibold text-xs py-1 px-2.5">
+                          <Badge className="bg-slate-100 text-slate-500 font-medium text-xs py-1 px-2.5 shadow-none border border-slate-200 hover:bg-slate-100">
                             Session Ended
                           </Badge>
                           <Button
@@ -569,7 +569,7 @@ function DoctorDashboard() {
                           <Button
                             size="sm"
                             onClick={() => handleApproveAppointment(a.id || "")}
-                            className="bg-emerald-600 hover:bg-emerald-700 text-white text-xs h-8 gap-1 rounded-lg"
+                            className="bg-[#438787] hover:bg-[#346a6f] text-white text-xs h-8 gap-1 rounded-lg shadow-sm"
                           >
                             <CheckCircle2 className="size-3.5" />
                             Approve
@@ -578,7 +578,8 @@ function DoctorDashboard() {
                             size="sm"
                             variant="outline"
                             onClick={() => handleDeclineAppointment(a.id || "")}
-                            className="text-xs h-8 text-rose-600 border-rose-200 hover:bg-rose-50 rounded-lg"
+                            title="Decline Request"
+                            className="text-slate-500 hover:text-slate-700 hover:bg-slate-100 border-slate-300 size-8 p-0 rounded-lg"
                           >
                             <XCircle className="size-3.5" />
                           </Button>

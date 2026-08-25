@@ -250,16 +250,16 @@ export function PortalShell({
   const getNotificationIcon = (type: NotificationItem["type"]) => {
     switch (type) {
       case "message":
-        return <MessageSquare className="size-4 text-blue-600 dark:text-blue-400" />;
+        return <MessageSquare className="size-4 text-[#438787]" />;
       case "appointment":
-        return <Calendar className="size-4 text-emerald-600 dark:text-emerald-400" />;
+        return <Calendar className="size-4 text-stone-500" />;
       case "medication":
-        return <Pill className="size-4 text-purple-600 dark:text-purple-400" />;
+        return <Pill className="size-4 text-rose-400" />;
       case "epass":
-        return <Award className="size-4 text-amber-600 dark:text-amber-400" />;
+        return <Award className="size-4 text-amber-500" />;
       case "system":
       default:
-        return <Info className="size-4 text-indigo-600 dark:text-indigo-400" />;
+        return <Info className="size-4 text-slate-400" />;
     }
   };
 
@@ -332,42 +332,44 @@ export function PortalShell({
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" size="icon" aria-label="Notifications" className="relative size-10 rounded-full hover:bg-muted">
-                  <Bell className="size-5 text-slate-700 dark:text-slate-200" />
+                  <Bell className="size-5 text-slate-600 dark:text-slate-300" />
                   {unreadCount > 0 && (
-                    <span className="absolute -top-0.5 -right-0.5 size-5 bg-blue-600 text-white font-extrabold text-[10px] rounded-full flex items-center justify-center border-2 border-card shadow-xs">
+                    <span className="absolute -top-0.5 -right-0.5 size-5 bg-[#438787] text-white font-extrabold text-[10px] rounded-full flex items-center justify-center border-2 border-card shadow-sm">
                       {unreadCount}
                     </span>
                   )}
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-[calc(100vw-2rem)] sm:w-80 max-w-sm p-0 rounded-2xl border border-border shadow-2xl overflow-hidden">
-                <div className="p-3.5 bg-gradient-to-r from-blue-50/80 via-white to-indigo-50/60 dark:from-slate-900 dark:via-slate-900 dark:to-slate-950 border-b border-border flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <Bell className="size-4 text-blue-600 dark:text-blue-400" />
-                    <span className="font-bold text-sm text-slate-900 dark:text-white">Notifications & Reminders</span>
+              <DropdownMenuContent align="end" className="w-[calc(100vw-2rem)] sm:w-80 max-w-sm p-0 rounded-xl border border-slate-200 shadow-xl overflow-hidden bg-white dark:bg-slate-900">
+                {/* Header */}
+                <div className="px-4 py-3 bg-white dark:bg-slate-900 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
+                  <div className="flex items-center gap-2.5">
+                    <Bell className="size-4 text-slate-500" />
+                    <span className="font-semibold text-sm text-slate-800 dark:text-slate-100">Notifications</span>
                     {unreadCount > 0 && (
-                      <Badge className="bg-blue-600 text-white text-[10px] font-bold px-1.5 py-0.2 rounded-full">
+                      <span className="text-[10px] font-semibold bg-[#438787]/10 text-[#438787] border border-[#438787]/20 px-2 py-0.5 rounded-full">
                         {unreadCount} new
-                      </Badge>
+                      </span>
                     )}
                   </div>
                   {notifications.length > 0 && (
                     <button
                       type="button"
                       onClick={markAllAsRead}
-                      className="text-[11px] font-bold text-blue-600 hover:text-blue-700 dark:text-blue-400 flex items-center gap-1"
+                      className="text-[11px] font-medium text-slate-500 hover:text-slate-700 flex items-center gap-1 transition-colors"
                     >
                       <Check className="size-3" /> Mark read
                     </button>
                   )}
                 </div>
 
-                <div className="max-h-88 overflow-y-auto divide-y divide-border">
+                {/* Notification items */}
+                <div className="max-h-[22rem] overflow-y-auto divide-y divide-slate-100 dark:divide-slate-800">
                   {notifications.length === 0 ? (
                     <div className="p-8 text-center space-y-2">
-                      <CheckCircle2 className="size-8 text-emerald-500 mx-auto opacity-80" />
-                      <p className="text-xs font-semibold text-foreground">You are all caught up!</p>
-                      <p className="text-[11px] text-muted-foreground">No pending messages or reminders.</p>
+                      <CheckCircle2 className="size-8 text-[#438787]/60 mx-auto" />
+                      <p className="text-xs font-semibold text-slate-700">All caught up!</p>
+                      <p className="text-[11px] text-slate-400">No pending messages or reminders.</p>
                     </div>
                   ) : (
                     notifications.map((n) => (
@@ -378,42 +380,46 @@ export function PortalShell({
                           if (n.link) navigate({ to: n.link });
                         }}
                         className={cn(
-                          "p-3.5 transition-colors cursor-pointer flex items-start gap-3 hover:bg-muted/50",
-                          !n.read ? "bg-blue-50/40 dark:bg-blue-950/20" : ""
+                          "px-4 py-3.5 transition-colors cursor-pointer flex items-start gap-3 hover:bg-slate-50 dark:hover:bg-slate-800/60",
+                          !n.read ? "bg-[#438787]/5 dark:bg-[#438787]/10" : "bg-white dark:bg-slate-900"
                         )}
                       >
-                        <div className="p-2 rounded-xl bg-slate-100 dark:bg-slate-800 shrink-0 mt-0.5">
+                        <div className="p-2 rounded-lg bg-slate-100 dark:bg-slate-800 shrink-0 mt-0.5">
                           {getNotificationIcon(n.type)}
                         </div>
-                        <div className="flex-1 min-w-0 space-y-1">
+                        <div className="flex-1 min-w-0 space-y-0.5">
                           <div className="flex items-center justify-between gap-2">
-                            <p className={cn("text-xs leading-tight truncate", !n.read ? "font-bold text-slate-900 dark:text-white" : "font-medium text-slate-700 dark:text-slate-300")}>
+                            <p className={cn(
+                              "text-xs leading-snug",
+                              !n.read ? "font-semibold text-slate-900 dark:text-white" : "font-medium text-slate-600 dark:text-slate-300"
+                            )}>
                               {n.title}
                             </p>
-                            {!n.read && <span className="size-2 rounded-full bg-blue-600 shrink-0" />}
+                            {!n.read && <span className="size-2 rounded-full bg-[#438787] shrink-0" />}
                           </div>
-                          <p className="text-[11px] text-slate-500 dark:text-slate-400 line-clamp-2 leading-relaxed">
+                          <p className="text-[11px] text-slate-400 dark:text-slate-500 line-clamp-2 leading-relaxed">
                             {n.description}
                           </p>
-                          <span className="text-[10px] text-slate-400 font-mono block pt-0.5">{n.time}</span>
+                          <span className="text-[10px] text-slate-300 dark:text-slate-600 block pt-0.5">{n.time}</span>
                         </div>
                       </div>
                     ))
                   )}
                 </div>
 
+                {/* Footer */}
                 {notifications.length > 0 && (
-                  <div className="p-2 border-t border-border bg-slate-50/80 dark:bg-slate-900/80 flex items-center justify-between px-3">
+                  <div className="px-4 py-2.5 border-t border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/80 flex items-center justify-between">
                     <button
                       type="button"
                       onClick={clearAllNotifications}
-                      className="text-[11px] text-rose-600 hover:text-rose-700 dark:text-rose-400 font-medium flex items-center gap-1"
+                      className="text-[11px] text-slate-400 hover:text-slate-600 font-medium flex items-center gap-1 transition-colors"
                     >
                       <Trash2 className="size-3" /> Clear panel
                     </button>
                     <Link
                       to="/patient/telemedicine"
-                      className="text-[11px] font-bold text-blue-600 hover:underline flex items-center gap-1"
+                      className="text-[11px] font-semibold text-[#438787] hover:text-[#346a6f] flex items-center gap-1 transition-colors"
                     >
                       View Consultations <ExternalLink className="size-3" />
                     </Link>

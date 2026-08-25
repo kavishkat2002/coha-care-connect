@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { Bot, Paperclip, Send, User, Mic, Calendar, ArrowRight, ShieldAlert, FileText, Camera, X, Activity } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
+import { GuestCreditBanner } from "@/components/shared/GuestCreditBanner";
 
 import { PageHeader } from "@/components/shared/PageHeader";
 import { AiDisclaimer } from "@/components/shared/AiDisclaimer";
@@ -113,14 +114,17 @@ function AssistantPage() {
     if (activePlan === "platinum") return 100000;
     if (activePlan === "gold") return 10000;
     if (activePlan === "silver") return 1000;
-    return 50;
+    // Guest user: 450 free credits
+    return 450;
   });
+  const [isGuest, setIsGuest] = useState<boolean>(false);
   const [patientId, setPatientId] = useState<string>("p1");
 
   useEffect(() => {
     patientService.getPatientProfile().then(p => {
       if (p?.id) {
         setPatientId(p.id);
+        setIsGuest(false);
         patientService.getEPassMembership(p.id).then(m => {
           if (m && typeof m.ai_credits === "number") {
             setAiCredits(m.ai_credits);
@@ -138,6 +142,14 @@ function AssistantPage() {
             setDynamicSuggestions(latest.dynamicSuggestions || []);
           }
         });
+      } else {
+        // No profile = guest user
+        setIsGuest(true);
+        const saved = localStorage.getItem("meddoc_ai_credits");
+        if (!saved) {
+          setAiCredits(450);
+          localStorage.setItem("meddoc_ai_credits", "450");
+        }
       }
     });
   }, []);

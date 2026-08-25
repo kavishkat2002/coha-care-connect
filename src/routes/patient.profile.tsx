@@ -144,7 +144,7 @@ This document has been archived directly by the patient inside their personal me
 
                   {attachment ? (
                     <div 
-                      className="flex items-center gap-1.5 mt-2 bg-blue-500/10 hover:bg-blue-500/20 text-blue-600 dark:text-blue-400 text-[10px] font-bold px-2 py-0.5 rounded-md border border-blue-500/20 cursor-pointer w-fit transition-all" 
+                      className="flex items-center gap-1.5 mt-2 bg-slate-100 hover:bg-slate-200 text-slate-600 dark:text-slate-300 text-[10px] font-semibold px-2 py-0.5 rounded-md border border-slate-200 cursor-pointer w-fit transition-all" 
                       onClick={() => handleDownloadAttachment(attachment)}
                     >
                       <Paperclip className="size-3 shrink-0" />
@@ -327,7 +327,7 @@ function ProfilePage() {
                 <input type="file" className="hidden" accept="image/*" onChange={handleAvatarChange} />
               </label>
             </div>
-            <div className="mt-1 text-[10px] font-bold bg-primary/10 text-primary px-2.5 py-0.5 rounded-full border border-primary/20 select-all cursor-pointer" title="Click to copy Patient ID">
+            <div className="mt-1 text-[10px] font-semibold bg-[#438787]/10 text-[#438787] px-2.5 py-0.5 rounded-full border border-[#438787]/20 select-all cursor-pointer" title="Click to copy Patient ID">
               {p.patientId || "Generating ID..."}
             </div>
           </div>

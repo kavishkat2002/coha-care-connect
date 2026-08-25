@@ -554,17 +554,17 @@ function PatientOverview() {
               <div className="flex flex-col gap-2.5">
                 {recentActivities.map((act) => {
                   let Icon = FileText;
-                  let iconBg = "bg-blue-500/10 text-blue-600 dark:text-blue-400";
+                  let iconBg = "bg-slate-100 text-slate-500";
                   
                   if (act.icon === "stethoscope") {
                     Icon = Stethoscope;
-                    iconBg = "bg-purple-500/10 text-purple-600 dark:text-purple-400";
+                    iconBg = "bg-stone-100 text-stone-600";
                   } else if (act.icon === "pill") {
                     Icon = Pill;
-                    iconBg = "bg-rose-500/10 text-rose-600 dark:text-rose-400";
+                    iconBg = "bg-rose-50 text-rose-400";
                   } else if (act.icon === "clipboard") {
                     Icon = ClipboardList;
-                    iconBg = "bg-amber-500/10 text-amber-600 dark:text-amber-400";
+                    iconBg = "bg-amber-50 text-amber-500";
                   }
 
                   return (

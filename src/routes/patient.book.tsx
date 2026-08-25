@@ -71,6 +71,7 @@ function BookPage() {
   const [specialty, setSpecialty] = useState("all");
   const [hospital, setHospital] = useState("");
   const [showHospitalSuggestions, setShowHospitalSuggestions] = useState(false);
+  const [selectedBranch, setSelectedBranch] = useState("all");
   const [selected, setSelected] = useState<Doctor | null>(null);
   const [slot, setSlot] = useState<string | null>(null);
   const [confirmed, setConfirmed] = useState(false);
@@ -259,10 +260,11 @@ function BookPage() {
       return (
         matchesQuery &&
         (specialty === "all" || d.specialty === specialty) &&
-        (!hQ || (d.hospital || "").toLowerCase().includes(hQ))
+        (!hQ || (d.hospital || "").toLowerCase().includes(hQ)) &&
+        (selectedBranch === "all" || d.branch === selectedBranch)
       );
     });
-  }, [query, specialty, hospital, rosterDoctors, doctors]);
+  }, [query, specialty, hospital, selectedBranch, rosterDoctors, doctors]);
 
   if (confirmed && selected) {
     return (
@@ -481,6 +483,7 @@ function BookPage() {
                 value={hospital}
                 onChange={(e) => {
                   setHospital(e.target.value);
+                  setSelectedBranch("all");
                   setShowHospitalSuggestions(true);
                 }}
                 onFocus={() => setShowHospitalSuggestions(true)}
@@ -496,6 +499,7 @@ function BookPage() {
                       className="px-4 py-2 hover:bg-muted cursor-pointer text-sm"
                       onClick={() => {
                         setHospital(name);
+                        setSelectedBranch("all");
                         setShowHospitalSuggestions(false);
                       }}
                     >
@@ -506,6 +510,26 @@ function BookPage() {
               )}
             </div>
           </div>
+
+          {/* Branch selector — only shows when a hospital with branches is selected */}
+          {branches.length > 0 && (
+            <div className="space-y-2">
+              <Label htmlFor="branch">Branch / Location</Label>
+              <Select value={selectedBranch} onValueChange={(v) => { setSelectedBranch(v); setSelected(null); setSlot(null); }}>
+                <SelectTrigger id="branch">
+                  <SelectValue placeholder="All branches" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All branches</SelectItem>
+                  {branches.map((b) => (
+                    <SelectItem key={b as string} value={b as string}>
+                      {b as string}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          )}
 
         </CardContent>
       </Card>
