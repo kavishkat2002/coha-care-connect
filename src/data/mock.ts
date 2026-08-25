@@ -1,4 +1,4 @@
-export type Role = "patient" | "doctor" | "hospital" | "admin";
+export type Role = "patient" | "doctor" | "hospital" | "admin" | "elab" | "pharmacy";
 
 export type Doctor = {
   id: string;

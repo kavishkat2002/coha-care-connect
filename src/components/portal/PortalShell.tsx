@@ -95,6 +95,48 @@ const INITIAL_NOTIFICATIONS: NotificationItem[] = [
   },
 ];
 
+const ADMIN_NOTIFICATIONS: NotificationItem[] = [
+  {
+    id: "a1",
+    type: "system",
+    title: "System Update Complete",
+    description: "The core platform has been updated to v2.1.0.",
+    time: "2 hours ago",
+    read: false,
+    link: "/admin",
+  },
+  {
+    id: "a2",
+    type: "appointment",
+    title: "New Hospital Registered",
+    description: "CarePoint Hospital has requested verification.",
+    time: "4 hours ago",
+    read: false,
+    link: "/admin",
+  },
+];
+
+const HOSPITAL_NOTIFICATIONS: NotificationItem[] = [
+  {
+    id: "h1",
+    type: "appointment",
+    title: "New Doctor Onboarded",
+    description: "Dr. Sandeep has joined the cardiology department.",
+    time: "1 hour ago",
+    read: false,
+    link: "/hospital",
+  },
+  {
+    id: "h2",
+    type: "system",
+    title: "Roster Update Required",
+    description: "Please update the weekend shift roster.",
+    time: "5 hours ago",
+    read: true,
+    link: "/hospital",
+  },
+];
+
 export function PortalShell({
   nav,
   portalLabel,
@@ -109,13 +151,24 @@ export function PortalShell({
   const [isLoading, setIsLoading] = useState(true);
   const [open, setOpen] = useState(false);
   const [notifications, setNotifications] = useState<NotificationItem[]>(() => {
-    const saved = localStorage.getItem("meddoc_notifications");
+    let initialArray = INITIAL_NOTIFICATIONS;
+    let storageKey = "meddoc_notifications_patient";
+
+    if (portalLabel.toLowerCase().includes("admin")) {
+      initialArray = ADMIN_NOTIFICATIONS;
+      storageKey = "coha_admin_notifs_v1";
+    } else if (portalLabel.toLowerCase().includes("hospital")) {
+      initialArray = HOSPITAL_NOTIFICATIONS;
+      storageKey = "coha_hospital_notifs_v1";
+    }
+
+    const saved = localStorage.getItem(storageKey);
     if (saved) {
       try {
         return JSON.parse(saved);
       } catch (e) {}
     }
-    return INITIAL_NOTIFICATIONS;
+    return initialArray;
   });
 
   const navigate = useNavigate();
@@ -169,8 +222,12 @@ export function PortalShell({
 
   // Sync notifications to localStorage
   useEffect(() => {
-    localStorage.setItem("meddoc_notifications", JSON.stringify(notifications));
-  }, [notifications]);
+    let storageKey = "meddoc_notifications_patient";
+    if (portalLabel.toLowerCase().includes("admin")) storageKey = "coha_admin_notifs_v1";
+    else if (portalLabel.toLowerCase().includes("hospital")) storageKey = "coha_hospital_notifs_v1";
+    
+    localStorage.setItem(storageKey, JSON.stringify(notifications));
+  }, [notifications, portalLabel]);
 
   useEffect(() => setOpen(false), [pathname]);
 

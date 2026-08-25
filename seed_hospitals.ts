@@ -16,26 +16,29 @@ const supabaseAnonKey = env['VITE_SUPABASE_ANON_KEY'];
 
 const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
-const generateRegId = (role: string) => {
-  return `HOS-${Math.floor(Math.random() * 900000) + 100000}`;
-};
-
-const createAccounts = async () => {
+async function seed() {
   for (const h of hospitals) {
-    const name = h.name;
-    const email = name.toLowerCase().replace(/[^a-z0-g]/g, '') + '@hospital.meddoc.com';
-    const { error } = await supabase.auth.signUp({
-      email,
-      password: "Password123!",
-      options: {
-        data: { role: 'hospital', name, registration_id: generateRegId('hospital') }
-      }
-    });
-    if (error && !error.message.includes("already registered") && !error.message.includes("rate limit")) {
-      console.log(`Failed ${name}: ${error.message}`);
+    const { error } = await supabase
+      .from('hospitals')
+      .upsert({
+        id: h.id,
+        name: h.name,
+        city: h.city,
+        rating: h.rating,
+        reviews: h.reviews,
+        branches: h.branches,
+        departments: h.departments,
+        emergency: h.emergency,
+        facilities: h.facilities,
+        phone: h.phone
+      });
+      
+    if (error) {
+      console.error(`Failed to seed ${h.name}:`, error.message);
     } else {
-      console.log(`Created (or Exists) ${name} (${email})`);
+      console.log(`Seeded ${h.name}`);
     }
   }
-};
-createAccounts();
+}
+
+seed();
