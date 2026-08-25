@@ -10,12 +10,18 @@ export const doctorService = {
       .from("doctors_roster")
       .select("*");
     
-    if (error) {
-      console.error("Error fetching doctors:", error);
-      return [];
+    const { doctors: mockDoctors } = await import("@/data/mock");
+
+    if (error || !data) {
+      if (error) console.warn("Error fetching doctors:", error);
+      return mockDoctors;
     }
     
-    return data || [];
+    // Merge DB doctors and mock doctors
+    const dbDocIds = new Set(data.map(d => d.id));
+    const missingMocks = mockDoctors.filter(d => !dbDocIds.has(d.id));
+    
+    return [...data, ...missingMocks];
   },
 
   /**
@@ -34,9 +40,10 @@ export const doctorService = {
       .order("distanceKm", { ascending: true })
       .limit(3);
       
-    if (error || !data || data.length === 0) {
+    const { doctors: mockDoctors } = await import("@/data/mock");
+
+    if (error || !data) {
       console.warn("Falling back to mock doctors for specialty:", specialty);
-      const { doctors: mockDoctors } = await import("@/data/mock");
       const matched = mockDoctors.filter(d => 
         searchPrefix ? d.specialty.toLowerCase().includes(searchPrefix) : true
       );
@@ -45,7 +52,16 @@ export const doctorService = {
         .slice(0, 3);
     }
     
-    return data;
+    const dbDocIds = new Set(data.map(d => d.id));
+    const missingMocks = mockDoctors.filter(d => 
+      !dbDocIds.has(d.id) && 
+      (searchPrefix ? d.specialty.toLowerCase().includes(searchPrefix) : true)
+    );
+
+    const merged = [...data, ...missingMocks];
+    return merged
+      .sort((a, b) => b.rating - a.rating || a.distanceKm - b.distanceKm)
+      .slice(0, 3);
   },
 
   /**

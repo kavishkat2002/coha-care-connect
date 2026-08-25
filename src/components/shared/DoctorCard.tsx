@@ -80,11 +80,6 @@ export function DoctorCard({ doctor, compact = false, onProfileClick }: { doctor
             >
               {doctor.name}
             </h3>
-            {doctor.online ? (
-              <Badge variant="outline" className="border-success/20 bg-success/10 text-success">
-                Online now
-              </Badge>
-            ) : null}
           </div>
           <p className="text-sm text-muted-foreground">
             {doctor.specialty} · {doctor.experienceYears} yrs experience

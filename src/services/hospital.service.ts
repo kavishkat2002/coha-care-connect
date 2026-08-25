@@ -20,12 +20,13 @@ export const hospitalService = {
       .from("hospitals")
       .select("*");
     
-    if (error) {
-      console.error("Error fetching hospitals:", error);
-      return [];
+    if (error || !data || data.length === 0) {
+      if (error) console.warn("Error fetching hospitals:", error);
+      const { hospitals: mockHospitals } = await import("@/data/mock");
+      return mockHospitals;
     }
     
-    return data || [];
+    return data;
   },
 
   /**
