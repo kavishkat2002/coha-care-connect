@@ -375,11 +375,11 @@ Return ONLY a valid JSON object matching this exact structure (no other text, no
   "plainLanguageSummary": string (natural doctor-patient dialogue acknowledging their exact symptoms and asking your follow-up question, or providing agentic action confirmation),
   "followUpQuestions": string[] (2-3 quick-reply options if asking follow-up, or general next steps if complete),
   "recommendation": string[] (2-4 clear next steps),
-  "suggestedSpecialty": string (MUST be one of: "General Medicine", "Dermatology", "Oncology", "Ophthalmology", "Dentistry & Oral Medicine", "Radiology", "Cardiology", "Gynaecology"),
+  "suggestedSpecialty": string (MUST be one of: "General Medicine", "Dermatology", "Oncology", "Ophthalmology", "Dentistry & Oral Medicine", "Radiology", "Cardiology", "Gynaecology", "Neurology", "Orthopaedic Surgery", "Endocrinology", "Rheumatology", "Gastroenterology", "Psychiatry & Mental Health", "General Surgery", "Nephrology", "Virology", "Vascular & Transplant Surgery", "Nutrition", "Subfertility & Gynaecology", "Oral & Maxillofacial Surgery"),
   "agenticAction": {
     "type": "redirect" | "book_doctor" | "find_specialist" | "analyze_image" | "book_specific_doctor" | "none",
     "targetRoute": string (e.g. "/patient/images" for scanning, "/patient/book" for directory, "/patient/medmind-ecare" for prescriptions/records),
-    "specialty": "General Medicine" | "Dermatology" | "Oncology" | "Ophthalmology" | "Dentistry & Oral Medicine" | "Radiology" | "Cardiology" | "Gynaecology" (Populate if user wants to find/book a specific class of specialist),
+    "specialty": string (Same as suggestedSpecialty. Populate if user wants to find/book a specific class of specialist),
     "message": string (A confirmation explaining what agentic widget or action is being triggered for them),
     "parameters": {
       "doctorName": string (e.g., "Dr. Amara Silva" - extract if user asks for a specific doctor),

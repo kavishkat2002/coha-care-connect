@@ -53,9 +53,9 @@ type ChatSession = {
 
 const suggestions = [
   "I have a mouth ulcer that has not healed in three weeks.",
-  "I have a skin rash on my forearm.",
-  "I have breast pain on one side.",
-  "I need a dermatologist near Colombo.",
+  "I am having chest pain and need a Cardiologist.",
+  "I have frequent headaches, I need a Neuro Physician.",
+  "My joints ache continuously. Find an Orthopaedic Surgeon.",
 ];
 
 function AssistantPage() {
