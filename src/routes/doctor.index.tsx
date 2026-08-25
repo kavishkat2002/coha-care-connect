@@ -116,7 +116,7 @@ function DoctorDashboard() {
   useEffect(() => {
     async function fetchAppts() {
       const allAppts = await patientService.getAppointments();
-      setAppointments(allAppts.sort((a, b) => a.time.localeCompare(b.time)));
+      setAppointments(allAppts);
       const p = await patientService.getPatientProfile();
       setSelectedPatientProfile(p);
     }
@@ -367,8 +367,8 @@ function DoctorDashboard() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {appointments.length > 0 ? (
-                appointments.map((a) => (
+              {appointments.filter((a) => a.status !== "Declined").length > 0 ? (
+                appointments.filter((a) => a.status !== "Declined").map((a) => (
                   <TableRow key={a.id}>
                     <TableCell className="font-medium">
                       <div className="font-bold text-slate-900 dark:text-white">
@@ -609,8 +609,7 @@ function DoctorDashboard() {
             <DialogTitle className="flex items-center justify-between text-sm font-medium">
               <div>
                 <p className="leading-none text-slate-900 dark:text-white">Patient Consultation: {chatAppt?.patient_name || "Patient"}</p>
-                <p className="text-[11px] text-slate-500 dark:text-slate-400 font-normal mt-1 flex items-center gap-1.5">
-                  <span className="w-1.5 h-1.5 rounded-full bg-slate-500" />
+                <p className="text-[11px] text-slate-500 dark:text-slate-400 font-normal mt-1">
                   Photos & PDF Sharing Enabled
                 </p>
               </div>
@@ -750,9 +749,8 @@ function DoctorDashboard() {
                       </Avatar>
                       <div>
                         <h4 className="text-base font-medium text-zinc-100">{activeDoctorVideoAppt.patient_name || "Mahinda Rajapaksha"}</h4>
-                        <p className="text-xs text-zinc-400 flex items-center justify-center gap-1.5 mt-1">
-                          <span className="size-1.5 rounded-full bg-zinc-500" />
-                          Waiting for patient to join...
+                        <p className="text-xs text-zinc-400 flex items-center justify-center mt-1">
+                          <span className="animate-pulse">Waiting for patient to join...</span>
                         </p>
                       </div>
                     </div>
@@ -818,7 +816,7 @@ function DoctorDashboard() {
         </DialogContent>
       </Dialog>
 
-      <AiDisclaimer className="max-w-2xl" />
+
     </div>
   );
 }

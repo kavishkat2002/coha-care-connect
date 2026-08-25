@@ -912,7 +912,16 @@ function TelemedicinePage() {
             </div>
 
             {/* Premium Video Call Button (Enabled on Scheduled Date Only) */}
-            {isCallDateAvailable(activeChatAppt?.date) ? (
+            {activeChatAppt?.status === "Completed" ? (
+              <Button
+                size="sm"
+                disabled
+                className="bg-slate-100 dark:bg-slate-800 text-slate-400 dark:text-slate-500 border border-slate-200 dark:border-slate-700 text-[11px] h-8.5 rounded-full font-medium gap-1 px-3 shrink-0 cursor-not-allowed opacity-80"
+              >
+                <CheckCircle2 className="size-3" />
+                <span>Session Ended</span>
+              </Button>
+            ) : isCallDateAvailable(activeChatAppt?.date) ? (
               <Button
                 size="sm"
                 onClick={() => {
@@ -1090,9 +1099,8 @@ function TelemedicinePage() {
                           </Avatar>
                           <div>
                             <h4 className="text-base font-medium text-zinc-100">{activeVideoDoctor.name}</h4>
-                            <p className="text-xs text-zinc-400 flex items-center justify-center gap-1.5 mt-1">
-                              <span className="size-1.5 rounded-full bg-zinc-500" />
-                              Connecting to doctor...
+                            <p className="text-xs text-zinc-400 flex items-center justify-center mt-1">
+                              <span className="animate-pulse">Connecting to doctor...</span>
                             </p>
                           </div>
                         </div>

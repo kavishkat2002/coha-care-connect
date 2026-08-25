@@ -48,12 +48,27 @@ export const patientService = {
    * Fetch all appointments from Supabase
    */
   async getAppointments(): Promise<DbAppointment[]> {
+    const sortAppts = (appts: DbAppointment[]) => {
+      return appts.sort((a, b) => {
+        const dateDiff = new Date(b.date).getTime() - new Date(a.date).getTime();
+        if (dateDiff !== 0) return dateDiff;
+        return b.time.localeCompare(a.time); // or a.time.localeCompare(b.time) depending on what they want. Let's do oldest first:
+      }).sort((a, b) => {
+        // ascending date
+        const dateA = new Date(a.date).getTime();
+        const dateB = new Date(b.date).getTime();
+        if (dateA !== dateB) return dateA - dateB;
+        // ascending time
+        return a.time.localeCompare(b.time);
+      });
+    };
+
     // 1. Try file-backed server API endpoint (works across all browsers & devices)
     try {
       const res = await fetch("/api/appointments");
       if (res.ok) {
         const data = await res.json();
-        if (Array.isArray(data) && data.length > 0) return data;
+        if (Array.isArray(data) && data.length > 0) return sortAppts(data);
       }
     } catch (e) {}
 
@@ -63,13 +78,13 @@ export const patientService = {
         .from("appointments")
         .select("*");
       
-      if (!error && data && data.length > 0) return data;
+      if (!error && data && data.length > 0) return sortAppts(data);
     } catch (e) {}
 
     // 3. Try LocalStorage
     try {
       const localApps = JSON.parse(localStorage.getItem('mock_appointments') || '[]');
-      if (Array.isArray(localApps)) return localApps;
+      if (Array.isArray(localApps)) return sortAppts(localApps);
     } catch (e) {}
 
     return [];
@@ -131,36 +146,42 @@ export const patientService = {
     );
     const assignedQueueNumber = currentQueueCount + 1;
 
-    // 2. Insert the appointment
-    const newApp = { ...appointment, queue_number: assignedQueueNumber, id: 'app-' + Date.now() };
+    const newApp = { ...appointment, queue_number: assignedQueueNumber };
+    let finalApp = null;
     
-    // Save to server API endpoint (syncs to all browsers)
+    // 1. Try to save to Supabase first to get the authoritative UUID
+    try {
+      const { data, error } = await supabase
+        .from("appointments")
+        .insert([newApp])
+        .select()
+        .single();
+
+      if (!error && data) finalApp = data;
+    } catch (e) {}
+
+    // 2. If Supabase fails, generate a fallback ID
+    if (!finalApp) {
+      finalApp = { ...newApp, id: 'app-' + Date.now() };
+    }
+
+    // 3. Save to server API endpoint with the authoritative ID (syncs to all browsers)
     try {
       void fetch("/api/appointments", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(newApp),
+        body: JSON.stringify(finalApp),
       });
     } catch (e) {}
 
-    try {
-      const { data, error } = await supabase
-        .from("appointments")
-        .insert([{ ...appointment, queue_number: assignedQueueNumber }])
-        .select()
-        .single();
-
-      if (!error && data) return data;
-    } catch (e) {}
-
+    // 4. Save to LocalStorage fallback
     try {
       const localApps = JSON.parse(localStorage.getItem('mock_appointments') || '[]');
-      localApps.push(newApp);
+      localApps.push(finalApp);
       localStorage.setItem('mock_appointments', JSON.stringify(localApps));
-      return newApp;
-    } catch (e) {
-      return newApp;
-    }
+    } catch (e) {}
+
+    return finalApp;
   },
 
   /**
