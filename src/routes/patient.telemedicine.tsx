@@ -48,6 +48,8 @@ import {
 import { doctors, SPECIALTIES, type Doctor } from "@/data/mock";
 import { doctorService } from "@/services/doctor.service";
 import { patientService, type DbAppointment } from "@/services/patient.service";
+import { supabase } from "@/lib/supabase";
+import { useWebRTC } from "@/hooks/use-webrtc";
 
 export const Route = createFileRoute("/patient/telemedicine")({
   head: () => ({
@@ -122,8 +124,8 @@ function TelemedicinePage() {
 
   // File Upload Ref
   const fileInputRef = useRef<HTMLInputElement>(null);
-
   const todayStr = new Date().toISOString().split("T")[0] || "";
+
 
   useEffect(() => {
     async function load() {
@@ -137,6 +139,19 @@ function TelemedicinePage() {
       setMyAppointments(appts);
     }
     void load();
+    
+    // Real-time updates for appointments
+    const channel = supabase.channel("patient_telemedicine_updates")
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "appointments" },
+        () => { void load(); }
+      )
+      .subscribe();
+      
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, []);
 
   const toggleFavoriteDoctor = (docId: string, docName: string) => {
@@ -229,6 +244,37 @@ function TelemedicinePage() {
     }
   };
 
+  // Sync chat messages across tabs/windows and devices via Supabase
+  useEffect(() => {
+    if (!activeChatAppt) return;
+    
+    // Listen for cross-tab local storage events
+    const handleStorage = (e: StorageEvent) => {
+      if (e.key === `meddoc_chat_${activeChatAppt.id}` && e.newValue) {
+        try {
+          setChatMessages(JSON.parse(e.newValue));
+        } catch (error) {}
+      }
+    };
+    window.addEventListener("storage", handleStorage);
+    
+    // Listen for remote messages via Supabase
+    const channel = supabase.channel(`chat_${activeChatAppt.id}`);
+    channel.on("broadcast", { event: "new_message" }, ({ payload }) => {
+      setChatMessages((prev) => {
+        if (prev.some(m => m.id === payload.id)) return prev;
+        const newArray = [...prev, payload];
+        localStorage.setItem(`meddoc_chat_${activeChatAppt.id}`, JSON.stringify(newArray));
+        return newArray;
+      });
+    }).subscribe();
+
+    return () => {
+      window.removeEventListener("storage", handleStorage);
+      supabase.removeChannel(channel);
+    };
+  }, [activeChatAppt]);
+
   const getInitialChatMessages = (appt: DbAppointment): ChatMessage[] => [
     {
       id: "m1",
@@ -255,18 +301,12 @@ function TelemedicinePage() {
     const chatKey = `meddoc_chat_${activeChatAppt.id}`;
     localStorage.setItem(chatKey, JSON.stringify(updated));
 
-    // Simulate Doctor Automated Follow-back response after 1.5 seconds
-    setTimeout(() => {
-      const doctorReply: ChatMessage = {
-        id: "msg-reply-" + Date.now(),
-        sender: "doctor",
-        text: `Thank you for the update. I have reviewed your symptoms. Please continue your prescribed dosage and contact me if symptoms persist. Digital e-Prescription updated in your reports.`,
-        timestamp: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
-      };
-      const withReply = [...updated, doctorReply];
-      setChatMessages(withReply);
-      localStorage.setItem(chatKey, JSON.stringify(withReply));
-    }, 1500);
+    // Broadcast over Supabase for real-time remote sync
+    supabase.channel(`chat_${activeChatAppt.id}`).send({
+      type: "broadcast",
+      event: "new_message",
+      payload: userMsg,
+    });
   };
 
   // Handle Photo & PDF File Upload from Patient
@@ -303,6 +343,13 @@ function TelemedicinePage() {
       const chatKey = `meddoc_chat_${activeChatAppt.id}`;
       localStorage.setItem(chatKey, JSON.stringify(updated));
 
+      // Broadcast over Supabase for real-time remote sync
+      supabase.channel(`chat_${activeChatAppt.id}`).send({
+        type: "broadcast",
+        event: "new_message",
+        payload: fileMsg,
+      });
+
       toast.success(`Shared ${isPdf ? "PDF document" : "photo"} with doctor!`);
 
       // Reset file input
@@ -328,6 +375,28 @@ function TelemedicinePage() {
     }
     return () => clearInterval(timer);
   }, [activeVideoDoctor]);
+
+  const activeVideoAppt = useMemo(() => {
+    if (!activeVideoDoctor) return null;
+    return myAppointments.find(a => a.doctor_id === activeVideoDoctor.id) || null;
+  }, [activeVideoDoctor, myAppointments]);
+
+  const { localStream, remoteStream, startCall } = useWebRTC(activeVideoAppt?.id || null);
+  const localVideoRef = useRef<HTMLVideoElement>(null);
+  const remoteVideoRef = useRef<HTMLVideoElement>(null);
+
+  useEffect(() => {
+    if (localVideoRef.current && localStream) {
+      localVideoRef.current.srcObject = localStream;
+    }
+  }, [localStream]);
+
+  useEffect(() => {
+    if (remoteVideoRef.current && remoteStream) {
+      remoteVideoRef.current.srcObject = remoteStream;
+    }
+  }, [remoteStream]);
+
 
   const formatCallTime = (totalSeconds: number) => {
     const mins = Math.floor(totalSeconds / 60);
@@ -939,32 +1008,49 @@ function TelemedicinePage() {
         <DialogContent className="sm:max-w-2xl rounded-3xl p-0 overflow-hidden bg-slate-950 text-white border-slate-800 shadow-2xl">
           {activeVideoDoctor && (
             <div className="relative h-[480px] flex flex-col justify-between p-5 bg-gradient-to-b from-slate-900 via-slate-950 to-slate-950">
-              {/* Doctor Main Video Stream Area */}
+              {/* Doctor Main Video Stream Area (Remote WebRTC) */}
               <div className="absolute inset-0 flex items-center justify-center bg-slate-900/90 overflow-hidden">
                 {!isVideoOff ? (
-                  <div className="relative size-full flex items-center justify-center bg-radial from-slate-800 to-slate-950">
-                    <div className="text-center space-y-3 z-10">
-                      <Avatar className="size-28 border-4 border-emerald-500/80 shadow-2xl mx-auto ring-4 ring-emerald-500/20 animate-pulse">
-                        <AvatarFallback className="bg-blue-700 text-white font-bold text-2xl">
-                          {activeVideoDoctor.photoInitials || activeVideoDoctor.name.substring(0, 2).toUpperCase()}
-                        </AvatarFallback>
-                      </Avatar>
-                      <div>
-                        <h4 className="text-lg font-bold text-white">{activeVideoDoctor.name}</h4>
-                        <p className="text-xs text-emerald-400 font-semibold flex items-center justify-center gap-1.5 mt-1">
-                          <span className="size-2 rounded-full bg-emerald-400 animate-ping" />
-                          HD Encrypted Telemedicine Video Active
-                        </p>
+                  <>
+                    <video
+                      ref={remoteVideoRef}
+                      autoPlay
+                      playsInline
+                      className="w-full h-full object-cover"
+                    />
+                    {!remoteStream && (
+                      <div className="absolute inset-0 flex items-center justify-center bg-radial from-slate-800 to-slate-950">
+                        <div className="text-center space-y-3 z-10">
+                          <Avatar className="size-28 border-4 border-emerald-500/80 shadow-2xl mx-auto ring-4 ring-emerald-500/20 animate-pulse">
+                            <AvatarFallback className="bg-blue-700 text-white font-bold text-2xl">
+                              {activeVideoDoctor.photoInitials || activeVideoDoctor.name.substring(0, 2).toUpperCase()}
+                            </AvatarFallback>
+                          </Avatar>
+                          <div>
+                            <h4 className="text-lg font-bold text-white">{activeVideoDoctor.name}</h4>
+                            <p className="text-xs text-emerald-400 font-semibold flex items-center justify-center gap-1.5 mt-1">
+                              <span className="size-2 rounded-full bg-emerald-400 animate-ping" />
+                              Connecting to doctor...
+                            </p>
+                          </div>
+                        </div>
                       </div>
-                    </div>
-                  </div>
+                    )}
+                  </>
                 ) : (
                   <div className="text-slate-500 text-xs font-semibold">Camera Turned Off</div>
                 )}
 
                 {/* Self Patient Camera Thumbnail (Picture in Picture) */}
                 <div className="absolute bottom-20 right-4 w-36 h-24 rounded-2xl bg-slate-800 border-2 border-slate-700 shadow-xl overflow-hidden flex items-center justify-center">
-                  <span className="text-[10px] font-bold text-slate-300">You (Patient Feed)</span>
+                  <video 
+                    ref={localVideoRef} 
+                    autoPlay 
+                    playsInline 
+                    muted 
+                    className="w-full h-full object-cover transform -scale-x-100" 
+                  />
+                  {!localStream && <span className="text-[10px] font-bold text-slate-300">You (Patient Feed)</span>}
                 </div>
               </div>
 
