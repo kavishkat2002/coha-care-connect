@@ -416,7 +416,7 @@ export const patientService = {
           patient_id: patientId,
           created_at: r.date
         }));
-        await supabase.from("patient_reports").upsert(formattedReports, { onConflict: "id" }).select();
+        await supabase.from("reports").upsert(formattedReports, { onConflict: "id" }).select();
       }
 
       const timeline = await this.getTimeline();
@@ -425,7 +425,7 @@ export const patientService = {
           ...t,
           patient_id: patientId
         }));
-        await supabase.from("patient_timeline").upsert(formattedTimeline, { onConflict: "id" }).select();
+        await supabase.from("timeline").upsert(formattedTimeline, { onConflict: "id" }).select();
       }
     } catch (e) {
       console.warn("Failed to sync local data to Supabase:", e);

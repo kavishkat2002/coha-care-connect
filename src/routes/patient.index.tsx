@@ -225,8 +225,17 @@ function PatientOverview() {
     }
 
     const realtimeSub = supabase
-      .channel('public:patient_profiles')
+      .channel('dashboard_realtime')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'patient_profiles' }, () => {
+        void loadData();
+      })
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'appointments' }, () => {
+        void loadData();
+      })
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'reports' }, () => {
+        void loadData();
+      })
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'timeline' }, () => {
         void loadData();
       })
       .subscribe();
@@ -236,7 +245,9 @@ function PatientOverview() {
         e.key === "coha_patient_profile_shared" || 
         e.key === "mock_appointments" || 
         e.key === "mock_reports" || 
-        e.key === "mock_timeline"
+        e.key === "mock_timeline" ||
+        e.key === "meddoc_messages" ||
+        e.key === "meddoc_assessment"
       ) {
         void loadData();
       }
@@ -440,8 +451,8 @@ function PatientOverview() {
             label="Attention Required" 
             value={String(alertsCount)} 
             hint={alertsHint} 
-            className={alertsCount > 0 ? "border-rose-500 bg-rose-50 dark:bg-rose-950/20 shadow-none ring-1 ring-rose-500 cursor-pointer" : "cursor-pointer"}
-            iconClassName={alertsCount > 0 ? "text-rose-600 bg-rose-100 dark:bg-rose-900 dark:text-rose-300" : undefined}
+            className="cursor-pointer"
+            iconClassName={alertsCount > 0 ? "text-rose-600 dark:text-rose-300" : undefined}
             valueClassName={alertsCount > 0 ? "text-rose-600 dark:text-rose-400" : undefined}
             labelClassName={alertsCount > 0 ? "text-rose-600 font-medium dark:text-rose-400" : undefined}
           />
