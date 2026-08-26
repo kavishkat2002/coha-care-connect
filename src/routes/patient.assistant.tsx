@@ -760,7 +760,7 @@ function AssistantPage() {
             )}
 
             <form
-              className="flex items-end gap-2"
+              className="flex items-end gap-1.5 sm:gap-2"
               onSubmit={(e) => {
                 e.preventDefault();
                 void send(input);
@@ -773,14 +773,14 @@ function AssistantPage() {
                 ref={fileInputRef}
                 onChange={handleFileChange}
               />
-              <div className="flex gap-1.5 shrink-0">
+              <div className="flex gap-1.5 shrink-0 mb-0.5 sm:mb-1">
                 <Button
                   type="button"
                   variant="outline"
                   size="icon"
                   aria-label="Attach a file"
                   onClick={() => fileInputRef.current?.click()}
-                  className="size-10"
+                  className="size-9 sm:size-10 rounded-full border-slate-200 dark:border-slate-800 text-slate-500 shadow-sm"
                 >
                   <Paperclip className="size-4" />
                 </Button>
@@ -790,34 +790,47 @@ function AssistantPage() {
                   size="icon"
                   aria-label={isListening ? "Stop recording" : "Start voice input"}
                   onClick={toggleListen}
-                  className={`size-10 ${isListening ? "bg-red-500 hover:bg-red-600 animate-pulse text-white" : ""}`}
+                  className={`size-9 sm:size-10 rounded-full shadow-sm border-slate-200 dark:border-slate-800 ${
+                    isListening ? "bg-red-500 border-red-500 hover:bg-red-600 animate-pulse text-white" : "text-slate-500"
+                  }`}
                   disabled={isTranscribing}
                 >
                   <Mic className="size-4" />
                 </Button>
               </div>
-              <Textarea
-                ref={textareaRef}
-                value={input}
-                onChange={(e) => {
-                  setInput(e.target.value);
-                  e.target.style.height = "auto";
-                  e.target.style.height = `${e.target.scrollHeight}px`;
-                }}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter" && !e.shiftKey) {
-                    e.preventDefault();
-                    if (!busy && input.trim()) void send(input);
-                  }
-                }}
-                placeholder="Describe your symptoms…"
-                aria-label="Message"
-                className="min-h-[44px] max-h-[200px] resize-none py-3 overflow-y-auto"
-                rows={1}
-              />
-              <Button type="submit" size="icon" aria-label="Send message" disabled={busy || (isGuest && aiCredits <= 0)} className="size-10 shrink-0">
-                <Send className="size-4" />
-              </Button>
+              
+              <div className="relative flex-1 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl shadow-sm focus-within:ring-1 focus-within:ring-primary focus-within:border-primary transition-all flex items-end">
+                <Textarea
+                  ref={textareaRef}
+                  value={input}
+                  onChange={(e) => {
+                    setInput(e.target.value);
+                    e.target.style.height = "auto";
+                    e.target.style.height = `${Math.min(e.target.scrollHeight, 200)}px`;
+                  }}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" && !e.shiftKey) {
+                      e.preventDefault();
+                      if (!busy && input.trim()) void send(input);
+                    }
+                  }}
+                  placeholder="Describe your symptoms…"
+                  aria-label="Message"
+                  className="w-full resize-none border-0 bg-transparent py-3 sm:py-3.5 pl-4 pr-12 focus-visible:ring-0 focus-visible:ring-offset-0 shadow-none min-h-[46px] max-h-[200px] text-sm"
+                  rows={1}
+                />
+                <div className="absolute right-1.5 bottom-1.5">
+                  <Button 
+                    type="submit" 
+                    size="icon" 
+                    aria-label="Send message" 
+                    disabled={busy || (isGuest && aiCredits <= 0)} 
+                    className="size-8 sm:size-9 rounded-full bg-primary hover:bg-primary/90 text-primary-foreground shadow-sm transition-transform active:scale-95"
+                  >
+                    <Send className="size-3.5 sm:size-4" />
+                  </Button>
+                </div>
+              </div>
             </form>
             <AiDisclaimer className="mt-3" />
             {isGuest && aiCredits <= 0 && (
