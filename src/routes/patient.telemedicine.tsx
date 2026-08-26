@@ -504,11 +504,11 @@ function TelemedicinePage() {
                   >
                     {/* Doctor name + status */}
                     <div className="flex items-center justify-between gap-2">
-                      <div>
-                        <span className="text-xs font-bold text-slate-900 dark:text-white">
+                      <div className="min-w-0">
+                        <p className="text-xs font-bold text-slate-900 dark:text-white truncate">
                           {doctor.name}
-                        </span>
-                        <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
+                        </p>
+                        <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5 truncate">
                           {appts.length > 1
                             ? `${appts.length} Appts · Latest: ${latestAppt.date} ${latestAppt.time}`
                             : `${latestAppt.date} · ${latestAppt.time} · LKR ${(latestAppt.fee || 5500).toLocaleString()}`}
@@ -703,7 +703,7 @@ function TelemedicinePage() {
                   <CardContent className="space-y-3 p-4 sm:p-5">
                     {/* Header: avatar + info + fav */}
                     <div className="flex items-start justify-between gap-2">
-                      <div className="flex items-center gap-3">
+                      <div className="flex items-center gap-3 min-w-0">
                         <Avatar className="size-11 border border-border shrink-0">
                           <AvatarFallback className="bg-blue-100 dark:bg-blue-950 text-blue-700 dark:text-blue-300 font-bold text-sm">
                             {d.photoInitials || d.name.substring(0, 2).toUpperCase()}
@@ -714,7 +714,7 @@ function TelemedicinePage() {
                           <p className="text-xs text-muted-foreground mt-0.5 truncate">
                             {d.specialty} · {d.hospital || "Metro Cancer Institute"}
                           </p>
-                          <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5 font-medium">
+                          <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5 font-medium truncate">
                             {d.languages?.join(", ") || "English, Sinhala"}
                           </p>
                         </div>
