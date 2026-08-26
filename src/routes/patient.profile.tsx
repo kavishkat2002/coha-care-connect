@@ -413,7 +413,7 @@ function ProfilePage() {
               Sign out of account
             </h4>
             <p className="text-xs text-muted-foreground">
-              Sign out of your MedDoc profile. All cached health records and session data on this device will be cleared.
+              Sign out of your MedDoc profile. Your session data on this device will be cleared.
             </p>
           </div>
           <Button 
