@@ -412,9 +412,7 @@ function ProfilePage() {
               <LogOut className="size-4 text-destructive" />
               Sign out of account
             </h4>
-            <p className="text-xs text-muted-foreground">
-              Sign out of your MedDoc profile. Your session data on this device will be cleared.
-            </p>
+
           </div>
           <Button 
             variant="outline" 
