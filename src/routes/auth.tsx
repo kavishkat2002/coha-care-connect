@@ -12,6 +12,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Checkbox } from "@/components/ui/checkbox";
 import type { Role } from "@/data/mock";
 import { portalHome, signIn, signUp } from "@/services/auth.service";
+import { isSupabaseConfigured } from "@/lib/supabase";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/auth")({
@@ -75,6 +76,10 @@ function AuthPage() {
   const [showPassword, setShowPassword] = useState(false);
 
   const handleLogin = async (email: string, password: string) => {
+    if (!isSupabaseConfigured()) {
+      toast.error("Supabase is not configured. Add VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY to your Vercel environment variables, then redeploy.");
+      return;
+    }
     setIsLoading(true);
     try {
       await signIn(email, password);
@@ -88,6 +93,10 @@ function AuthPage() {
   };
 
   const handleRegister = async (email: string, password: string, name: string, registerRole: Role = "patient") => {
+    if (!isSupabaseConfigured()) {
+      toast.error("Supabase is not configured. Add VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY to your Vercel environment variables, then redeploy.");
+      return;
+    }
     setIsLoading(true);
     try {
       await signUp(email, password, registerRole, name);
