@@ -483,11 +483,9 @@ function TelemedicinePage() {
       {groupedConsultations.length > 0 && (
         <Card className="shadow-soft border border-blue-100 dark:border-blue-900/40 bg-gradient-to-r from-blue-50/50 via-white to-blue-50/30 dark:from-slate-900 dark:to-slate-950 rounded-2xl overflow-hidden">
           <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-bold flex items-center justify-between">
-              <span className="flex items-center gap-2 text-slate-900 dark:text-white">
-                <Video className="size-4 text-emerald-600 dark:text-emerald-400" />
-                My Scheduled Video Consultations & Follow-ups ({groupedConsultations.length})
-              </span>
+            <CardTitle className="text-sm font-bold flex items-center gap-2 text-slate-900 dark:text-white">
+              <Video className="size-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
+              My Scheduled Consultations ({groupedConsultations.length})
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-3 pt-0">
@@ -502,70 +500,71 @@ function TelemedicinePage() {
                 return (
                   <div
                     key={doctor.id}
-                    className="p-3.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-xs flex items-center justify-between gap-3"
+                    className="p-3.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-xs flex flex-col gap-3"
                   >
-                    <div className="space-y-1">
-                      <div className="flex items-center gap-2">
+                    {/* Doctor name + status */}
+                    <div className="flex items-center justify-between gap-2">
+                      <div>
                         <span className="text-xs font-bold text-slate-900 dark:text-white">
                           {doctor.name}
                         </span>
-                        <Badge
-                          className={`text-[10px] font-bold px-1.5 py-0.2 ${
-                            isCompleted
-                              ? "bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300"
-                              : "bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-200"
-                          }`}
-                        >
-                          {isCompleted ? "Session Completed" : "Approved"}
-                        </Badge>
+                        <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
+                          {appts.length > 1
+                            ? `${appts.length} Appts · Latest: ${latestAppt.date} ${latestAppt.time}`
+                            : `${latestAppt.date} · ${latestAppt.time} · LKR ${(latestAppt.fee || 5500).toLocaleString()}`}
+                        </p>
                       </div>
-                      <p className="text-[11px] text-slate-500 dark:text-slate-400">
-                        {appts.length > 1
-                          ? `${appts.length} Appointments (Latest: ${latestAppt.date} at ${latestAppt.time})`
-                          : `${latestAppt.date} at ${latestAppt.time} • Fee: LKR ${(latestAppt.fee || 5500).toLocaleString()}`}
-                      </p>
+                      <Badge
+                        className={`text-[10px] font-bold px-1.5 py-0.5 shrink-0 ${
+                          isCompleted
+                            ? "bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300"
+                            : "bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-200"
+                        }`}
+                      >
+                        {isCompleted ? "Completed" : "Approved"}
+                      </Badge>
                     </div>
 
-                    <div className="flex items-center gap-1.5 shrink-0">
-                      {/* Prominent Video Call Icon Button */}
+                    {/* Action buttons — full width on mobile */}
+                    <div className="flex gap-2">
                       {isCompleted ? (
                         <Button
                           size="sm"
                           disabled
-                          className="bg-slate-100 dark:bg-slate-800 text-slate-400 dark:text-slate-500 border border-slate-200 dark:border-slate-700 text-xs h-8.5 rounded-xl font-medium gap-1 cursor-not-allowed opacity-75"
+                          className="flex-1 bg-slate-100 dark:bg-slate-800 text-slate-400 border border-slate-200 text-xs h-8 rounded-xl font-medium gap-1 cursor-not-allowed opacity-75"
                         >
                           <CheckCircle2 className="size-3.5 text-slate-400" />
-                          <span>Session Ended</span>
+                          Session Ended
                         </Button>
                       ) : canJoinVideo ? (
                         <Button
                           size="sm"
                           onClick={() => setActiveVideoDoctor(doctor)}
-                          className="bg-emerald-600 hover:bg-emerald-700 text-white text-xs h-8.5 rounded-xl font-semibold gap-1.5 shadow-sm"
+                          className="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white text-xs h-8 rounded-xl font-semibold gap-1.5 shadow-sm"
                         >
-                          <Video className="size-4 animate-pulse" />
-                          <span>Join Video Call</span>
+                          <Video className="size-3.5 animate-pulse" />
+                          Join Video Call
                         </Button>
                       ) : (
                         <Button
                           size="sm"
                           disabled
                           title={`Video call unlocks on ${latestAppt.date}`}
-                          className="bg-slate-100 dark:bg-slate-800 text-slate-400 dark:text-slate-500 border border-slate-200 dark:border-slate-700 text-xs h-8.5 rounded-xl font-medium gap-1.5 cursor-not-allowed opacity-80"
+                          className="flex-1 bg-slate-100 dark:bg-slate-800 text-slate-400 border border-slate-200 text-xs h-8 rounded-xl font-medium gap-1.5 cursor-not-allowed opacity-80"
                         >
                           <Clock className="size-3.5" />
-                          <span>Available {latestAppt.date}</span>
+                          Available {latestAppt.date}
                         </Button>
                       )}
 
-                      {/* Chat Button */}
                       <Button
                         size="sm"
                         variant="outline"
                         onClick={() => openChatWithDoctor(latestAppt)}
-                        className="text-xs h-8.5 rounded-xl font-medium gap-1 border-slate-200 dark:border-slate-700"
+                        className="text-xs h-8 rounded-xl font-medium gap-1 border-slate-200 dark:border-slate-700 px-3"
                       >
                         <MessageSquare className="size-3.5" />
+                        <span className="hidden sm:inline">Chat</span>
                       </Button>
                     </div>
                   </div>
@@ -578,31 +577,29 @@ function TelemedicinePage() {
 
       {/* Search & Filter Section */}
       <Card className="shadow-soft border border-border bg-card rounded-2xl">
-        <CardContent className="p-5 space-y-4">
-          <div className="flex items-center justify-between border-b border-border pb-3">
-            <div className="flex items-center gap-2">
-              <Button
-                type="button"
-                variant={viewFilter === "all" ? "default" : "outline"}
-                size="sm"
-                onClick={() => setViewFilter("all")}
-                className="text-xs h-8.5 rounded-full font-medium"
-              >
-                All Telemedicine Doctors ({allAvailableDoctors.length})
-              </Button>
-              <Button
-                type="button"
-                variant={viewFilter === "favorites" ? "default" : "outline"}
-                size="sm"
-                onClick={() => setViewFilter("favorites")}
-                className={`text-xs h-8.5 rounded-full font-medium gap-1.5 ${
-                  viewFilter === "favorites" ? "bg-rose-600 hover:bg-rose-700 text-white" : ""
-                }`}
-              >
-                <Heart className={`size-3.5 ${favDoctorIds.length > 0 ? "fill-rose-500 text-rose-500" : ""}`} />
-                My Favorites ({favDoctorIds.length})
-              </Button>
-            </div>
+        <CardContent className="p-4 sm:p-5 space-y-4">
+          <div className="flex flex-wrap items-center gap-2 border-b border-border pb-3">
+            <Button
+              type="button"
+              variant={viewFilter === "all" ? "default" : "outline"}
+              size="sm"
+              onClick={() => setViewFilter("all")}
+              className="text-xs h-8 rounded-full font-medium"
+            >
+              All ({allAvailableDoctors.length})
+            </Button>
+            <Button
+              type="button"
+              variant={viewFilter === "favorites" ? "default" : "outline"}
+              size="sm"
+              onClick={() => setViewFilter("favorites")}
+              className={`text-xs h-8 rounded-full font-medium gap-1.5 ${
+                viewFilter === "favorites" ? "bg-rose-600 hover:bg-rose-700 text-white" : ""
+              }`}
+            >
+              <Heart className={`size-3.5 ${favDoctorIds.length > 0 ? "fill-rose-500 text-rose-500" : ""}`} />
+              Favorites ({favDoctorIds.length})
+            </Button>
           </div>
 
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 items-end">
@@ -703,68 +700,69 @@ function TelemedicinePage() {
               const isFav = favDoctorIds.includes(d.id);
               return (
                 <Card key={d.id} className="shadow-soft hover:shadow-md transition-all rounded-2xl border border-border relative">
-                  <CardContent className="space-y-4 p-5">
-                    <div className="flex items-start justify-between gap-3">
-                      <div className="flex items-center gap-4">
-                        <Avatar className="size-13 border border-border">
+                  <CardContent className="space-y-3 p-4 sm:p-5">
+                    {/* Header: avatar + info + fav */}
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="flex items-center gap-3">
+                        <Avatar className="size-11 border border-border shrink-0">
                           <AvatarFallback className="bg-blue-100 dark:bg-blue-950 text-blue-700 dark:text-blue-300 font-bold text-sm">
                             {d.photoInitials || d.name.substring(0, 2).toUpperCase()}
                           </AvatarFallback>
                         </Avatar>
-                        <div>
-                          <p className="font-bold text-base text-foreground leading-tight">{d.name}</p>
-                          <p className="text-xs text-muted-foreground mt-0.5">
+                        <div className="min-w-0">
+                          <p className="font-bold text-sm text-foreground leading-tight truncate">{d.name}</p>
+                          <p className="text-xs text-muted-foreground mt-0.5 truncate">
                             {d.specialty} · {d.hospital || "Metro Cancer Institute"}
                           </p>
                           <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5 font-medium">
-                            Languages: {d.languages?.join(", ") || "English, Sinhala"}
+                            {d.languages?.join(", ") || "English, Sinhala"}
                           </p>
                         </div>
                       </div>
-
-                      <div className="flex items-center gap-2 shrink-0">
-                        {/* Favorite Button Toggle */}
-                        <button
-                          type="button"
-                          onClick={() => toggleFavoriteDoctor(d.id, d.name)}
-                          title={isFav ? "Remove from Favorites" : "Add to Favorites"}
-                          className={`p-2 rounded-full border transition-all ${
-                            isFav
-                              ? "bg-rose-50 border-rose-200 text-rose-600 dark:bg-rose-950/60 dark:border-rose-800 dark:text-rose-300 shadow-xs"
-                              : "bg-muted/30 border-border text-slate-400 hover:text-rose-500 hover:bg-rose-50/50"
-                          }`}
-                        >
-                          <Heart className={`size-4 ${isFav ? "fill-rose-600" : ""}`} />
-                        </button>
-                      </div>
+                      <button
+                        type="button"
+                        onClick={() => toggleFavoriteDoctor(d.id, d.name)}
+                        title={isFav ? "Remove from Favorites" : "Add to Favorites"}
+                        className={`p-2 rounded-full border transition-all shrink-0 ${
+                          isFav
+                            ? "bg-rose-50 border-rose-200 text-rose-600 dark:bg-rose-950/60 dark:border-rose-800 dark:text-rose-300 shadow-xs"
+                            : "bg-muted/30 border-border text-slate-400 hover:text-rose-500 hover:bg-rose-50/50"
+                        }`}
+                      >
+                        <Heart className={`size-4 ${isFav ? "fill-rose-600" : ""}`} />
+                      </button>
                     </div>
 
-                    <div className="grid grid-cols-3 gap-2 pt-1">
+                    {/* Consultation mode buttons */}
+                    <div className="grid grid-cols-3 gap-2">
                       {[
-                        { label: "Video Call" as const, icon: Video },
-                        { label: "Voice Call" as const, icon: Phone },
-                        { label: "Chat" as const, icon: MessageSquare },
+                        { label: "Video Call" as const, shortLabel: "Video", icon: Video },
+                        { label: "Voice Call" as const, shortLabel: "Voice", icon: Phone },
+                        { label: "Chat" as const, shortLabel: "Chat", icon: MessageSquare },
                       ].map((mode) => (
                         <Button
                           key={mode.label}
                           variant="outline"
                           size="sm"
                           onClick={() => openScheduleModal(d, mode.label)}
-                          className="rounded-xl text-xs h-9 font-medium gap-1.5 hover:border-blue-500 hover:text-blue-600"
+                          className="rounded-xl text-xs h-9 font-medium gap-1 hover:border-blue-500 hover:text-blue-600 px-2"
                         >
-                          <mode.icon className="size-3.5 text-blue-600 dark:text-blue-400" />
-                          <span className="truncate">{mode.label}</span>
+                          <mode.icon className="size-3.5 text-blue-600 dark:text-blue-400 shrink-0" />
+                          <span className="hidden sm:inline truncate">{mode.label}</span>
+                          <span className="sm:hidden truncate">{mode.shortLabel}</span>
                         </Button>
                       ))}
                     </div>
 
-                    <div className="flex items-center justify-between pt-2 border-t border-border/60 text-xs">
+                    {/* Fee + prescription badge */}
+                    <div className="flex items-center justify-between pt-1 border-t border-border/60 text-xs">
                       <span className="font-bold text-blue-600 dark:text-blue-400">
                         LKR {d.fee?.toLocaleString() || "5,500"} / Visit
                       </span>
                       <span className="text-[11px] text-muted-foreground font-medium flex items-center gap-1">
                         <UserCheck className="size-3 text-emerald-500" />
-                        Digital Prescription Included
+                        <span className="hidden sm:inline">Digital Prescription Included</span>
+                        <span className="sm:hidden">e-Prescription</span>
                       </span>
                     </div>
                   </CardContent>
@@ -777,7 +775,7 @@ function TelemedicinePage() {
 
       {/* Schedule Telemedicine Session Modal */}
       <Dialog open={!!bookingDoctor} onOpenChange={() => setBookingDoctor(null)}>
-        <DialogContent className="sm:max-w-md rounded-2xl">
+        <DialogContent className="w-[calc(100vw-1rem)] sm:max-w-md rounded-2xl max-h-[90dvh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2 text-lg font-bold">
               <Calendar className="size-5 text-blue-600 dark:text-blue-400" />
@@ -887,7 +885,7 @@ function TelemedicinePage() {
 
       {/* Patient - Doctor 2-Way Live Chat Modal */}
       <Dialog open={!!activeChatAppt} onOpenChange={() => setActiveChatAppt(null)}>
-        <DialogContent className="sm:max-w-md rounded-3xl flex flex-col h-[560px] p-0 overflow-hidden border border-slate-200 dark:border-slate-800 shadow-2xl">
+        <DialogContent className="w-[calc(100vw-1rem)] sm:max-w-md rounded-3xl flex flex-col h-[90dvh] sm:h-[560px] max-h-[620px] p-0 overflow-hidden border border-slate-200 dark:border-slate-800 shadow-2xl">
           {/* Enhanced Premium Header */}
           <div className="px-5 py-3.5 border-b border-border bg-slate-50 dark:bg-slate-900 flex items-center justify-between gap-3 pr-12">
             <div className="flex items-center gap-3 min-w-0">
@@ -1076,9 +1074,9 @@ function TelemedicinePage() {
 
       {/* Interactive HD Telemedicine Live Video Meeting Room */}
       <Dialog open={!!activeVideoDoctor} onOpenChange={() => setActiveVideoDoctor(null)}>
-        <DialogContent className="sm:max-w-2xl rounded-2xl p-0 overflow-hidden bg-zinc-950 text-zinc-100 border-zinc-800 shadow-xl">
+        <DialogContent className="w-[calc(100vw-1rem)] sm:max-w-2xl rounded-2xl p-0 overflow-hidden bg-zinc-950 text-zinc-100 border-zinc-800 shadow-xl">
           {activeVideoDoctor && (
-            <div className="relative h-[480px] flex flex-col justify-between p-5 bg-zinc-950">
+            <div className="relative h-[60dvh] sm:h-[480px] flex flex-col justify-between p-3 sm:p-5 bg-zinc-950">
               {/* Doctor Main Video Stream Area (Remote WebRTC) */}
               <div className="absolute inset-0 flex items-center justify-center bg-zinc-900 overflow-hidden">
                 {!isVideoOff ? (
@@ -1112,7 +1110,7 @@ function TelemedicinePage() {
                 )}
 
                 {/* Self Patient Camera Thumbnail (Picture in Picture) */}
-                <div className="absolute bottom-20 right-4 w-36 h-24 rounded-lg bg-zinc-800 border border-zinc-700/50 shadow-lg overflow-hidden flex items-center justify-center">
+                <div className="absolute bottom-20 right-2 sm:right-4 w-28 h-20 sm:w-36 sm:h-24 rounded-lg bg-zinc-800 border border-zinc-700/50 shadow-lg overflow-hidden flex items-center justify-center">
                   <video 
                     ref={localVideoRef} 
                     autoPlay 
