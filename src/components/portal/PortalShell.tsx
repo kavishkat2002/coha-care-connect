@@ -229,6 +229,15 @@ export function PortalShell({
     localStorage.setItem(storageKey, JSON.stringify(notifications));
   }, [notifications, portalLabel]);
 
+  const isGuest = !isLoading && !profile && portalLabel.toLowerCase().includes("patient");
+
+  // Redirect to auth if logged out and not a guest
+  useEffect(() => {
+    if (!isLoading && !session && !isGuest) {
+      navigate({ to: "/auth", replace: true });
+    }
+  }, [isLoading, session, isGuest, navigate]);
+
   useEffect(() => setOpen(false), [pathname]);
 
   const unreadCount = notifications.filter((n) => !n.read).length;
@@ -272,7 +281,6 @@ export function PortalShell({
         .toUpperCase()
     : "MD";
 
-  const isGuest = !isLoading && !profile && portalLabel.toLowerCase().includes("patient");
   const filteredNav = isGuest
     ? nav.filter(
         (item) =>
