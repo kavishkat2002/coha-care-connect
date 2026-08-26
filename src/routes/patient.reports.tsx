@@ -907,7 +907,8 @@ ${350 + pdfLength}
           )}
 
           {/* Analysis History */}
-          <Card className="shadow-soft rounded-[24px]">
+          {!isGuest && (
+            <Card className="shadow-soft rounded-[24px]">
             <CardHeader className="pb-3 border-b border-border/40">
               <div className="flex items-center justify-between">
                 <CardTitle className="text-sm font-extrabold flex items-center gap-2">
@@ -1011,6 +1012,7 @@ ${350 + pdfLength}
               )}
             </CardContent>
           </Card>
+          )}
         </div>
 
         {/* Diagnostic Results Card */}

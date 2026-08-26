@@ -272,9 +272,19 @@ export function PortalShell({
         .toUpperCase()
     : "MD";
 
+  const isGuest = !isLoading && !profile && portalLabel.toLowerCase().includes("patient");
+  const filteredNav = isGuest
+    ? nav.filter(
+        (item) =>
+          !["/patient", "/patient/timeline", "/patient/profile", "/patient/appointments"].includes(
+            item.to
+          )
+      )
+    : nav;
+
   const links = (
     <nav className="space-y-1">
-      {nav.map((item) => {
+      {filteredNav.map((item) => {
         const Icon = item.icon;
         const isActive = pathname === item.to;
         return (
@@ -329,6 +339,7 @@ export function PortalShell({
 
           <div className="flex items-center gap-2">
             {/* Interactive Notifications & Reminders Dropdown Panel */}
+            {!isGuest && (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" size="icon" aria-label="Notifications" className="relative size-10 rounded-full hover:bg-muted">
@@ -427,6 +438,7 @@ export function PortalShell({
                 )}
               </DropdownMenuContent>
             </DropdownMenu>
+            )}
             
             {isLoading ? null : session ? (
               <DropdownMenu>
