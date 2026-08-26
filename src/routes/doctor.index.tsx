@@ -399,10 +399,10 @@ function DoctorDashboard() {
     .reduce((sum, appt) => sum + Number(appt.fee || 0), 0);
 
   return (
-    <div className="space-y-8 max-w-6xl mx-auto pb-12">
+    <div className="space-y-6 max-w-6xl mx-auto pb-12">
       <PageHeader title="Doctor Clinical Dashboard" description="Review patient health backgrounds, approve telemedicine requests, and launch instant video calls." />
 
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
         <StatCard icon={CalendarCheck} label="Appointments today" value={myAppointments.length.toString()} hint="Live from booking system" />
         <StatCard icon={Banknote} label="Total Revenue" value={`LKR ${totalRevenue.toLocaleString()}`} hint="From completed sessions" />
         <StatCard icon={Users} label="Waiting now" value="3" hint="Average wait 12 min" />
@@ -410,39 +410,43 @@ function DoctorDashboard() {
       </div>
 
       <Card className="shadow-soft border border-border">
-        <CardHeader>
-          <CardTitle className="text-lg flex items-center gap-2">
-            <CalendarCheck className="size-5 text-primary" />
+        <CardHeader className="pb-3">
+          <CardTitle className="text-base flex items-center gap-2">
+            <CalendarCheck className="size-4 text-primary shrink-0" />
             Availability Schedule
           </CardTitle>
-          <CardDescription>
+          <CardDescription className="text-xs">
             Set your availability for specific dates. Patients will see this status when booking telemedicine or in-person sessions.
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="flex flex-col sm:flex-row gap-4 items-end bg-muted/20 p-4 rounded-xl border border-border/50">
-            <div className="space-y-2 w-full sm:w-auto flex-1">
-              <Label htmlFor="schedule-date">Select Date</Label>
+          <div className="flex flex-col gap-3 bg-muted/20 p-3 sm:p-4 rounded-xl border border-border/50">
+            <div className="space-y-1.5">
+              <Label htmlFor="schedule-date" className="text-xs font-medium">Select Date</Label>
               <Input 
                 id="schedule-date" 
                 type="date" 
                 value={schedDate} 
                 onChange={(e) => setSchedDate(e.target.value)} 
                 min={today}
+                className="h-9 text-sm"
               />
             </div>
-            <div className="flex gap-2 w-full sm:w-auto">
+            <div className="flex gap-2">
               <Button 
-                type="button" 
+                type="button"
+                size="sm"
                 variant={schedStatus ? "default" : "outline"} 
-                className={schedStatus ? "bg-green-600 hover:bg-green-700" : ""}
+                className={`flex-1 ${schedStatus ? "bg-green-600 hover:bg-green-700" : ""}`}
                 onClick={() => handleUpdateScheduleStatus(true)}
               >
                 Available
               </Button>
               <Button 
-                type="button" 
+                type="button"
+                size="sm"
                 variant={!schedStatus ? "destructive" : "outline"}
+                className="flex-1"
                 onClick={() => handleUpdateScheduleStatus(false)}
               >
                 Offline
@@ -453,150 +457,274 @@ function DoctorDashboard() {
       </Card>
 
       <Card className="shadow-soft border border-border">
-        <CardHeader>
-          <CardTitle className="text-base font-bold flex items-center justify-between">
-            <span>Telemedicine Consultation Requests & Queue</span>
-            <Badge variant="outline" className="bg-slate-50 text-slate-600 border-slate-200 text-xs font-semibold">
+        <CardHeader className="pb-3">
+          <div className="flex items-start justify-between gap-2">
+            <CardTitle className="text-sm font-bold leading-snug">
+              Telemedicine Consultation Requests & Queue
+            </CardTitle>
+            <Badge variant="outline" className="bg-slate-50 text-slate-600 border-slate-200 text-[10px] font-semibold shrink-0">
               Live Patient Requests
             </Badge>
-          </CardTitle>
-          <CardDescription>
+          </div>
+          <CardDescription className="text-xs">
             Inspect requested patient health history, medical conditions, and approve telemedicine consultations.
           </CardDescription>
         </CardHeader>
         <CardContent className="p-0">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Patient Details</TableHead>
-                <TableHead>Schedule Time</TableHead>
-                <TableHead>Health Profile & ePass</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead className="text-right">Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {myAppointments.filter((a) => a.status !== "Declined").length > 0 ? (
-                myAppointments.filter((a) => a.status !== "Declined").map((a) => (
-                  <TableRow key={a.id}>
-                    <TableCell className="font-medium">
-                      <div className="font-bold text-slate-900 dark:text-white">
-                        {a.patient_name || a.patient_id || "Mahinda Rajapaksha"}
-                      </div>
-                      <div className="text-xs text-muted-foreground">{a.patient_mobile || "+94 77 123 4567"}</div>
-                    </TableCell>
-                    <TableCell>
-                      <div className="text-xs font-semibold">{a.date}</div>
-                      <div className="text-xs text-muted-foreground">{a.time}</div>
-                    </TableCell>
-                    <TableCell>
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() => setViewingAppt(a)}
-                        className="text-xs h-8 gap-1.5 rounded-lg border-slate-300 text-slate-700 hover:bg-slate-50 hover:text-slate-900"
-                      >
-                        <Eye className="size-3.5" />
-                        View Health Background
-                      </Button>
-                    </TableCell>
-                    <TableCell>
-                      <Badge
-                        variant="outline"
-                        className={
-                          a.status === "Completed"
-                            ? "bg-slate-50 text-slate-600 border-slate-200 font-semibold"
-                            : a.status === "Approved"
-                            ? "bg-teal-50 text-teal-700 border-teal-200 font-semibold"
-                            : "bg-stone-50 text-stone-700 border-stone-200 font-semibold"
-                        }
-                      >
-                        {a.status || "Pending Approval"}
-                      </Badge>
-                    </TableCell>
-                    <TableCell className="text-right space-x-2">
-                      {a.status === "Approved" ? (
-                        <div className="flex items-center justify-end gap-1.5">
-                          {/* Doctor Always Enabled Start Video Call Button */}
-                          <Button
-                            size="sm"
-                            onClick={() => setActiveDoctorVideoAppt(a)}
-                            className="bg-[#438787] hover:bg-[#346a6f] text-white text-xs h-8 rounded-lg font-bold gap-1 shadow-sm"
-                          >
-                            <Video className="size-3.5" />
-                            <span>Start Video Call</span>
-                          </Button>
+          {/* ── Mobile card list (hidden on large screens) ── */}
+          <div className="lg:hidden divide-y divide-border">
+            {myAppointments.filter((a) => a.status !== "Declined").length > 0 ? (
+              myAppointments.filter((a) => a.status !== "Declined").map((a) => (
+                <div key={a.id} className="p-4 space-y-3">
+                  {/* Row 1: name + status */}
+                  <div className="flex items-start justify-between gap-2">
+                    <div>
+                      <p className="text-sm font-bold text-slate-900 dark:text-white leading-tight">
+                        {a.patient_name || a.patient_id || "Patient"}
+                      </p>
+                      <p className="text-[11px] text-muted-foreground mt-0.5">{a.patient_mobile || "+94 77 123 4567"}</p>
+                    </div>
+                    <Badge
+                      variant="outline"
+                      className={`text-[10px] font-semibold shrink-0 ${
+                        a.status === "Completed"
+                          ? "bg-slate-50 text-slate-600 border-slate-200"
+                          : a.status === "Approved"
+                          ? "bg-teal-50 text-teal-700 border-teal-200"
+                          : "bg-stone-50 text-stone-700 border-stone-200"
+                      }`}
+                    >
+                      {a.status || "Pending"}
+                    </Badge>
+                  </div>
 
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => openDoctorChat(a)}
-                            className="text-xs h-8 rounded-lg gap-1 border-slate-200 dark:border-slate-700"
-                          >
-                            <MessageSquare className="size-3.5" />
-                            <span>Chat</span>
-                          </Button>
+                  {/* Row 2: date + time + view background */}
+                  <div className="flex items-center gap-2">
+                    <div className="bg-muted/50 rounded-lg px-2.5 py-1.5 text-center">
+                      <p className="text-[10px] text-muted-foreground">Date</p>
+                      <p className="text-xs font-bold text-foreground">{a.date}</p>
+                    </div>
+                    <div className="bg-muted/50 rounded-lg px-2.5 py-1.5 text-center">
+                      <p className="text-[10px] text-muted-foreground">Time</p>
+                      <p className="text-xs font-bold text-foreground">{a.time}</p>
+                    </div>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => setViewingAppt(a)}
+                      className="ml-auto text-[11px] h-8 gap-1 rounded-lg border-slate-300 text-slate-700"
+                    >
+                      <Eye className="size-3" />
+                      View ePass
+                    </Button>
+                  </div>
 
-                          {/* End Consultation Session Button */}
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => handleEndSession(a.id || "")}
-                            title="Complete and end consultation session"
-                            className="text-xs h-8 text-slate-600 border-slate-300 hover:bg-slate-100 rounded-lg gap-1 font-medium"
-                          >
-                            <CheckCircle2 className="size-3.5" />
-                            <span>End Session</span>
-                          </Button>
+                  {/* Row 3: action buttons */}
+                  <div className="flex flex-wrap gap-2">
+                    {a.status === "Approved" ? (
+                      <>
+                        <Button
+                          size="sm"
+                          onClick={() => setActiveDoctorVideoAppt(a)}
+                          className="bg-[#438787] hover:bg-[#346a6f] text-white text-xs h-8 rounded-lg font-bold gap-1.5 shadow-sm flex-1"
+                        >
+                          <Video className="size-3.5" />
+                          Start Video Call
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => openDoctorChat(a)}
+                          className="text-xs h-8 rounded-lg gap-1 border-slate-200"
+                        >
+                          <MessageSquare className="size-3.5" />
+                          Chat
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => handleEndSession(a.id || "")}
+                          className="text-xs h-8 text-slate-600 border-slate-300 rounded-lg gap-1"
+                        >
+                          <CheckCircle2 className="size-3.5" />
+                          End
+                        </Button>
+                      </>
+                    ) : a.status === "Completed" ? (
+                      <>
+                        <Badge className="bg-slate-100 text-slate-500 text-xs py-1 px-2.5 border border-slate-200">
+                          Session Ended
+                        </Badge>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => openDoctorChat(a)}
+                          className="text-xs h-8 rounded-lg gap-1 border-slate-200"
+                        >
+                          <MessageSquare className="size-3.5" />
+                          View Log
+                        </Button>
+                      </>
+                    ) : (
+                      <>
+                        <Button
+                          size="sm"
+                          onClick={() => handleApproveAppointment(a.id || "")}
+                          className="bg-[#438787] hover:bg-[#346a6f] text-white text-xs h-8 gap-1.5 rounded-lg shadow-sm flex-1"
+                        >
+                          <CheckCircle2 className="size-3.5" />
+                          Approve
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => handleDeclineAppointment(a.id || "")}
+                          className="text-slate-500 border-slate-300 size-8 p-0 rounded-lg"
+                        >
+                          <XCircle className="size-3.5" />
+                        </Button>
+                      </>
+                    )}
+                  </div>
+                </div>
+              ))
+            ) : (
+              <div className="text-center text-muted-foreground py-10 text-sm">
+                No telemedicine appointment requests today.
+              </div>
+            )}
+          </div>
+
+          {/* ── Desktop table (hidden on small screens) ── */}
+          <div className="hidden lg:block">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Patient Details</TableHead>
+                  <TableHead>Schedule Time</TableHead>
+                  <TableHead>Health Profile & ePass</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead className="text-right">Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {myAppointments.filter((a) => a.status !== "Declined").length > 0 ? (
+                  myAppointments.filter((a) => a.status !== "Declined").map((a) => (
+                    <TableRow key={a.id}>
+                      <TableCell className="font-medium">
+                        <div className="font-bold text-slate-900 dark:text-white">
+                          {a.patient_name || a.patient_id || "Mahinda Rajapaksha"}
                         </div>
-                      ) : a.status === "Completed" ? (
-                        <div className="flex items-center justify-end gap-1.5">
-                          <Badge className="bg-slate-100 text-slate-500 font-medium text-xs py-1 px-2.5 shadow-none border border-slate-200 hover:bg-slate-100">
-                            Session Ended
-                          </Badge>
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => openDoctorChat(a)}
-                            className="text-xs h-8 rounded-lg gap-1 border-slate-200 dark:border-slate-700"
-                          >
-                            <MessageSquare className="size-3.5" />
-                            <span>View Log</span>
-                          </Button>
-                        </div>
-                      ) : (
-                        <>
-                          <Button
-                            size="sm"
-                            onClick={() => handleApproveAppointment(a.id || "")}
-                            className="bg-[#438787] hover:bg-[#346a6f] text-white text-xs h-8 gap-1 rounded-lg shadow-sm"
-                          >
-                            <CheckCircle2 className="size-3.5" />
-                            Approve
-                          </Button>
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => handleDeclineAppointment(a.id || "")}
-                            title="Decline Request"
-                            className="text-slate-500 hover:text-slate-700 hover:bg-slate-100 border-slate-300 size-8 p-0 rounded-lg"
-                          >
-                            <XCircle className="size-3.5" />
-                          </Button>
-                        </>
-                      )}
+                        <div className="text-xs text-muted-foreground">{a.patient_mobile || "+94 77 123 4567"}</div>
+                      </TableCell>
+                      <TableCell>
+                        <div className="text-xs font-semibold">{a.date}</div>
+                        <div className="text-xs text-muted-foreground">{a.time}</div>
+                      </TableCell>
+                      <TableCell>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => setViewingAppt(a)}
+                          className="text-xs h-8 gap-1.5 rounded-lg border-slate-300 text-slate-700 hover:bg-slate-50 hover:text-slate-900"
+                        >
+                          <Eye className="size-3.5" />
+                          View Health Background
+                        </Button>
+                      </TableCell>
+                      <TableCell>
+                        <Badge
+                          variant="outline"
+                          className={
+                            a.status === "Completed"
+                              ? "bg-slate-50 text-slate-600 border-slate-200 font-semibold"
+                              : a.status === "Approved"
+                              ? "bg-teal-50 text-teal-700 border-teal-200 font-semibold"
+                              : "bg-stone-50 text-stone-700 border-stone-200 font-semibold"
+                          }
+                        >
+                          {a.status || "Pending Approval"}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="text-right">
+                        {a.status === "Approved" ? (
+                          <div className="flex items-center justify-end gap-1.5">
+                            <Button
+                              size="sm"
+                              onClick={() => setActiveDoctorVideoAppt(a)}
+                              className="bg-[#438787] hover:bg-[#346a6f] text-white text-xs h-8 rounded-lg font-bold gap-1 shadow-sm"
+                            >
+                              <Video className="size-3.5" />
+                              <span>Start Video Call</span>
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => openDoctorChat(a)}
+                              className="text-xs h-8 rounded-lg gap-1 border-slate-200 dark:border-slate-700"
+                            >
+                              <MessageSquare className="size-3.5" />
+                              <span>Chat</span>
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => handleEndSession(a.id || "")}
+                              className="text-xs h-8 text-slate-600 border-slate-300 hover:bg-slate-100 rounded-lg gap-1 font-medium"
+                            >
+                              <CheckCircle2 className="size-3.5" />
+                              <span>End Session</span>
+                            </Button>
+                          </div>
+                        ) : a.status === "Completed" ? (
+                          <div className="flex items-center justify-end gap-1.5">
+                            <Badge className="bg-slate-100 text-slate-500 font-medium text-xs py-1 px-2.5 shadow-none border border-slate-200 hover:bg-slate-100">
+                              Session Ended
+                            </Badge>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => openDoctorChat(a)}
+                              className="text-xs h-8 rounded-lg gap-1 border-slate-200 dark:border-slate-700"
+                            >
+                              <MessageSquare className="size-3.5" />
+                              <span>View Log</span>
+                            </Button>
+                          </div>
+                        ) : (
+                          <div className="flex items-center justify-end gap-1.5">
+                            <Button
+                              size="sm"
+                              onClick={() => handleApproveAppointment(a.id || "")}
+                              className="bg-[#438787] hover:bg-[#346a6f] text-white text-xs h-8 gap-1 rounded-lg shadow-sm"
+                            >
+                              <CheckCircle2 className="size-3.5" />
+                              Approve
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => handleDeclineAppointment(a.id || "")}
+                              title="Decline Request"
+                              className="text-slate-500 hover:text-slate-700 hover:bg-slate-100 border-slate-300 size-8 p-0 rounded-lg"
+                            >
+                              <XCircle className="size-3.5" />
+                            </Button>
+                          </div>
+                        )}
+                      </TableCell>
+                    </TableRow>
+                  ))
+                ) : (
+                  <TableRow>
+                    <TableCell colSpan={5} className="text-center text-muted-foreground py-6">
+                      No telemedicine appointment requests today.
                     </TableCell>
                   </TableRow>
-                ))
-              ) : (
-                <TableRow>
-                  <TableCell colSpan={5} className="text-center text-muted-foreground py-6">
-                    No telemedicine appointment requests today.
-                  </TableCell>
-                </TableRow>
-              )}
-            </TableBody>
-          </Table>
+                )}
+              </TableBody>
+            </Table>
+          </div>
         </CardContent>
       </Card>
 
@@ -678,7 +806,7 @@ function DoctorDashboard() {
               </div>
 
               {/* Allergies & Family History */}
-              <div className="grid grid-cols-2 gap-2">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                 <div className="p-3 rounded-xl bg-rose-50/60 dark:bg-rose-950/30 border border-rose-200 dark:border-rose-900/40 space-y-1">
                   <p className="font-bold text-rose-900 dark:text-rose-200 flex items-center gap-1">
                     <AlertTriangle className="size-3.5 text-rose-600" />
@@ -714,7 +842,7 @@ function DoctorDashboard() {
 
       {/* Doctor - Patient Live Follow-back Messaging Dialog */}
       <Dialog open={!!chatAppt} onOpenChange={() => setChatAppt(null)}>
-        <DialogContent className="sm:max-w-md rounded-2xl flex flex-col h-[540px]">
+        <DialogContent className="w-[calc(100vw-1rem)] sm:max-w-md rounded-2xl flex flex-col h-[90dvh] sm:h-[540px] max-h-[620px]">
           <DialogHeader className="pb-2 border-b border-border bg-slate-50 dark:bg-slate-900 px-5 pt-5">
             <DialogTitle className="flex items-center justify-between text-sm font-medium">
               <div>
@@ -838,9 +966,9 @@ function DoctorDashboard() {
 
       {/* Interactive HD Telemedicine Live Video Meeting Room for Doctor */}
       <Dialog open={!!activeDoctorVideoAppt} onOpenChange={() => setActiveDoctorVideoAppt(null)}>
-        <DialogContent className="sm:max-w-2xl rounded-2xl p-0 overflow-hidden bg-zinc-950 text-zinc-100 border-zinc-800 shadow-xl">
+        <DialogContent className="w-[calc(100vw-1rem)] sm:max-w-2xl rounded-2xl p-0 overflow-hidden bg-zinc-950 text-zinc-100 border-zinc-800 shadow-xl">
           {activeDoctorVideoAppt && (
-            <div className="relative h-[480px] flex flex-col justify-between p-5 bg-zinc-950">
+            <div className="relative h-[60dvh] sm:h-[480px] flex flex-col justify-between p-3 sm:p-5 bg-zinc-950">
               {/* Patient Video Stream Area (Remote WebRTC) */}
               <div className="absolute inset-0 flex items-center justify-center bg-zinc-900 overflow-hidden">
                 <video
@@ -868,7 +996,7 @@ function DoctorDashboard() {
                 )}
 
                 {/* Self Doctor Camera Thumbnail (Picture in Picture) */}
-                <div className="absolute bottom-20 right-4 w-36 h-24 rounded-lg bg-zinc-800 border border-zinc-700/50 shadow-lg overflow-hidden flex items-center justify-center">
+                <div className="absolute bottom-20 right-2 sm:right-4 w-28 h-20 sm:w-36 sm:h-24 rounded-lg bg-zinc-800 border border-zinc-700/50 shadow-lg overflow-hidden flex items-center justify-center">
                   <video 
                     ref={localVideoRef} 
                     autoPlay 
