@@ -105,15 +105,20 @@ function AssistantPage() {
   const [dynamicSuggestions, setDynamicSuggestions] = useState<string[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(true);
   const [activePlanId, setActivePlanId] = useState<string | null>(() => {
-    return localStorage.getItem("meddoc_active_epass");
+    if (typeof window !== "undefined") {
+      return localStorage.getItem("meddoc_active_epass");
+    }
+    return null;
   });
   const [aiCredits, setAiCredits] = useState<number>(() => {
-    const saved = localStorage.getItem("meddoc_ai_credits");
-    if (saved) return parseInt(saved, 10);
-    const activePlan = localStorage.getItem("meddoc_active_epass");
-    if (activePlan === "platinum") return 100000;
-    if (activePlan === "gold") return 10000;
-    if (activePlan === "silver") return 1000;
+    if (typeof window !== "undefined") {
+      const saved = localStorage.getItem("meddoc_ai_credits");
+      if (saved) return parseInt(saved, 10);
+      const activePlan = localStorage.getItem("meddoc_active_epass");
+      if (activePlan === "platinum") return 100000;
+      if (activePlan === "gold") return 10000;
+      if (activePlan === "silver") return 1000;
+    }
     // Guest user: 450 free credits
     return 450;
   });

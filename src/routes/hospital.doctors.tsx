@@ -13,10 +13,9 @@ import { Badge } from "@/components/ui/badge";
 import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { doctors as initialDoctors } from "@/data/mock";
+import { doctors as initialDoctors, hospitals, type Doctor } from "@/data/mock";
 import { adminCreateAccount } from "@/services/auth.service";
 import { doctorService } from "@/services/doctor.service";
-import { type Doctor } from "@/data/mock";
 
 import {
   DropdownMenu,
@@ -60,12 +59,14 @@ function HospitalDoctors() {
   }, []);
 
   const [branchesData] = useState<{name: string, capacity: number}[]>(() => {
-    const saved = localStorage.getItem("mock_hospital_branches_data");
-    if (saved) {
-      try { return JSON.parse(saved); } catch (e) { return []; }
+    if (typeof window !== "undefined") {
+      const saved = localStorage.getItem("mock_hospital_branches_data");
+      if (saved) {
+        try { return JSON.parse(saved); } catch (e) { return []; }
+      }
     }
     // Fallback to initial mock if branches weren't set yet
-    return require("@/data/mock").hospitals[0].branches.map((b: string) => ({ name: b, capacity: 100 }));
+    return hospitals[0]?.branches.map((b: string) => ({ name: b, capacity: 100 })) || [];
   });
 
   

@@ -162,11 +162,13 @@ export function PortalShell({
       storageKey = "coha_hospital_notifs_v1";
     }
 
-    const saved = localStorage.getItem(storageKey);
-    if (saved) {
-      try {
-        return JSON.parse(saved);
-      } catch (e) {}
+    if (typeof window !== "undefined") {
+      const saved = localStorage.getItem(storageKey);
+      if (saved) {
+        try {
+          return JSON.parse(saved);
+        } catch (e) {}
+      }
     }
     return initialArray;
   });
