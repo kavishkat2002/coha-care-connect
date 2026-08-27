@@ -24,7 +24,13 @@
     "exactOptionalPropertyTypes": true,
     "noUncheckedSideEffectImports": true,
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": ["./src/*"],
+      "@/types": ["./src/types/index.ts"],
+      "@/types/*": ["./src/types/*"],
+      "@/constants": ["./src/constants/index.ts"],
+      "@/constants/*": ["./src/constants/*"],
+      "@/services/ai": ["./src/services/ai/index.ts"],
+      "@/services/ai/*": ["./src/services/ai/*"]
     }
   }
 }
