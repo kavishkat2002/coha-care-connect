@@ -265,7 +265,7 @@ coha-care-connect/
 │   └── styles.css                 # Tailwind v4 design system tokens
 ├── supabase_setup.sql             # DB schema DDL
 ├── supabase_seed.sql              # Seed data SQL
-├── vite.config.ts                 # Vite + Lovable preset
+├── vite.config.ts                 # Vite config with custom presets
 ├── tsconfig.json
 └── package.json
 ```
