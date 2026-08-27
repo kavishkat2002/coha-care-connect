@@ -238,7 +238,40 @@ const CONDITION_SPECIALTY_MAP: Record<string, string> = {
 };
 
 export function detectIntent(message: string) {
-  const text = message.toLowerCase();
+  const text = message.toLowerCase().trim();
+
+  // 1. General Greeting Intent (e.g. "hi", "hello", "hey", "good morning", "how are you", etc.)
+  if (
+    /^(hi|hello|hey|heya|howdy|greetings|good\s+(morning|afternoon|evening|day)|hi\s+there|hello\s+there|hello\s+meddoc|hi\s+meddoc|hey\s+meddoc|hello\s+doctor|hi\s+doctor)[!.,?]?$/i.test(text) ||
+    /\b(how are you|how do you do|how's it going|how are you doing)\b/i.test(text)
+  ) {
+    return {
+      type: "general_greeting",
+      condition: "General Inquiry",
+      specialty: "General Medicine",
+    };
+  }
+
+  // 2. General Gratitude Intent (e.g. "thank you", "thanks", "appreciate it", etc.)
+  if (/^(thank\s*you|thanks|thank\s*u|thx|many\s*thanks|appreciate\s*it|thank\s*you\s*so\s*much)[!.,?]?$/i.test(text)) {
+    return {
+      type: "general_thanks",
+      condition: "General Gratitude",
+      specialty: "General Medicine",
+    };
+  }
+
+  // 3. General Capabilities / Help Intent (e.g. "who are you", "what can you do", "help", "what is meddoc")
+  if (
+    /^(help|who\s+are\s+you|what\s+can\s+you\s+do|what\s+is\s+meddoc|how\s+can\s+you\s+help|how\s+does\s+this\s+work|what\s+are\s+your\s+features)[!.,?]?$/i.test(text) ||
+    /\b(who are you|what can you do|what is meddoc|how does this work)\b/i.test(text)
+  ) {
+    return {
+      type: "general_inquiry",
+      condition: "Platform Capabilities",
+      specialty: "General Medicine",
+    };
+  }
 
   // A. Check for specific doctor booking request (e.g., "book Dr. Amara Silva")
   const matchedDoctor = doctors.find((d) =>
@@ -362,6 +395,16 @@ DYNAMIC CLINICAL INTERVIEW PROTOCOL (Symptom-Aware & Intent-Driven):
    - IF the user provides an image or document alongside a text message (e.g., "explain me for this"), YOUR ABSOLUTE FIRST PRIORITY is to address their specific text question using the document as evidence.
    - You MUST provide a detailed interpretation, observation, and clinical analysis of the uploaded file in "plainLanguageSummary" that directly answers their question, BEFORE asking any follow-up questions.
    - Explain what you see in the image/document clearly to the user, and base your assessment on that visual/document evidence. Only ask follow-up questions if absolutely necessary after giving your analysis.
+5. GENERAL GREETINGS & CASUAL INTENTIONS (e.g., "Hi", "Hello", "Hey", "Good morning", "How are you", "Who are you", "What can you do", "Help", "Thank you"):
+   - When the user sends a general greeting, friendly salutation, inquiry about your capabilities or identity, or simple gratitude without reporting specific symptoms:
+     - Set "intent" to "General Greeting & Triage Readiness" (or "Platform Capabilities & Guidance" / "General Gratitude").
+     - Set "possibleConditions" to an EMPTY array [].
+     - Set "risk" to "low", "confidence" to 100.
+     - Set "suggestedSpecialty" to "General Medicine".
+     - In "plainLanguageSummary": Respond warmly, naturally, politely, and professionally as MedDoc (e.g., "Hello! I am MedDoc, your AI clinical health assistant. How are you feeling today? You can describe any symptoms you are experiencing, ask medical questions, attach a photo or lab report, or ask to book a consultation with a specialist.").
+     - In "followUpQuestions": Provide 3 natural, helpful starter prompts for the patient (e.g., ["I have a fever, cough or headache", "I want to check a skin rash or lesion", "I want to book an appointment with a doctor"]).
+     - In "recommendation": Provide 2-3 helpful guidance tips (e.g., ["Describe what you are feeling in your own words", "Mention symptom duration and severity", "Attach a lab report or photo if available"]).
+     - Set "agenticAction" to {"type": "none"}.
 
 RESPONSE FORMAT:
 Return ONLY a valid JSON object matching this exact structure (no other text, no markdown):
@@ -516,6 +559,79 @@ export async function analyseSymptoms(conversationHistory: ChatMessage[]): Promi
   // Fallback / Offline Logic — Intent-Driven Symptom-Aware Consultation
   await delay(800);
   const hit = detectIntent(fullUserSymptomQuery);
+
+  if (hit.type === "general_greeting") {
+    return {
+      intent: "General Greeting & Triage Readiness",
+      possibleConditions: [],
+      risk: "low",
+      confidence: 100,
+      summary: "Friendly clinical greeting and assistance readiness.",
+      reasoning: "Intent Classification: general_greeting\n- Identified user greeting / opening salutation ('hi', 'hello', 'hey', etc.).\n- Prepared triage readiness for symptom intake, image evaluation, or specialist booking.",
+      plainLanguageSummary: "Hello! I am MedDoc, your AI clinical health assistant. How are you feeling today? You can describe any symptoms you are experiencing in your own words, upload a medical photo or lab report, or ask to book an appointment with a specialist.",
+      followUpQuestions: [
+        "I have a fever, headache or cough",
+        "I want to check a skin rash or lesion",
+        "I want to book an appointment with a doctor"
+      ],
+      recommendation: [
+        "Describe your symptoms, how long you've had them, and their severity",
+        "Attach a photo or lab report if you have one",
+        "Let me know if you need to schedule a doctor consultation"
+      ],
+      suggestedSpecialty: "General Medicine",
+      disclaimer: AI_DISCLAIMER,
+      agenticAction: { type: "none" }
+    };
+  }
+
+  if (hit.type === "general_thanks") {
+    return {
+      intent: "General Gratitude",
+      possibleConditions: [],
+      risk: "low",
+      confidence: 100,
+      summary: "Patient gratitude acknowledged.",
+      reasoning: "Intent Classification: general_thanks\n- Patient expressed thanks/acknowledgement.\n- Action: Provided warm closing and reminder of continued availability.",
+      plainLanguageSummary: "You're very welcome! I'm glad I could help. If you experience any other symptoms or have further health questions, please don't hesitate to ask anytime. Take care!",
+      followUpQuestions: [
+        "Ask another health question",
+        "Book a follow-up appointment",
+        "Check my medications"
+      ],
+      recommendation: [
+        "Monitor how you feel over the next 24-48 hours",
+        "Seek emergency medical attention immediately if red-flag symptoms arise"
+      ],
+      suggestedSpecialty: "General Medicine",
+      disclaimer: AI_DISCLAIMER,
+      agenticAction: { type: "none" }
+    };
+  }
+
+  if (hit.type === "general_inquiry") {
+    return {
+      intent: "Platform Capabilities & Guidance",
+      possibleConditions: [],
+      risk: "low",
+      confidence: 100,
+      summary: "Overview of MedDoc AI assistant capabilities.",
+      reasoning: "Intent Classification: general_inquiry\n- User asked about platform features or assistant identity.\n- Action: Outlined symptom evaluation, image analysis, lab report review, and specialist booking.",
+      plainLanguageSummary: "I am MedDoc, your personal AI healthcare assistant. Here is what I can do for you:\n\n• **Symptom Triage:** Tell me what you're experiencing for an evidence-based clinical evaluation.\n• **Medical Image & Report Analysis:** Upload skin or eye photos, prescriptions, or lab test documents for structured evaluation.\n• **Specialist Directory & Appointments:** Search and book verified doctors across multiple specialties for online or in-person visits.\n\nWhat would you like assistance with today?",
+      followUpQuestions: [
+        "Evaluate my symptoms",
+        "Analyze an uploaded photo or lab report",
+        "Book an appointment with a doctor"
+      ],
+      recommendation: [
+        "Type your symptoms or health question to begin",
+        "Upload relevant medical documents or photos if available"
+      ],
+      suggestedSpecialty: "General Medicine",
+      disclaimer: AI_DISCLAIMER,
+      agenticAction: { type: "none" }
+    };
+  }
 
   if (hit.type === "book_specific_doctor") {
     const docName = (hit as any).doctorName;
