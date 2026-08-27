@@ -375,42 +375,45 @@ function BookPage() {
             { id: "dental", label: "eDental", image: "/images-1.jpg", isNew: true, color: "text-indigo-500" },
             { id: "skin", label: "eLAB", image: "/laboratory.png", isNew: true, color: "text-amber-500" },
             { id: "homeo", label: "MediFit", image: "/healthcare-trackers-wearables-sensors-abstract-concept-illustration_335657-2181.avif", isNew: true, color: "text-green-600" },
-          ] as any[] ).map((item) => (
-            <div
-              key={item.id}
-              onClick={() => {
-                if (item.id === "hosp") {
-                  navigate({ to: "/patient/telemedicine" });
-                } else if (item.id === "dl") {
-                  navigate({ to: "/patient/medmind-ecare" });
-                } else if (item.id === "mfa") {
-                  navigate({ to: "/patient/epass" });
-                } else if (item.id === "skin") {
-                  navigate({ to: "/patient/elab" });
-                } else if (item.id === "homeo") {
-                  navigate({ to: "/patient/medifit" });
-                }
-              }}
-              className="relative p-5 bg-card border border-border shadow-soft rounded-2xl flex flex-col items-center justify-center gap-4 hover:shadow-md transition-shadow cursor-pointer"
-            >
-              {item.isNew && (
-                <span className="absolute top-0 left-0 bg-green-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-tl-2xl rounded-br-lg">
-                  New
-                </span>
-              )}
-              <Info className="absolute top-3 right-3 size-4 text-muted-foreground/50 hover:text-muted-foreground" />
-              {(item as any).image ? (
-                <div className="w-16 h-16 flex items-center justify-center">
-                  <img src={(item as any).image} alt={item.label} className="w-full h-full object-contain" />
-                </div>
-              ) : (
-                <div className={`p-4 rounded-full bg-muted/30 ${item.color}`}>
-                  {item.icon && <item.icon className="size-8" strokeWidth={1.5} />}
-                </div>
-              )}
-              <span className="text-sm font-medium text-foreground text-center">{item.label}</span>
-            </div>
-          ))}
+          ] as any[] ).map((item) => {
+            const isClickable = item.id === "hosp" || item.id === "mfa" || item.id === "skin" || item.id === "homeo";
+            return (
+              <div
+                key={item.id}
+                onClick={() => {
+                  if (item.id === "hosp") {
+                    navigate({ to: "/patient/telemedicine" });
+                  } else if (item.id === "mfa") {
+                    navigate({ to: "/patient/epass" });
+                  } else if (item.id === "skin") {
+                    navigate({ to: "/patient/elab" });
+                  } else if (item.id === "homeo") {
+                    navigate({ to: "/patient/medifit" });
+                  }
+                }}
+                className={`relative p-5 bg-card border border-border shadow-soft rounded-2xl flex flex-col items-center justify-center gap-4 transition-shadow ${
+                  isClickable ? "hover:shadow-md cursor-pointer" : "cursor-default"
+                }`}
+              >
+                {item.isNew && (
+                  <span className="absolute top-0 left-0 bg-green-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-tl-2xl rounded-br-lg">
+                    New
+                  </span>
+                )}
+                <Info className="absolute top-3 right-3 size-4 text-muted-foreground/50 hover:text-muted-foreground" />
+                {(item as any).image ? (
+                  <div className="w-16 h-16 flex items-center justify-center">
+                    <img src={(item as any).image} alt={item.label} className="w-full h-full object-contain" />
+                  </div>
+                ) : (
+                  <div className={`p-4 rounded-full bg-muted/30 ${item.color}`}>
+                    {item.icon && <item.icon className="size-8" strokeWidth={1.5} />}
+                  </div>
+                )}
+                <span className="text-sm font-medium text-foreground text-center">{item.label}</span>
+              </div>
+            );
+          })}
         </div>
       </div>
 
