@@ -81,28 +81,89 @@ function calculateDistance(lat1: number, lon1: number, lat2: number, lon2: numbe
 
 function AssistantPage() {
   const [sessions, setSessions] = useState<ChatSession[]>([]);
-  const [activeSessionId, setActiveSessionId] = useState<string>(`sess_${Date.now()}`);
-  const [messages, setMessages] = useState<Message[]>([
-    {
-      id: "m0",
-      role: "assistant",
-      text: "Hello, I am MedDoc. Tell me what you are experiencing in your own words. You can also attach a photo of the affected area, a prescription, or a lab report.",
-    },
-  ]);
+  const [activeSessionId, setActiveSessionId] = useState<string>(() => {
+    if (typeof window !== "undefined") {
+      try {
+        const saved = localStorage.getItem("meddoc_active_session_data");
+        if (saved) {
+          const parsed = JSON.parse(saved);
+          if (parsed?.id) return parsed.id;
+        }
+      } catch (_) {}
+    }
+    return `sess_${Date.now()}`;
+  });
+
+  const [messages, setMessages] = useState<Message[]>(() => {
+    if (typeof window !== "undefined") {
+      try {
+        const saved = localStorage.getItem("meddoc_active_session_data");
+        if (saved) {
+          const parsed = JSON.parse(saved);
+          if (Array.isArray(parsed?.messages) && parsed.messages.length > 0) {
+            return parsed.messages;
+          }
+        }
+      } catch (_) {}
+    }
+    return [
+      {
+        id: "m0",
+        role: "assistant",
+        text: "Hello, I am MedDoc. Tell me what you are experiencing in your own words. You can also attach a photo of the affected area, a prescription, or a lab report.",
+      },
+    ];
+  });
+
   const [input, setInput] = useState("");
   const [attachment, setAttachment] = useState<string | null>(null);
   const [imageBase64, setImageBase64] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
-  const [assessment, setAssessment] = useState<Assessment | null>(null);
+
+  const [assessment, setAssessment] = useState<Assessment | null>(() => {
+    if (typeof window !== "undefined") {
+      try {
+        const saved = localStorage.getItem("meddoc_active_session_data");
+        if (saved) {
+          const parsed = JSON.parse(saved);
+          if (parsed?.assessment) return parsed.assessment;
+        }
+      } catch (_) {}
+    }
+    return null;
+  });
+
   const [care, setCare] = useState<null | {
     topRated: Doctor[];
     nearest: Doctor[];
     mostAvailable: Doctor[];
     originalNearest?: Doctor[]; 
-  }>(null);
+  }>(() => {
+    if (typeof window !== "undefined") {
+      try {
+        const saved = localStorage.getItem("meddoc_active_session_data");
+        if (saved) {
+          const parsed = JSON.parse(saved);
+          if (parsed?.care) return parsed.care;
+        }
+      } catch (_) {}
+    }
+    return null;
+  });
   
   const [isLocating, setIsLocating] = useState(false);
-  const [dynamicSuggestions, setDynamicSuggestions] = useState<string[]>([]);
+  const [dynamicSuggestions, setDynamicSuggestions] = useState<string[]>(() => {
+    if (typeof window !== "undefined") {
+      try {
+        const saved = localStorage.getItem("meddoc_active_session_data");
+        if (saved) {
+          const parsed = JSON.parse(saved);
+          if (Array.isArray(parsed?.dynamicSuggestions)) return parsed.dynamicSuggestions;
+        }
+      } catch (_) {}
+    }
+    return [];
+  });
   const [showSuggestions, setShowSuggestions] = useState(true);
   const [activePlanId, setActivePlanId] = useState<string | null>(() => {
     if (typeof window !== "undefined") {
@@ -127,18 +188,31 @@ function AssistantPage() {
 
   useEffect(() => {
     patientService.getPatientProfile().then(p => {
+      const pid = p?.id || "guest";
+      setPatientId(pid);
+      setIsGuest(!p?.id);
+
       if (p?.id) {
-        setPatientId(p.id);
-        setIsGuest(false);
         patientService.getEPassMembership(p.id).then(m => {
           if (m && typeof m.ai_credits === "number") {
             setAiCredits(m.ai_credits);
             localStorage.setItem("meddoc_ai_credits", m.ai_credits.toString());
           }
         });
-        patientService.getChatHistory(p.id).then(hist => {
-          if (hist && hist.length > 0) {
-            setSessions(hist);
+      } else {
+        const saved = localStorage.getItem("meddoc_ai_credits");
+        if (!saved) {
+          setAiCredits(450);
+          localStorage.setItem("meddoc_ai_credits", "450");
+        }
+      }
+
+      // Fetch chat history for this patient / guest
+      patientService.getChatHistory(pid).then(hist => {
+        if (hist && hist.length > 0) {
+          setSessions(hist);
+          // Only override active session if current session has no user messages
+          if (messages.length <= 1) {
             const latest = hist[0];
             setActiveSessionId(latest.id);
             setMessages(latest.messages);
@@ -146,16 +220,8 @@ function AssistantPage() {
             setCare(latest.care);
             setDynamicSuggestions(latest.dynamicSuggestions || []);
           }
-        });
-      } else {
-        // No profile = guest user
-        setIsGuest(true);
-        const saved = localStorage.getItem("meddoc_ai_credits");
-        if (!saved) {
-          setAiCredits(450);
-          localStorage.setItem("meddoc_ai_credits", "450");
         }
-      }
+      });
     });
   }, []);
 
@@ -209,17 +275,24 @@ function AssistantPage() {
   }, [messages, busy]);
 
   const startNewChat = () => {
-    setActiveSessionId(`sess_${Date.now()}`);
-    setMessages([
+    const newId = `sess_${Date.now()}`;
+    const initialMessages: Message[] = [
       {
         id: "m0",
         role: "assistant",
         text: "Hello, I am MedDoc. Tell me what you are experiencing in your own words. You can also attach a photo of the affected area, a prescription, or a lab report.",
       },
-    ]);
+    ];
+    setActiveSessionId(newId);
+    setMessages(initialMessages);
     setAssessment(null);
     setCare(null);
     setDynamicSuggestions([]);
+    if (typeof window !== "undefined") {
+      try {
+        localStorage.removeItem("meddoc_active_session_data");
+      } catch (_) {}
+    }
   };
 
   const loadChat = (session: ChatSession) => {
@@ -228,6 +301,11 @@ function AssistantPage() {
     setAssessment(session.assessment);
     setCare(session.care);
     setDynamicSuggestions(session.dynamicSuggestions);
+    if (typeof window !== "undefined") {
+      try {
+        localStorage.setItem("meddoc_active_session_data", JSON.stringify(session));
+      } catch (_) {}
+    }
   };
 
   const toggleListen = async () => {

@@ -109,7 +109,18 @@ const ELAB_SERVICES = [
 function ReportsPage() {
   const [busy, setBusy] = useState(false);
   const [pipelineStage, setPipelineStage] = useState<number>(0);
-  const [result, setResult] = useState<ReportAnalysis | null>(null);
+  const [result, setResult] = useState<ReportAnalysis | null>(() => {
+    if (typeof window !== "undefined") {
+      try {
+        const saved = localStorage.getItem("meddoc_active_report_analysis");
+        if (saved) {
+          const parsed = JSON.parse(saved);
+          if (parsed) return parsed;
+        }
+      } catch (_) {}
+    }
+    return null;
+  });
   const [reports, setReports] = useState<ReportItem[]>([]);
 
   const chunkedReports = useMemo(() => {

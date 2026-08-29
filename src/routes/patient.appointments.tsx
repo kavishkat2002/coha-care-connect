@@ -39,7 +39,29 @@ function AppointmentsPage() {
       const data = await patientService.getAppointments();
       setAppointments(data);
     }
-    load();
+    void load();
+
+    const channel = typeof window !== "undefined" && "BroadcastChannel" in window 
+      ? new BroadcastChannel("coha_profile_sync") 
+      : null;
+
+    if (channel) {
+      channel.onmessage = () => {
+        void load();
+      };
+    }
+
+    const handleStorage = (e: StorageEvent) => {
+      if (e.key === "mock_appointments" || e.key === "meddoc_appointments") {
+        void load();
+      }
+    };
+    window.addEventListener("storage", handleStorage);
+
+    return () => {
+      channel?.close();
+      window.removeEventListener("storage", handleStorage);
+    };
   }, []);
 
   return (

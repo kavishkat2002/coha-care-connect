@@ -66,9 +66,46 @@ function ImagesPage() {
   const [region, setRegion] = useState("Skin");
   const [busy, setBusy] = useState(false);
   const [stageProgress, setStageProgress] = useState(0);
-  const [result, setResult] = useState<ImageAnalysis | null>(null);
-  const [imageBase64, setImageBase64] = useState<string | null>(null);
-  const [pixelMetrics, setPixelMetrics] = useState<RealPixelMetrics | null>(null);
+
+  const [result, setResult] = useState<ImageAnalysis | null>(() => {
+    if (typeof window !== "undefined") {
+      try {
+        const saved = localStorage.getItem("meddoc_active_image_analysis");
+        if (saved) {
+          const parsed = JSON.parse(saved);
+          if (parsed?.result) return parsed.result;
+        }
+      } catch (_) {}
+    }
+    return null;
+  });
+
+  const [imageBase64, setImageBase64] = useState<string | null>(() => {
+    if (typeof window !== "undefined") {
+      try {
+        const saved = localStorage.getItem("meddoc_active_image_analysis");
+        if (saved) {
+          const parsed = JSON.parse(saved);
+          if (parsed?.imageBase64) return parsed.imageBase64;
+        }
+      } catch (_) {}
+    }
+    return null;
+  });
+
+  const [pixelMetrics, setPixelMetrics] = useState<RealPixelMetrics | null>(() => {
+    if (typeof window !== "undefined") {
+      try {
+        const saved = localStorage.getItem("meddoc_active_image_analysis");
+        if (saved) {
+          const parsed = JSON.parse(saved);
+          if (parsed?.pixelMetrics) return parsed.pixelMetrics;
+        }
+      } catch (_) {}
+    }
+    return null;
+  });
+
   const [recommendedDoctors, setRecommendedDoctors] = useState<Doctor[]>([]);
 
   const [aiCredits, setAiCredits] = useState<number>(() => {
@@ -84,17 +121,30 @@ function ImagesPage() {
   useEffect(() => {
     async function load() {
       const p = await patientService.getPatientProfile();
+      const pid = p?.id || "guest";
+      setPatientId(pid);
+      setIsGuest(!p?.id);
+
       if (p?.id) {
-        setPatientId(p.id);
-        setIsGuest(false);
         const m = await patientService.getEPassMembership(p.id);
         if (m && typeof m.ai_credits === "number") {
           setAiCredits(m.ai_credits);
           localStorage.setItem("meddoc_ai_credits", m.ai_credits.toString());
         }
-        const lastImageAnalysis = await patientService.getLastImageAnalysis(p.id);
-        if (lastImageAnalysis) {
-          setResult(lastImageAnalysis);
+      }
+
+      const lastImageAnalysis = await patientService.getLastImageAnalysis(pid);
+      if (lastImageAnalysis) {
+        if (lastImageAnalysis.result) {
+          setResult(prev => prev || lastImageAnalysis.result);
+          if (lastImageAnalysis.imageBase64) {
+            setImageBase64(prev => prev || lastImageAnalysis.imageBase64);
+          }
+          if (lastImageAnalysis.pixelMetrics) {
+            setPixelMetrics(prev => prev || lastImageAnalysis.pixelMetrics);
+          }
+        } else {
+          setResult(prev => prev || lastImageAnalysis);
         }
       }
     }
@@ -177,6 +227,8 @@ function ImagesPage() {
           const ctx = canvas.getContext("2d");
           ctx?.drawImage(img, 0, 0, width, height);
           
+          let calculatedMetrics: RealPixelMetrics | null = null;
+
           // Compute real RGBA pixel metrics from canvas
           const imageData = ctx?.getImageData(0, 0, width, height);
           if (imageData) {
@@ -295,6 +347,17 @@ function ImagesPage() {
           // Compress and convert to base64
           const dataUrl = canvas.toDataURL("image/jpeg", 0.7);
           setImageBase64(dataUrl);
+          if (typeof window !== "undefined") {
+            try {
+              const payload = {
+                result: null,
+                imageBase64: dataUrl,
+                pixelMetrics: calculatedMetrics,
+                updated_at: new Date().toISOString()
+              };
+              localStorage.setItem("meddoc_active_image_analysis", JSON.stringify(payload));
+            } catch (_) {}
+          }
         };
         img.src = reader.result as string;
       };
@@ -342,7 +405,7 @@ function ImagesPage() {
       const res = await analyseMedicalImage(region, imageBase64 || undefined, pixelMetrics || undefined, metadata);
       setStageProgress(4);
       setResult(res);
-      void patientService.saveLastImageAnalysis(patientId, res);
+      void patientService.saveLastImageAnalysis(patientId, res, imageBase64 || undefined, pixelMetrics || undefined);
       if (res.suggestedSpecialty) {
         const doctors = await doctorService.getDoctorsBySpecialty(res.suggestedSpecialty);
         setRecommendedDoctors(doctors);
@@ -595,16 +658,42 @@ function ImagesPage() {
               </div>
             )}
 
-            <Button className="w-full gap-2" onClick={() => void run()} disabled={busy || !imageBase64 || (isGuest && aiCredits <= 0)}>
-              {busy ? (
-                <>
-                  <RefreshCw className="size-4 animate-spin" />
-                  Analyzing photo with Vision AI & GPT reasoning…
-                </>
-              ) : (
-                `Run ${region.toLowerCase()} Vision AI assessment`
-              )}
-            </Button>
+            {imageBase64 ? (
+              <div className="flex gap-2">
+                <Button className="flex-1 gap-2" onClick={() => void run()} disabled={busy || (isGuest && aiCredits <= 0)}>
+                  {busy ? (
+                    <>
+                      <RefreshCw className="size-4 animate-spin" />
+                      Analyzing photo with Vision AI & GPT reasoning…
+                    </>
+                  ) : (
+                    `Run ${region.toLowerCase()} Vision AI assessment`
+                  )}
+                </Button>
+                <Button 
+                  type="button" 
+                  variant="outline" 
+                  onClick={() => {
+                    setImageBase64(null);
+                    setResult(null);
+                    setPixelMetrics(null);
+                    setRecommendedDoctors([]);
+                    if (typeof window !== "undefined") {
+                      try {
+                        localStorage.removeItem("meddoc_active_image_analysis");
+                      } catch (_) {}
+                    }
+                  }}
+                  disabled={busy}
+                >
+                  Clear
+                </Button>
+              </div>
+            ) : (
+              <Button className="w-full gap-2" disabled={true}>
+                Select an image above to run {region.toLowerCase()} assessment
+              </Button>
+            )}
             <AiDisclaimer />
             {isGuest && aiCredits <= 0 && (
               <div className="mt-3">

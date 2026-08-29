@@ -744,109 +744,221 @@ export const patientService = {
   },
 
   /**
-   * Fetch chat history from Supabase
+   * Fetch chat history from Supabase with local storage fallback
    */
   async getChatHistory(patientId: string): Promise<any[]> {
+    const storageKey = `meddoc_chat_history_${patientId || "guest"}`;
+
+    // 1. Try Supabase
     try {
-      const { data, error } = await supabase
-        .from("chat_sessions")
-        .select("*")
-        .eq("patient_id", patientId)
-        .order("updatedAt", { ascending: false });
-      
-      if (!error && data) return data;
+      if (patientId && patientId !== "guest") {
+        const { data, error } = await supabase
+          .from("chat_sessions")
+          .select("*")
+          .eq("patient_id", patientId)
+          .order("updatedAt", { ascending: false });
+        
+        if (!error && data && data.length > 0) {
+          if (typeof window !== "undefined") {
+            try {
+              localStorage.setItem(storageKey, JSON.stringify(data));
+            } catch (_) {}
+          }
+          return data;
+        }
+      }
     } catch (e) {
       console.warn("Supabase getChatHistory notice:", e);
     }
+
+    // 2. Fallback to local storage
+    if (typeof window !== "undefined") {
+      try {
+        const local = localStorage.getItem(storageKey) || localStorage.getItem("meddoc_chat_history_shared");
+        if (local) {
+          const parsed = JSON.parse(local);
+          if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+        }
+      } catch (_) {}
+    }
+
     return [];
   },
 
   /**
-   * Save a chat session to Supabase
+   * Save a chat session to Supabase and local storage
    */
   async saveChatSession(patientId: string, session: any): Promise<void> {
+    const storageKey = `meddoc_chat_history_${patientId || "guest"}`;
+
+    // 1. Save to local storage first for zero-latency cross-page navigation
+    if (typeof window !== "undefined") {
+      try {
+        const local = localStorage.getItem(storageKey);
+        let list = local ? JSON.parse(local) : [];
+        if (!Array.isArray(list)) list = [];
+        const idx = list.findIndex((s: any) => s.id === session.id);
+        if (idx >= 0) {
+          list[idx] = session;
+        } else {
+          list = [session, ...list];
+        }
+        localStorage.setItem(storageKey, JSON.stringify(list));
+        localStorage.setItem("meddoc_chat_history_shared", JSON.stringify(list));
+        localStorage.setItem("meddoc_active_session_data", JSON.stringify(session));
+      } catch (_) {}
+    }
+
+    // 2. Persist to Supabase
     try {
-      await supabase
-        .from("chat_sessions")
-        .upsert({
-          id: session.id,
-          patient_id: patientId,
-          title: session.title,
-          updatedAt: session.updatedAt,
-          messages: session.messages,
-          assessment: session.assessment,
-          care: session.care,
-          dynamicSuggestions: session.dynamicSuggestions
-        });
+      if (patientId && patientId !== "guest") {
+        await supabase
+          .from("chat_sessions")
+          .upsert({
+            id: session.id,
+            patient_id: patientId,
+            title: session.title,
+            updatedAt: session.updatedAt,
+            messages: session.messages,
+            assessment: session.assessment,
+            care: session.care,
+            dynamicSuggestions: session.dynamicSuggestions
+          });
+      }
     } catch (e) {
       console.warn("Supabase saveChatSession notice:", e);
     }
   },
 
   /**
-   * Save the last image analysis result to Supabase
+   * Save the last image analysis result to Supabase and local storage
    */
-  async saveLastImageAnalysis(patientId: string, result: any): Promise<void> {
+  async saveLastImageAnalysis(patientId: string, result: any, imageBase64?: string, pixelMetrics?: any): Promise<void> {
+    const storageKey = `meddoc_last_image_analysis_${patientId || "guest"}`;
+
+    // 1. Cache to local storage immediately
+    if (typeof window !== "undefined") {
+      try {
+        const payload = {
+          result,
+          imageBase64: imageBase64 || null,
+          pixelMetrics: pixelMetrics || null,
+          updated_at: new Date().toISOString()
+        };
+        localStorage.setItem(storageKey, JSON.stringify(payload));
+        localStorage.setItem("meddoc_active_image_analysis", JSON.stringify(payload));
+      } catch (_) {}
+    }
+
+    // 2. Persist to Supabase
     try {
-      await supabase
-        .from("health_analyses")
-        .upsert({
-          patient_id: patientId,
-          type: "image",
-          result: result,
-          updated_at: new Date().toISOString(),
-        }, { onConflict: "patient_id,type" });
+      if (patientId && patientId !== "guest") {
+        await supabase
+          .from("health_analyses")
+          .upsert({
+            patient_id: patientId,
+            type: "image",
+            result: result,
+            updated_at: new Date().toISOString(),
+          }, { onConflict: "patient_id,type" });
+      }
     } catch (e) {
       console.warn("Supabase saveLastImageAnalysis notice:", e);
     }
   },
 
   /**
-   * Get the last image analysis result from Supabase
+   * Get the last image analysis result from Supabase or local storage
    */
   async getLastImageAnalysis(patientId: string): Promise<any> {
+    const storageKey = `meddoc_last_image_analysis_${patientId || "guest"}`;
+
+    // 1. Try local storage cache for instant hydration
+    if (typeof window !== "undefined") {
+      try {
+        const cached = localStorage.getItem(storageKey) || localStorage.getItem("meddoc_active_image_analysis");
+        if (cached) {
+          const parsed = JSON.parse(cached);
+          if (parsed && (parsed.result || parsed.classification)) return parsed;
+        }
+      } catch (_) {}
+    }
+
+    // 2. Try Supabase
     try {
-      const { data, error } = await supabase
-        .from("health_analyses")
-        .select("result")
-        .eq("patient_id", patientId)
-        .eq("type", "image")
-        .single();
-      if (!error && data) return data.result;
+      if (patientId && patientId !== "guest") {
+        const { data, error } = await supabase
+          .from("health_analyses")
+          .select("result")
+          .eq("patient_id", patientId)
+          .eq("type", "image")
+          .single();
+        if (!error && data) return data.result;
+      }
     } catch (e) {}
     return null;
   },
 
   /**
-   * Save the last report analysis result to Supabase
+   * Save the last report analysis result to Supabase and local storage
    */
   async saveLastReportAnalysis(patientId: string, result: any): Promise<void> {
+    const storageKey = `meddoc_last_report_analysis_${patientId || "guest"}`;
+
+    if (typeof window !== "undefined") {
+      try {
+        if (result) {
+          localStorage.setItem(storageKey, JSON.stringify(result));
+          localStorage.setItem("meddoc_active_report_analysis", JSON.stringify(result));
+        } else {
+          localStorage.removeItem(storageKey);
+          localStorage.removeItem("meddoc_active_report_analysis");
+        }
+      } catch (_) {}
+    }
+
     try {
-      await supabase
-        .from("health_analyses")
-        .upsert({
-          patient_id: patientId,
-          type: "report",
-          result: result,
-          updated_at: new Date().toISOString(),
-        }, { onConflict: "patient_id,type" });
+      if (patientId && patientId !== "guest") {
+        await supabase
+          .from("health_analyses")
+          .upsert({
+            patient_id: patientId,
+            type: "report",
+            result: result,
+            updated_at: new Date().toISOString(),
+          }, { onConflict: "patient_id,type" });
+      }
     } catch (e) {
       console.warn("Supabase saveLastReportAnalysis notice:", e);
     }
   },
 
   /**
-   * Get the last report analysis result from Supabase
+   * Get the last report analysis result from Supabase or local storage
    */
   async getLastReportAnalysis(patientId: string): Promise<any> {
+    const storageKey = `meddoc_last_report_analysis_${patientId || "guest"}`;
+
+    if (typeof window !== "undefined") {
+      try {
+        const cached = localStorage.getItem(storageKey) || localStorage.getItem("meddoc_active_report_analysis");
+        if (cached) {
+          const parsed = JSON.parse(cached);
+          if (parsed) return parsed;
+        }
+      } catch (_) {}
+    }
+
     try {
-      const { data, error } = await supabase
-        .from("health_analyses")
-        .select("result")
-        .eq("patient_id", patientId)
-        .eq("type", "report")
-        .single();
-      if (!error && data) return data.result;
+      if (patientId && patientId !== "guest") {
+        const { data, error } = await supabase
+          .from("health_analyses")
+          .select("result")
+          .eq("patient_id", patientId)
+          .eq("type", "report")
+          .single();
+        if (!error && data) return data.result;
+      }
     } catch (e) {}
     return null;
   },
