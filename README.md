@@ -911,54 +911,84 @@ npm run format
 Create a `.env` file in the project root:
 
 ```env
+# Supabase Configuration
 VITE_SUPABASE_URL=https://your-project.supabase.co
-VITE_SUPABASE_ANON_KEY=your-anon-key
+VITE_SUPABASE_ANON_KEY=your-anon-key-here
+
+# Groq AI Inference Engine (Optional but recommended for full AI features)
+VITE_GROQ_API_KEY=gsk_your-groq-api-key-here
 ```
 
-> **Security note:** `VITE_` prefixed variables are embedded in the client bundle and visible in the browser. The Supabase `anon` key is safe to expose as long as Row Level Security policies are correctly configured.
+> **Security note:** `VITE_` prefixed variables are embedded in the client bundle and visible in the browser. The Supabase `anon` key is safe to expose as long as Row Level Security policies are correctly configured. Never put your Supabase `service_role` key in `VITE_` variables.
 
 ---
 
-## 16. Development Setup
+## 16. Development Setup & Run Instructions
 
 ### Prerequisites
 
-- Node.js `>=18` (or Bun `>=1.0`)
-- A Supabase project with the schema from `supabase_setup.sql`
+- **Node.js**: `>=18.x` (or **Bun**: `>=1.0`)
+- **Package Manager**: `npm`, `pnpm`, or `bun`
+- **Database**: Supabase account (or use built-in offline/localStorage fallback)
 
-### Steps
+### Quick Start Guide
 
 ```bash
-# 1. Clone and install
-git clone <repo>
+# 1. Clone repository & install dependencies
+git clone https://github.com/kavishkat2002/coha-care-connect.git
 cd coha-care-connect
-npm install   # or: bun install
+npm install
 
-# 2. Configure environment
-cp .env.example .env
-# Edit .env with your Supabase credentials
+# 2. Configure environment variables
+# Create a .env file with your Supabase & Groq keys:
+# VITE_SUPABASE_URL=https://htkaegeoqtjmpdywrtzy.supabase.co
+# VITE_SUPABASE_ANON_KEY=...
+# VITE_GROQ_API_KEY=...
 
-# 3. Set up database
-# Run supabase_setup.sql in your Supabase SQL editor
-# Optionally run supabase_seed.sql for demo data
-
-# 4. Start dev server
+# 3. Start local development server
 npm run dev
 
-# App available at http://localhost:3000
+# App runs locally at: http://localhost:3000 (or http://localhost:5173)
 ```
 
-### Seeding Data
+### Available NPM Scripts
+
+| Script | Command | Description |
+|---|---|---|
+| `dev` | `npm run dev` | Starts Vite HMR local dev server |
+| `build` | `npm run build` | Compiles production client & Nitro SSR server bundle |
+| `preview` | `npm run preview` | Previews the production build locally |
+| `typecheck` | `npm run typecheck` | Validates TypeScript with `tsc --noEmit` |
+| `lint` | `npm run lint` | Runs ESLint analysis across the codebase |
+| `lint:fix` | `npm run lint:fix` | Auto-fixes ESLint formatting and rule warnings |
+| `format` | `npm run format` | Runs Prettier formatter across all source files |
+
+---
+
+## 16.1 Demo & Test Credentials
+
+The platform supports 4 distinct portal roles. You can sign in using the test accounts below, or click **"Register"** on the `/auth` page to create your own account under any role.
+
+| Role | Email | Password | Target Portal | Notes |
+|---|---|---|---|---|
+| **Doctor** | `amara.silva@meddoc.com` | `password123` | `/doctor` | Pre-configured Consultant Dermatologist account (Dr. Amara Silva) |
+| **Patient** | `kavishka@gmail.com` | `password123` | `/patient` | Patient profile with sample health records, appointments, and ePass |
+| **Hospital** | `hospital@lakeside.com` | `password123` | `/hospital` | Hospital administrator for Lakeside General Hospital |
+| **Admin** | `admin@meddoc.com` | `password123` | `/admin` | System Administrator with full operational & provisioning control |
+
+> 💡 **Self-Registration**: You can also register a brand new account with any valid email and password directly on the [`/auth`](/auth) page by selecting your desired role tab (*Patient*, *Doctor*, or *Hospital*).
+
+### Database Seeding & Maintenance Scripts
 
 ```bash
-# Seed hospitals
-npx tsx seed_hospitals.ts
+# Seed initial hospital registry into Supabase
+npx tsx scripts/seed_hospitals.ts
 
-# Seed doctor roster
-npx tsx seed_roster.ts
+# Seed doctor schedules and clinic roster
+npx tsx scripts/seed_roster.ts
 
-# Check DB connection
-node check_db.mjs
+# Test Supabase connectivity and verify tables
+node scripts/check_db.mjs
 ```
 
 ---
