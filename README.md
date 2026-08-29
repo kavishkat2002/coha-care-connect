@@ -3,7 +3,7 @@
 
 > **Technical Architecture & System Specification**  
 > **Version:** 2.2.0 (Edge Runtime & Isomorphic SSR Enabled)  
-> **Authored by:** Senior AI Systems & Cloud Architect
+> 
 
 ---
 
@@ -406,4 +406,4 @@ npx tsx scripts/seed_roster.ts
 ---
 
 **License**: Proprietary / Clinical Research License  
-**Maintained by**: Lifora Health / Coha Care Connect Architecture Team
+**Maintained by**: MedDoc Health by Kavishka Thilakarathna  hello@kavishka.online
